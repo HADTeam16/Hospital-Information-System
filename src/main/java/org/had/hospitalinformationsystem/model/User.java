@@ -9,7 +9,7 @@ import lombok.Setter;
 public class User {
 
 
-    private String id;
+    private String documentId;
     private String firstName;
     private String lastName;
     private String userName;
