@@ -16,10 +16,10 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
-//    @PostMapping("/create")
-//    public String createUser(@RequestBody User user) throws InterruptedException, ExecutionException{
-//        return userRepository.createUser(user);
-//    }
+    @PostMapping("/create")
+    public String createUser(@RequestBody User user) throws InterruptedException, ExecutionException{
+        return userRepository.createUser(user);
+    }
 
     @GetMapping("/get/{username}")
     public User getUser(@PathVariable String username) throws InterruptedException, ExecutionException{
