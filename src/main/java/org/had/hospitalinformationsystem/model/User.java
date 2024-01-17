@@ -8,7 +8,6 @@ import lombok.Setter;
 @Getter
 public class User {
 
-
     private String documentId;
     private String firstName;
     private String lastName;
