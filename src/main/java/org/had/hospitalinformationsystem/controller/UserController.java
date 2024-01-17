@@ -21,8 +21,8 @@ public class UserController {
 //        return userRepository.createUser(user);
 //    }
 
-    @GetMapping("/get")
-    public User getUser(@RequestParam String username) throws InterruptedException, ExecutionException{
+    @GetMapping("/get/{username}")
+    public User getUser(@PathVariable String username) throws InterruptedException, ExecutionException{
         return userRepository.getUser(username);
     }
 
