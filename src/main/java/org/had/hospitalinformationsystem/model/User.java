@@ -26,7 +26,7 @@ public class User {
     private String address;
     private String contact;
     @Column(unique = true)
-    private String emailId;
+    private String email;
     private String profilePicture;
 
     private String role;
