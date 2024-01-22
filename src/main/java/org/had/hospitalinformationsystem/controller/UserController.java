@@ -4,14 +4,14 @@ import org.had.hospitalinformationsystem.model.User;
 import org.had.hospitalinformationsystem.repository.UserRepository;
 import org.had.hospitalinformationsystem.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
+
     @Autowired
     UserRepository userRepository;
 
@@ -31,14 +31,25 @@ public class UserController {
     }
 
     //Get User details by Id
-    @GetMapping("/{id}")
-    public User findUser(@PathVariable Long id) throws Exception {
+    @GetMapping("/userById/{id}")
+    public User findUserById(@PathVariable Long id) throws Exception {
         User user;
         user = userService.findUserById(id);
         return  user;
-
     }
-  
+
+    //Get User Details by Role
+    @GetMapping("/userByRole/{role}")
+    public List<User> findUserByRole(@PathVariable String role) throws Exception {
+        return userService.findUserByRole(role);
+    }
+
+    //Get User Details By specialization
+    @GetMapping("/userBySpecialization/{specialization}")
+    public List<User> findUserBySpecialization(@PathVariable String specialization) throws Exception {
+        return userService.findUserBySpecialization(specialization);
+    }
+
     //Add User Details
     @PostMapping("/createUser")
     public User createUser(@RequestBody User user){
