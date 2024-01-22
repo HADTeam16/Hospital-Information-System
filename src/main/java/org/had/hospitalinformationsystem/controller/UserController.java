@@ -22,7 +22,6 @@ public class UserController {
     }
 
 
-
     @PostMapping("/createUser")
     public User createUser(@RequestBody User user){
         User savedUser;
