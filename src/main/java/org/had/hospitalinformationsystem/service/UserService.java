@@ -10,8 +10,7 @@ public interface UserService {
 
     User findUserById(Long userId) throws Exception;
 
-    User findUserByUsername(String username) throws Exception;
-
+    String loginUser(User user) throws Exception;
 
     User updateUser(User user, Long userId);
 

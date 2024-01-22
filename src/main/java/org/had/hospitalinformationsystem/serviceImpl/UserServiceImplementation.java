@@ -15,21 +15,32 @@ import java.util.Optional;
 public class UserServiceImplementation implements UserService {
     @Autowired
     UserRepository userRepository;
+
+
+    public String loginUser(User user) throws Exception {
+
+        User currUser = userRepository.findByUserName(user.getUserName());
+        System.out.println(user.getUserName());
+        System.out.println(user.getPassword());
+        if(currUser!=null){
+            String currUserPassword = currUser.getPassword();
+            String userPassword = user.getPassword();
+            boolean isPwdRight;
+            isPwdRight = currUserPassword.equals(userPassword);
+            if(isPwdRight){
+                return currUser.getRole();
+            }
+            else{
+                return "Check Username and/or Password";
+            }
+        }
+        return "Nothing";
+    }
+
     @Override
     public User registerUser(User user) {
-        User newUser=new User();
-        newUser.setFirstName(user.getFirstName());
-        newUser.setLastName(user.getLastName());
-        newUser.setUserName(user.getUserName());
-        newUser.setPassword(user.getPassword());
-        newUser.setAge(user.getAge());
-        newUser.setRole(user.getRole());
-        newUser.setContact(user.getContact());
-        newUser.setAvatarUrl(user.getAvatarUrl());
-        newUser.setSpecialization(user.getSpecialization());
-
-        userRepository.save(newUser);
-        return newUser;
+        userRepository.save(user);
+        return user;
     }
 
     @Override
@@ -40,18 +51,7 @@ public class UserServiceImplementation implements UserService {
         }
         throw new Exception("user does not exist with userid " + userId);
     }
-
-    @Override
-    public User findUserByUsername(String username) throws Exception {
-        Optional<User> user= userRepository.findByUserName(username);
-
-        if(user.isPresent()){
-            return user.get();
-        }
-        throw new Exception("user does not exist with this  username -> "+ username);
-    }
-
-
+    
     @Override
     public User updateUser(User user, Long userId) {
         User oldUser = userRepository.findById(userId)
