@@ -19,9 +19,9 @@ public class UserServiceImplementation implements UserService {
 
     public String loginUser(User user) throws Exception {
 
+        if(user.getUserName().isEmpty() || user.getPassword().isEmpty()) return "Add userName and/or Password";
+
         User currUser = userRepository.findByUserName(user.getUserName());
-        System.out.println(user.getUserName());
-        System.out.println(user.getPassword());
         if(currUser!=null){
             String currUserPassword = currUser.getPassword();
             String userPassword = user.getPassword();
@@ -34,7 +34,7 @@ public class UserServiceImplementation implements UserService {
                 return "Check Username and/or Password";
             }
         }
-        return "Nothing";
+        return "Check Username and/or Password";
     }
 
     @Override
