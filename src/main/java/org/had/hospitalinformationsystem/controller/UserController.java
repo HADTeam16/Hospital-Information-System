@@ -38,6 +38,7 @@ public class UserController {
         return  user;
 
     }
+  
     //Add User Details
     @PostMapping("/createUser")
     public User createUser(@RequestBody User user){
