@@ -4,9 +4,7 @@ import org.had.hospitalinformationsystem.model.User;
 import org.had.hospitalinformationsystem.repository.UserRepository;
 import org.had.hospitalinformationsystem.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +15,7 @@ public class UserServiceImplementation implements UserService {
     UserRepository userRepository;
 
 
-    public String loginUser(User user) throws Exception {
+    public String loginUser(User user){
 
         if(user.getUserName().isEmpty() || user.getPassword().isEmpty()) return "Add userName and/or Password";
 
@@ -51,23 +49,31 @@ public class UserServiceImplementation implements UserService {
         }
         throw new Exception("user does not exist with userid " + userId);
     }
+
+    public List<User> findUserByRole(String role) {
+        return userRepository.findAllByRole(role);
+    }
+
+    public List<User> findUserBySpecialization(String specialization) {
+        return userRepository.findUserBySpecialization(specialization);
+    }
     
-    @Override
-    public User updateUser(User user, Long userId) {
-        User oldUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist with id " + userId));
-        if (user.getFirstName() != null) {
-            oldUser.setFirstName(user.getFirstName());
-        }
-        if (user.getLastName() != null) {
-            oldUser.setLastName(user.getLastName());
-        }
-
-        return userRepository.save(oldUser);
-    }
-
-    @Override
-    public List<User> searchUser(String query) {
-        return userRepository.searchUser(query);
-    }
+//    @Override
+//    public User updateUser(User user, Long userId) {
+//        User oldUser = userRepository.findById(userId)
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist with id " + userId));
+//        if (user.getFirstName() != null) {
+//            oldUser.setFirstName(user.getFirstName());
+//        }
+//        if (user.getLastName() != null) {
+//            oldUser.setLastName(user.getLastName());
+//        }
+//
+//        return userRepository.save(oldUser);
+//    }
+//
+//    @Override
+//    public List<User> searchUser(String query) {
+//        return userRepository.searchUser(query);
+//    }
 }
