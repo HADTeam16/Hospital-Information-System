@@ -15,11 +15,11 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long appointmentId;
     @ManyToOne
-    @JoinColumn(name="doctor_id", referencedColumnName = "id")
+    @JoinColumn(name="doctor_id", referencedColumnName = "doctorid")
     private User doctor;
 
     @ManyToOne
-    @JoinColumn(name="patient_id",referencedColumnName = "id")
+    @JoinColumn(name="patient_id",referencedColumnName = "patientid")
     private User patient;
 
     private LocalDateTime slot;

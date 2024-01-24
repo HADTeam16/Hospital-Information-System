@@ -8,13 +8,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-    public User findByUserName(String userName);
-    public User findByEmail(String email);
+public interface DoctorRepository extends JpaRepository<Doctor, Long> {
+
+    public Doctor findByDoctorName(String doctorName);
+
+    public Doctor findByEmail(String email);
 
 
 
-    @Query("select u from User u where  u.userName LIKE %:query%")
-    public List<Doctor> searchUser(@Param("query") String query);
+    @Query("select u from Doctor u where u.firstName LIKE %:query% OR u.lastName LIKE %:query% OR u.doctorName LIKE %:query%")
+    public List<Doctor> searchDoctor(@Param("query") String query);
 }

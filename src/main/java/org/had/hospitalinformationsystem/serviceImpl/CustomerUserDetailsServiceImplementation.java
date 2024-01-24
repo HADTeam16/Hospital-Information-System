@@ -25,4 +25,5 @@ public class CustomerUserDetailsServiceImplementation implements UserDetailsServ
         List<GrantedAuthority> authorities=new ArrayList<>();
         return new org.springframework.security.core.userdetails.User(user.getUserName(),user.getPassword(),authorities);
     }
+
 }

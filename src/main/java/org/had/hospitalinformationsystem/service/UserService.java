@@ -6,13 +6,9 @@ import java.util.List;
 
 public interface UserService {
 
-    User registerUser(User user);
+    User findUserById(Long userId);
 
-    User findUserById(Long userId) throws Exception;
+    User updateUser(User user,Long userId);
 
-    String loginUser(User user) throws Exception;
-
-    User updateUser(User user, Long userId);
-
-    List<User> searchUser(String  query);
+    List<User> searchUser(String query);
 }
