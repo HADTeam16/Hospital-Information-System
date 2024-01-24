@@ -21,7 +21,8 @@ public interface UserService {
 
 
 
-//    User updateUser(User user, Long userId);
+    List<User> searchUser(String  query);
+    User findUserByJwt(String jwt);
 
-//    List<User> searchUser(String  query);
+    User updateUser(User user, Long userId);
 }

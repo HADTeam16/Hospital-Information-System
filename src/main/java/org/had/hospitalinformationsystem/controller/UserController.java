@@ -18,15 +18,9 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    //Login
-    @PostMapping("/login")
-    public String userLogin(@RequestBody User user) throws Exception {
-        return  userService.loginUser(user);
-    }
-
     //Get details of all users
     @GetMapping("/allUsers")
-    public List<User>getAllUsers(){
+    public List<User>getAllUsers(@RequestHeader("Authorization") String jwt){
         return userRepository.findAll();
     }
 
@@ -51,20 +45,15 @@ public class UserController {
     }
 
     //Add User Details
-    @PostMapping("/createUser")
-    public User createUser(@RequestBody User user){
-        User savedUser;
-        savedUser = userService.registerUser(user);
-        return savedUser;
+    @PutMapping("/update")
+    public User updateUser(@RequestHeader("Authorization") String jwt,@RequestBody User user) throws Exception {
+
+        User reqUser = userService.findUserByJwt(jwt);
+        User updatedUser= userService.updateUser(user, reqUser.getId());
+
+        return updatedUser;
     }
 
-//    @PutMapping("/updateUser/{id}")
-//    public User updateUser(@RequestBody User user){
-//        try{
-//            User newUser = userRepository.findAllById(user.getId());
-//        }catch(){
-//
-//        }
-//    }
+
 
 }

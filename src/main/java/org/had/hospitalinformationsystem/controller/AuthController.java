@@ -46,7 +46,7 @@ public class AuthController {
 
         return res;
     }
-    private Authentication authenticate(String userName, String password) {
+    private Authentication authenticate(String userName, String password,String role) {
         UserDetails userDetails=customerUserDetailsService.loadUserByUsername(userName);
 
         if(userDetails==null){
@@ -55,11 +55,18 @@ public class AuthController {
         if(!passwordEncoder.matches(password,userDetails.getPassword())){
             throw new BadCredentialsException("password not matched");
         }
+        User user=userRepository.findByUserName(userDetails.getUsername());
+        System.out.println(user.getRole() +" " +role );
+        if(!user.getRole().matches(role)){
+            throw new BadCredentialsException("role not matched");
+        }
+
+
         return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
     }
     @PostMapping("/signin")
     public AuthResponse signin(@RequestBody LoginRequest loginRequest){
-        Authentication authentication=authenticate(loginRequest.getUserName(),loginRequest.getPassword());
+        Authentication authentication=authenticate(loginRequest.getUserName(),loginRequest.getPassword(),loginRequest.getRole());
         String token= JwtProvider.generateToken(authentication);
         AuthResponse res=new AuthResponse(token,"Login Success");
 

@@ -24,6 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     public List<User> findUserBySpecialization(String specialization);
 
 
-//    @Query("select u from User u where u.firstName LIKE %:query% OR u.lastName LIKE %:query% OR u.userName LIKE %:query%")
-//    public List<User> searchUser(@Param("query") String query);
+    @Query("select u from User u where u.firstName LIKE %:query% OR u.lastName LIKE %:query% OR u.userName LIKE %:query%")
+    public List<User> searchUser(@Param("query") String query);
 }
