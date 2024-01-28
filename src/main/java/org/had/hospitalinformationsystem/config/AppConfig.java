@@ -1,6 +1,8 @@
 package org.had.hospitalinformationsystem.config;
 
+
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,10 +23,14 @@ import java.util.Collections;
 @EnableWebSecurity
 public class AppConfig {
 
+@Configuration
+@EnableWebSecurity
+public class AppConfig {
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http.sessionManagement(management->management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(Authorize ->Authorize.requestMatchers("/api/**")
+                .authorizeHttpRequests(Authorize ->Authorize.requestMatchers("/api/")
                         .authenticated()
                         .anyRequest()
                         .permitAll())
@@ -39,6 +45,7 @@ public class AppConfig {
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
+
     private CorsConfigurationSource corsConfigurationSource(){
         return new CorsConfigurationSource() {
             @Override
@@ -55,5 +62,6 @@ public class AppConfig {
             }
         };
     }
+
 
 }
