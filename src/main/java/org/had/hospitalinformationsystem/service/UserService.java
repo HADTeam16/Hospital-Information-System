@@ -13,7 +13,6 @@ public interface UserService {
 
     List<User> findUserByRole(String role) throws Exception;
 
-    List<User> findUserBySpecialization(String specialization) throws Exception;
 
 
     User findUserById(Long userId) throws Exception;
@@ -21,7 +20,8 @@ public interface UserService {
 
 
 
-//    User updateUser(User user, Long userId);
+    List<User> searchUser(String  query);
+    User findUserByJwt(String jwt);
 
-//    List<User> searchUser(String  query);
+    User updateUser(User user, Long userId);
 }
