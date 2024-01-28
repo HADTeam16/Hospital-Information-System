@@ -4,12 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
 @Getter
 @Setter
-@Table(name="users")
-public class User {
-
+@Entity
+@Table(name="doctors")
+public class Doctor {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
@@ -30,4 +29,5 @@ public class User {
     private String profilePicture;
 
     private String role;
+    private String specialization;
 }

@@ -20,8 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.role = ?1")
     public List<User> findAllByRole(String role);
 
-    @Query("SELECT u FROM User u WHERE u.specialization = ?1")
-    public List<User> findUserBySpecialization(String specialization);
 
 
     @Query("select u from User u where u.firstName LIKE %:query% OR u.lastName LIKE %:query% OR u.userName LIKE %:query%")
