@@ -29,4 +29,11 @@ public class JwtProvider {
         String userName=String.valueOf(claims.get("userName"));
         return  userName;
     }
+    public static String getUserNameFromJwtTokenUnfiltered(String jwt){
+        //jwt=jwt.substring(7);
+        Claims claims=Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
+
+        String userName=String.valueOf(claims.get("userName"));
+        return  userName;
+    }
 }

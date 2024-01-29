@@ -49,6 +49,10 @@ public class UserController {
         return updatedUser;
     }
 
+    @GetMapping()
+    public User getUserByJwt(@RequestHeader("Authorization") String jwt){
+        return userService.findUserByJwt(jwt);
+    }
 
 
 }
