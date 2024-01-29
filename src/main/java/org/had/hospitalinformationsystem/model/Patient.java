@@ -4,19 +4,17 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+@Entity
 @Getter
 @Setter
-@Entity
-@Table(name="doctors")
-public class Doctor {
+@Table(name="patient")
+public class Patient {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
-
+    private Long patientId;
     @Column(unique = true)
     private String userName;
     private String password;
-
     private String firstName;
     private String lastName;
     private Integer age;
@@ -27,6 +25,5 @@ public class Doctor {
     @Column(unique = true)
     private String email;
     private String profilePicture;
-    private String role;
-    private String specialization;
+
 }
