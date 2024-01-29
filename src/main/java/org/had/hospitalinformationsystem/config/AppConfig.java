@@ -23,10 +23,6 @@ import java.util.Collections;
 @EnableWebSecurity
 public class AppConfig {
 
-@Configuration
-@EnableWebSecurity
-public class AppConfig {
-
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http.sessionManagement(management->management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -41,6 +37,7 @@ public class AppConfig {
 
         return http.build();
     }
+
     @Bean
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
@@ -62,6 +59,5 @@ public class AppConfig {
             }
         };
     }
-
 
 }

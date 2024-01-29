@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface DoctorService {
 
-
     List<Doctor> findDoctorBySpecialization(String specialization) throws Exception;
 
 

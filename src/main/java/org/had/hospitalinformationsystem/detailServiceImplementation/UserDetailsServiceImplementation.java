@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.serviceImpl;
+package org.had.hospitalinformationsystem.detailServiceImplementation;
 
 import org.had.hospitalinformationsystem.model.User;
 import org.had.hospitalinformationsystem.repository.UserRepository;
