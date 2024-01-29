@@ -12,12 +12,11 @@ public class JwtProvider {
 
     private static SecretKey key= Keys.hmacShaKeyFor(JwtConstant.SECRET_KEY.getBytes());
 
-    public static String generateToken(Authentication auth,String role){
+    public static String generateToken(Authentication auth){
         String jwt= Jwts.builder()
                 .setIssuer("had").setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime()+28800000))
                 .claim("userName",auth.getName())
-                .claim("role",role)
                 .signWith(key)
                 .compact();
         return jwt;
