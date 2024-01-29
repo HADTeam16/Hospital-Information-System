@@ -1,7 +1,6 @@
-package org.had.hospitalinformationsystem.serviceImpl;
+package org.had.hospitalinformationsystem.detailServiceImplementation;
 
 import org.had.hospitalinformationsystem.model.Doctor;
-import org.had.hospitalinformationsystem.model.User;
 import org.had.hospitalinformationsystem.repository.DoctorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,4 +26,5 @@ public class DoctorDetailsServiceImplementation implements UserDetailsService {
         List<GrantedAuthority> authorities=new ArrayList<>();
         return new org.springframework.security.core.userdetails.User(doctor.getUserName(),doctor.getPassword(),authorities);
     }
+
 }
