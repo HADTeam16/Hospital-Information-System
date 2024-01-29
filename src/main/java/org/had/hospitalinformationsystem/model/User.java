@@ -29,6 +29,7 @@ public class User {
     private String profilePicture;
 
     private String role;
+
     private String specialization;
 
     @Override
@@ -49,4 +50,5 @@ public class User {
                 ", specialization='" + specialization + '\'' +
                 '}';
     }
+
 }
