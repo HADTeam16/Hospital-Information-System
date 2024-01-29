@@ -42,7 +42,8 @@ public class AuthController {
         User savedUser=userRepository.save(user);
         Authentication authentication=new UsernamePasswordAuthenticationToken(savedUser.getUserName(),savedUser.getPassword());
         String token= JwtProvider.generateToken(authentication);
-        AuthResponse res=new AuthResponse(token,"Register Success");
+
+        AuthResponse res=new AuthResponse(token,"Register Success",user);
 
         return res;
     }
@@ -68,7 +69,9 @@ public class AuthController {
     public AuthResponse signin(@RequestBody LoginRequest loginRequest){
         Authentication authentication=authenticate(loginRequest.getUserName(),loginRequest.getPassword(),loginRequest.getRole());
         String token= JwtProvider.generateToken(authentication);
-        AuthResponse res=new AuthResponse(token,"Login Success");
+        String userName=JwtProvider.getUserNameFromJwtTokenUnfiltered(token);
+        User user=userRepository.findByUserName(userName);
+        AuthResponse res=new AuthResponse(token,"Login Success",user);
 
         return res;
     }
