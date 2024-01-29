@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.detailServiceImplementation;
+package org.had.hospitalinformationsystem.serviceImpl;
 
 import org.had.hospitalinformationsystem.model.User;
 import org.had.hospitalinformationsystem.repository.UserRepository;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class UserDetailsServiceImplementation implements UserDetailsService {
+public class CustomerUserDetailsServiceImplementation implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
     @Override

@@ -13,6 +13,7 @@ public interface UserService {
 
     List<User> findUserByRole(String role) throws Exception;
 
+    List<User> findUserBySpecialization(String specialization) throws Exception;
 
 
     User findUserById(Long userId) throws Exception;

@@ -38,6 +38,11 @@ public class UserController {
         return userService.findUserByRole(role);
     }
 
+    //Get User Details By specialization
+    @GetMapping("/userBySpecialization/{specialization}")
+    public List<User> findUserBySpecialization(@PathVariable String specialization) throws Exception {
+        return userService.findUserBySpecialization(specialization);
+    }
 
     //Add User Details
     @PutMapping("/update")
@@ -49,6 +54,10 @@ public class UserController {
         return updatedUser;
     }
 
+    @GetMapping()
+    public User getUserByJwt(@RequestHeader("Authorization") String jwt){
+        return userService.findUserByJwt(jwt);
+    }
 
 
 }
