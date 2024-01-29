@@ -10,17 +10,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 @Repository
 public interface DoctorRepository extends JpaRepository<Doctor,Long> {
-    public Doctor findByUserName(String userName);
-
-    public Doctor findByEmail(String email);
 
 
-    @Query("SELECT d FROM Doctor d WHERE d.role = ?1")
-    public List<Doctor> findAllByRole(String role);
-
-    @Query("SELECT d FROM Doctor d WHERE d.specialization = ?1")
-    public List<Doctor> findUserBySpecialization(String specialization);
-
+    public Doctor findByUserName(String username);
 
     @Query("select d from Doctor d where d.firstName LIKE %:query% OR d.lastName LIKE %:query% OR d.userName LIKE %:query%")
     public List<Doctor> searchDoctor(@Param("query") String query);

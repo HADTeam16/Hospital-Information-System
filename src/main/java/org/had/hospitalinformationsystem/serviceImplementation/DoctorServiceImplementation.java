@@ -1,8 +1,7 @@
-package org.had.hospitalinformationsystem.serviceImpl;
+package org.had.hospitalinformationsystem.serviceImplementation;
 
 import org.had.hospitalinformationsystem.config.JwtProvider;
 import org.had.hospitalinformationsystem.model.Doctor;
-import org.had.hospitalinformationsystem.model.User;
 import org.had.hospitalinformationsystem.repository.DoctorRepository;
 import org.had.hospitalinformationsystem.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +40,7 @@ public class DoctorServiceImplementation implements DoctorService {
     @Override
     public Doctor findDoctorByJwt(String jwt) {
         String userName= JwtProvider.getUserNameFromJwtToken(jwt);
-        Doctor doctor=doctorRepository.findByUserName(userName);
-        return doctor;
+        return doctorRepository.findByUserName(userName);
     }
 
     @Override
