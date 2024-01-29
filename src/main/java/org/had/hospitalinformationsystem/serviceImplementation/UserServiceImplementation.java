@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.serviceImpl;
+package org.had.hospitalinformationsystem.serviceImplementation;
 
 import org.had.hospitalinformationsystem.config.JwtProvider;
 import org.had.hospitalinformationsystem.model.User;
@@ -70,9 +70,6 @@ public class UserServiceImplementation implements UserService {
         return userRepository.findAllByRole(role);
     }
 
-    public List<User> findUserBySpecialization(String specialization) {
-        return userRepository.findUserBySpecialization(specialization);
-    }
     
     @Override
     public User updateUser(User user, Long userId) {
@@ -87,9 +84,4 @@ public class UserServiceImplementation implements UserService {
 
         return userRepository.save(oldUser);
     }
-//
-//    @Override
-//    public List<User> searchUser(String query) {
-//        return userRepository.searchUser(query);
-//    }
 }
