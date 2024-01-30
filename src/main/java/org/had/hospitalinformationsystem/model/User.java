@@ -21,7 +21,7 @@ public class User {
     private String lastName;
     private Integer age;
     private String gender;
-    private String dataOfBirth;
+    private String dateOfBirth;
     private String address;
     private String contact;
     @Column(unique = true)
@@ -30,25 +30,5 @@ public class User {
 
     private String role;
 
-    private String specialization;
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", userName='" + userName + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", age=" + age +
-                ", gender='" + gender + '\'' +
-                ", dataOfBirth='" + dataOfBirth + '\'' +
-                ", address='" + address + '\'' +
-                ", contact='" + contact + '\'' +
-                ", email='" + email + '\'' +
-                ", profilePicture='" + profilePicture + '\'' +
-                ", role='" + role + '\'' +
-                ", specialization='" + specialization + '\'' +
-                '}';
-    }
 
 }
