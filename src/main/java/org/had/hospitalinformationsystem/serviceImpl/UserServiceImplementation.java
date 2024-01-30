@@ -70,9 +70,9 @@ public class UserServiceImplementation implements UserService {
         return userRepository.findAllByRole(role);
     }
 
-    public List<User> findUserBySpecialization(String specialization) {
-        return userRepository.findUserBySpecialization(specialization);
-    }
+//    public List<User> findUserBySpecialization(String specialization) {
+//        return userRepository.findUserBySpecialization(specialization);
+//    }
     
     @Override
     public User updateUser(User user, Long userId) {
