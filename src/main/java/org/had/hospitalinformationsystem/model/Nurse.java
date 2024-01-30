@@ -26,6 +26,8 @@ public class Nurse {
             name = "nurse_ward",
             joinColumns = @JoinColumn(name = "nurse_id"),
             inverseJoinColumns = @JoinColumn(name = "ward_id")
+
+
     )
     private Set<Ward> wards = new HashSet<>();
 
