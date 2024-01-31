@@ -34,7 +34,7 @@ public class JwtProvider {
         return String.valueOf(claims.get("userName"));
     }
 
-    public static String getRoleFromJwtTokenUnfiltered(String jwt){
+    public static String getRoleFromJwtToken(String jwt){
         jwt=jwt.substring(7);
         Claims claims=Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
         return String.valueOf(claims.get("role"));
