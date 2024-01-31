@@ -51,7 +51,7 @@ public class AuthController {
         User newUser = getUser(registrationDto);
         User savedUser = new User();
 
-        String role = JwtProvider.getRoleFromJwtTokenUnfiltered(jwt);
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
 
         if (role.equals("admin") && registrationDto.getRole().equals("doctor")) {
             savedUser = userRepository.save(newUser);
