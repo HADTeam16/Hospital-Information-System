@@ -24,7 +24,7 @@ public class UserController {
         return userRepository.findAll();
     }
 
-    //Get User details by Id
+    //Get User details by id
     @GetMapping("/userById/{id}")
     public User findUserById(@PathVariable Long id) throws Exception {
         User user;
@@ -38,20 +38,13 @@ public class UserController {
         return userService.findUserByRole(role);
     }
 
-//    //Get User Details By specialization
-//    @GetMapping("/userBySpecialization/{specialization}")
-//    public List<User> findUserBySpecialization(@PathVariable String specialization) throws Exception {
-//        return userService.findUserBySpecialization(specialization);
-//    }
-
     //Add User Details
     @PutMapping("/update")
-    public User updateUser(@RequestHeader("Authorization") String jwt,@RequestBody User user) throws Exception {
+    public User updateUser(@RequestHeader("Authorization") String jwt,@RequestBody User user){
 
         User reqUser = userService.findUserByJwt(jwt);
-        User updatedUser= userService.updateUser(user, reqUser.getId());
 
-        return updatedUser;
+        return userService.updateUser(user, reqUser.getId());
     }
 
     @GetMapping()

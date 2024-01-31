@@ -1,7 +1,14 @@
 package org.had.hospitalinformationsystem.controller;
 
 import org.had.hospitalinformationsystem.config.JwtProvider;
+import org.had.hospitalinformationsystem.dto.RegistrationDto;
+import org.had.hospitalinformationsystem.model.Doctor;
+import org.had.hospitalinformationsystem.model.Patient;
+import org.had.hospitalinformationsystem.model.Receptionist;
 import org.had.hospitalinformationsystem.model.User;
+import org.had.hospitalinformationsystem.repository.DoctorRepository;
+import org.had.hospitalinformationsystem.repository.PatientRepository;
+import org.had.hospitalinformationsystem.repository.ReceptionistRepository;
 import org.had.hospitalinformationsystem.repository.UserRepository;
 import org.had.hospitalinformationsystem.request.LoginRequest;
 import org.had.hospitalinformationsystem.response.AuthResponse;
@@ -13,43 +20,85 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    @Autowired
-    UserService userService;
-    @Autowired
-    UserRepository userRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
 
     @Autowired
     CustomerUserDetailsServiceImplementation customerUserDetailsService;
 
+    @Autowired
+    UserService userService;
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    DoctorRepository doctorRepository;
+
+    @Autowired
+    PatientRepository patientRepository;
+
+    @Autowired
+    ReceptionistRepository receptionistRepository;
+
     @PostMapping("/signup")
-    public AuthResponse createUser(@RequestBody User user) throws Exception {
-        User isExist= userRepository.findByUserName(user.getUserName());
-        if(isExist!=null){
-            throw new Exception("Account already exists");
+    public AuthResponse createUser(@RequestHeader("Authorization") String jwt,@RequestBody RegistrationDto registrationDto){
+
+        User newUser = getUser(registrationDto);
+        User savedUser = new User();
+
+        String role = JwtProvider.getRoleFromJwtTokenUnfiltered(jwt);
+
+        if (role.equals("admin") && registrationDto.getRole().equals("doctor")) {
+            savedUser = userRepository.save(newUser);
+            Doctor newDoctor = new Doctor();
+            newDoctor.setUser(savedUser);
+            newDoctor.setSpecialization(registrationDto.getSpecialization());
+            doctorRepository.save(newDoctor);
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        User savedUser=userRepository.save(user);
+        else if (role.equals("admin") && registrationDto.getRole().equals("receptionist")) {
+            savedUser = userRepository.save(newUser);
+            Receptionist newReceptionist  =  new Receptionist();
+            newReceptionist.setUser(savedUser);
+            receptionistRepository.save(newReceptionist);
+        }
+        else if((role.equals("receptionist") || role.equals("doctor")) && registrationDto.getRole().equals("patient")){
+            savedUser = userRepository.save(newUser);
+            Patient newPatient = new Patient();
+            newPatient.setUser(savedUser);
+            newPatient.setTemperature(registrationDto.getTemperature());
+            patientRepository.save(newPatient);
+        }
+
         Authentication authentication=new UsernamePasswordAuthenticationToken(savedUser.getUserName(),savedUser.getPassword());
-        String token= JwtProvider.generateToken(authentication);
-
-        AuthResponse res=new AuthResponse(token,"Register Success",user);
-
-        return res;
+        String token= JwtProvider.generateToken(authentication,newUser.getRole());
+        return new AuthResponse(token,"Register Success",savedUser);
     }
+
+    private User getUser(RegistrationDto registrationDto) {
+        User newUser = new User();
+        newUser.setUserName(registrationDto.getUserName());
+        newUser.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        newUser.setFirstName(registrationDto.getFirstName());
+        newUser.setLastName(registrationDto.getLastName());
+        newUser.setAge(registrationDto.getAge());
+        newUser.setGender(registrationDto.getGender());
+        newUser.setDateOfBirth(registrationDto.getDateOfBirth());
+        newUser.setAddress(registrationDto.getAddress());
+        newUser.setContact(registrationDto.getContact());
+        newUser.setEmail(registrationDto.getEmail());
+        newUser.setProfilePicture(registrationDto.getProfilePicture());
+        newUser.setRole(registrationDto.getRole());
+        return newUser;
+    }
+
+
     private Authentication authenticate(String userName, String password,String role) {
         UserDetails userDetails=customerUserDetailsService.loadUserByUsername(userName);
-
         if(userDetails==null){
             throw new BadCredentialsException("invalid username");
         }
@@ -57,22 +106,18 @@ public class AuthController {
             throw new BadCredentialsException("password not matched");
         }
         User user=userRepository.findByUserName(userDetails.getUsername());
-        System.out.println(user.getRole() +" " +role );
         if(!user.getRole().matches(role)){
             throw new BadCredentialsException("role not matched");
         }
-
-
         return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
     }
     @PostMapping("/signin")
-    public AuthResponse signin(@RequestBody LoginRequest loginRequest){
-        Authentication authentication=authenticate(loginRequest.getUserName(),loginRequest.getPassword(),loginRequest.getRole());
-        String token= JwtProvider.generateToken(authentication);
-        String userName=JwtProvider.getUserNameFromJwtTokenUnfiltered(token);
-        User user=userRepository.findByUserName(userName);
-        AuthResponse res=new AuthResponse(token,"Login Success",user);
-
-        return res;
+    public AuthResponse signin(@RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticate(loginRequest.getUserName(), loginRequest.getPassword(), loginRequest.getRole());
+        String token = JwtProvider.generateToken(authentication, loginRequest.getRole());
+        String userName = JwtProvider.getUserNameFromJwtTokenUnfiltered(token);
+        User user = userRepository.findByUserName(userName);
+        return new AuthResponse(token, "Login Success",user);
     }
+
 }

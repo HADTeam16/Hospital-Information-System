@@ -7,23 +7,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    public User findByUserName(String username);
-
-    public User findByEmail(String email);
-
+    User findByUserName(String username);
 
     @Query("SELECT u FROM User u WHERE u.role = ?1")
-    public List<User> findAllByRole(String role);
-
-//    @Query("SELECT u FROM User u WHERE u.specialization = ?1")
-//    public List<User> findUserBySpecialization(String specialization);
-
+    List<User> findAllByRole(String role);
 
     @Query("select u from User u where u.firstName LIKE %:query% OR u.lastName LIKE %:query% OR u.userName LIKE %:query%")
-    public List<User> searchUser(@Param("query") String query);
+    List<User> searchUser(@Param("query") String query);
 }
