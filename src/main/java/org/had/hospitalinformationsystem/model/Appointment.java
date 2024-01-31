@@ -1,9 +1,14 @@
 package org.had.hospitalinformationsystem.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+
+@Getter
+@Setter
 @Entity
 @Table(name = "appointments")
 public class Appointment {
@@ -21,5 +26,4 @@ public class Appointment {
 
     private LocalDateTime slot;
 
-    // Additional methods and constructors...
 }

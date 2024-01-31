@@ -17,11 +17,10 @@ public class AuthResponse {
     private User user;
 
 
-    public AuthResponse(String token, String message,User user) {
+    public AuthResponse(String token, String message, User user) {
         super();
         this.token = token;
         this.message = message;
-
         this.user=user;
 
     }
