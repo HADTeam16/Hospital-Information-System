@@ -22,7 +22,7 @@ public class Chat {
 
     private String chat_image;
     @ManyToMany
-    private List<Doctor> doctors=new ArrayList<>();
+    private List<User> users=new ArrayList<>();
 
     @OneToMany(mappedBy = "chat")
     private List<Message> messages=new ArrayList<>();
