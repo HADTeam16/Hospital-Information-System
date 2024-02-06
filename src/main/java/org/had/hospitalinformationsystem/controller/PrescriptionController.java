@@ -19,7 +19,7 @@ public class PrescriptionController {
     PrescriptionRepository prescriptionRepository;
 
 
-    @GetMapping("{appointmentId}")
+    @GetMapping("/{appointmentId}")
     public List<String> getPrescription(@PathVariable Long appointmentId){
         return prescriptionRepository.findPrescription(appointmentId);
     }

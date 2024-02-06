@@ -45,6 +45,21 @@ public class AuthController {
     @Autowired
     ReceptionistRepository receptionistRepository;
 
+    @GetMapping("/signup/admin")
+    public AuthResponse createAdmin(){
+        User user=new User();
+        user.setUserName("admin");
+        user.setPassword(passwordEncoder.encode("1234"));
+        user.setRole("admin");
+        user.setEmail("admin@gmail.com");
+        userRepository.save(user);
+        User savedUser=user;
+        Authentication authentication=new UsernamePasswordAuthenticationToken(savedUser.getUserName(),savedUser.getPassword());
+        String token= JwtProvider.generateToken(authentication,user.getRole());
+        return new AuthResponse(token,"Register Success",savedUser);
+
+    }
+
     @PostMapping("/signup")
     public AuthResponse createUser(@RequestHeader("Authorization") String jwt,@RequestBody RegistrationDto registrationDto){
 

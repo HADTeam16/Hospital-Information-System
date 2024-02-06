@@ -20,7 +20,7 @@ public class Message {
     private String content;
 
     @ManyToOne
-    private Doctor doctor;
+    private User user;
 
     @JsonIgnore
     @ManyToOne
