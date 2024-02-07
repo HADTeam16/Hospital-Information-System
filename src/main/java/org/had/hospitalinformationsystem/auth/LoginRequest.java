@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.login;
+package org.had.hospitalinformationsystem.auth;
 
 import lombok.Getter;
 import lombok.Setter;

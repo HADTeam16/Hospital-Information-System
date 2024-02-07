@@ -3,6 +3,9 @@ package org.had.hospitalinformationsystem.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.had.hospitalinformationsystem.ward.Ward;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,6 +30,11 @@ public class RegistrationDto {
 
         //Patient-specific field
         private  String temperature;
+
+        //Nurse-spicific field
+        private String isHeadNurse;
+        private Set<Ward> wards;
+
 
 
 
