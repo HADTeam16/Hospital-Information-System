@@ -1,7 +1,9 @@
-package org.had.hospitalinformationsystem.security;
+package org.had.hospitalinformationsystem.auth;
 
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.doctor.Doctor;
+import org.had.hospitalinformationsystem.nurse.Nurse;
+import org.had.hospitalinformationsystem.nurse.NurseRepository;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
 import org.had.hospitalinformationsystem.user.User;
@@ -9,7 +11,6 @@ import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.receptionist.ReceptionistRepository;
 import org.had.hospitalinformationsystem.user.UserRepository;
-import org.had.hospitalinformationsystem.login.LoginRequest;
 import org.had.hospitalinformationsystem.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +19,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashSet;
 
 @RestController
 @RequestMapping("/auth")
@@ -42,6 +45,9 @@ public class AuthController {
     @Autowired
     ReceptionistRepository receptionistRepository;
 
+    @Autowired
+    NurseRepository nurseRepository;
+
     @GetMapping("/signup/admin")
     public AuthResponse createAdmin(){
         User user=new User();
@@ -55,7 +61,7 @@ public class AuthController {
         return new AuthResponse(token,"Register Success", user);
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/signup/user")
     public AuthResponse createUser(@RequestHeader("Authorization") String jwt,@RequestBody RegistrationDto registrationDto){
 
         User newUser = getUser(registrationDto);
@@ -76,7 +82,18 @@ public class AuthController {
             newReceptionist.setUser(savedUser);
             receptionistRepository.save(newReceptionist);
         }
-        else if((role.equals("receptionist") || role.equals("doctor")) && registrationDto.getRole().equals("patient")){
+        else if (role.equals("admin") && registrationDto.getRole().equals("nurse")) {
+            savedUser = userRepository.save(newUser);
+            Nurse newNurse = new Nurse();
+            newNurse.setUser(savedUser);
+
+            //change below lines
+//            newNurse.setWards(new HashSet<>());
+//            newNurse.setHeadNurse(Boolean.parseBoolean(registrationDto.getIsHeadNurse()));
+
+            nurseRepository.save(newNurse);
+        }
+        else if(role.equals("receptionist")  && registrationDto.getRole().equals("patient")){
             savedUser = userRepository.save(newUser);
             Patient newPatient = new Patient();
             newPatient.setUser(savedUser);
@@ -121,8 +138,9 @@ public class AuthController {
         }
         return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
     }
-    @PostMapping("/signin")
+    @PostMapping("/signin/user")
     public AuthResponse signin(@RequestBody LoginRequest loginRequest) {
+
         Authentication authentication = authenticate(loginRequest.getUserName(), loginRequest.getPassword(), loginRequest.getRole());
         String token = JwtProvider.generateToken(authentication, loginRequest.getRole());
         String userName = JwtProvider.getUserNameFromJwtTokenUnfiltered(token);

@@ -1,6 +1,6 @@
 package org.had.hospitalinformationsystem.appointment;
 
-import org.had.hospitalinformationsystem.security.JwtProvider;
+import org.had.hospitalinformationsystem.auth.JwtProvider;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.user.User;

@@ -18,6 +18,8 @@ public class Nurse {
     @Id
     private Long nurseId;
 
+    private boolean isHeadNurse;
+
     @OneToOne
     @MapsId
     @JoinColumn(name = "userid")
@@ -31,6 +33,7 @@ public class Nurse {
 
 
     )
+
     private Set<Ward> wards = new HashSet<>();
 
 

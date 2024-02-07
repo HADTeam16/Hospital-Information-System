@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.security;
+package org.had.hospitalinformationsystem.auth;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

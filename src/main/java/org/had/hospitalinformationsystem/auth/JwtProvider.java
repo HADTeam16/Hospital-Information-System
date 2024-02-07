@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.security;
+package org.had.hospitalinformationsystem.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

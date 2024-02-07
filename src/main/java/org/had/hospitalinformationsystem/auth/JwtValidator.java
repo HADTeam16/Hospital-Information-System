@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.security;
+package org.had.hospitalinformationsystem.auth;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
