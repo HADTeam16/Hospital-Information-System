@@ -50,11 +50,9 @@ public class AuthController {
         user.setRole("admin");
         user.setEmail("admin@gmail.com");
         userRepository.save(user);
-        User savedUser=user;
-        Authentication authentication=new UsernamePasswordAuthenticationToken(savedUser.getUserName(),savedUser.getPassword());
+        Authentication authentication=new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword());
         String token= JwtProvider.generateToken(authentication,user.getRole());
-        return new AuthResponse(token,"Register Success",savedUser);
-
+        return new AuthResponse(token,"Register Success", user);
     }
 
     @PostMapping("/signup")
