@@ -21,6 +21,12 @@ public class Doctor {
     @JoinColumn(name="user_id")
     private User user;
 
+    private String medicalLicenseNumber;
     private String specialization;
+    private String boardCertification; // Doc
+    private String experience;
+    private String medicalDegree; //Doc
+    private String cv; //Doc
+    private String drugScreeningResult; // Doc
 
 }
