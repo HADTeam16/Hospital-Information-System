@@ -21,4 +21,13 @@ public class Patient {
     private User user;
 
     private String temperature;
+    private String bloodPressure;
+    private String admissionDate;
+    private String dischargeDate;
+
+
+
+
+
+
 }
