@@ -148,4 +148,24 @@ public class AuthController {
         return new AuthResponse(token, "Login Success",user);
     }
 
+    @PutMapping("/change/password")
+    public String changePassword(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
+
+        String oldPassword = changePasswordRequest.getOldPassword();
+        String newPassword = changePasswordRequest.getNewPassword();
+
+        String userName = JwtProvider.getUserNameFromJwtToken(jwt);
+        User currUser = userRepository.findByUserName(userName);
+
+        if (passwordEncoder.matches(oldPassword, currUser.getPassword())) {
+            String encodedNewPassword = passwordEncoder.encode(newPassword);
+            currUser.setPassword(encodedNewPassword);
+            userRepository.save(currUser);
+
+            return "Password updated successfully!";
+        } else {
+            return "Incorrect old password. Password not updated.";
+        }
+    }
+
 }
