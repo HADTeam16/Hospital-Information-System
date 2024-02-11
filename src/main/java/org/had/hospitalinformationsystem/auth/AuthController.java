@@ -108,14 +108,23 @@ public class AuthController {
         newUser.setUserName(registrationDto.getUserName());
         newUser.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
         newUser.setFirstName(registrationDto.getFirstName());
+        newUser.setMiddleName(registrationDto.getMiddleName());
         newUser.setLastName(registrationDto.getLastName());
         newUser.setAge(registrationDto.getAge());
         newUser.setGender(registrationDto.getGender());
         newUser.setDateOfBirth(registrationDto.getDateOfBirth());
-        newUser.setAddress(registrationDto.getAddress());
+        newUser.setCountry(registrationDto.getCountry());
+        newUser.setState(registrationDto.getState());
+        newUser.setCity(registrationDto.getCity());
+        newUser.setAddressLine1(registrationDto.getAddressLine1());
+        newUser.setAddressLine2(registrationDto.getAddressLine2());
+        newUser.setLandmark(registrationDto.getLandmark());
+        newUser.setPinCode(registrationDto.getPinCode());
         newUser.setContact(registrationDto.getContact());
         newUser.setEmail(registrationDto.getEmail());
         newUser.setProfilePicture(registrationDto.getProfilePicture());
+        newUser.setEmergencyContactName(registrationDto.getEmergencyContactName());
+        newUser.setEmergencyContactNumber(registrationDto.getEmergencyContactNumber());
         newUser.setRole(registrationDto.getRole());
         return newUser;
     }

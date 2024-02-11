@@ -16,25 +16,50 @@ public class RegistrationDto {
         private String userName;
         private String password;
         private String firstName;
+        private String middleName;
         private String lastName;
         private Integer age;
         private String gender;
         private String dateOfBirth;
-        private String address;
+        private String country;
+        private String state;
+        private String city;
+        private String addressLine1;
+        private String addressLine2;
+        private String landmark;
+        private String pinCode;
         private String contact;
         private String email;
         private String profilePicture;
+        private String emergencyContactName;
+        private String emergencyContactNumber;
+
         private String role;
 
         // Doctor-specific field
+        private String medicalLicenseNumber;
         private String specialization;
+        private String boardCertification; // Doc
+        private String experience;
+        private String medicalDegree; //Doc
+        private String cv; //Doc
+        private String drugScreeningResult; // Doc
 
         //Patient-specific field
-        private  String temperature;
+        private String temperature;
+        private String bloodPressure;
+        private String admissionDate;
+        private String dischargeDate;
 
+<<<<<<< HEAD
         //Nurse-spicific field
         private boolean headNurse;
         private List<Long> wardIds;
+=======
+        //Nurse-specific field
+        private String isHeadNurse;
+        private Set<Ward> wards;
+>>>>>>> 5486a2cf63b3d82f3ac51eb243967d104d60b10f
 
 
 
