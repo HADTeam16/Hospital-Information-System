@@ -1,5 +1,6 @@
-package org.had.hospitalinformationsystem.auth;
+package org.had.hospitalinformationsystem.jwt;
 
+import org.had.hospitalinformationsystem.jwt.JwtValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

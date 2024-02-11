@@ -1,36 +1,49 @@
 package org.had.hospitalinformationsystem.receptionist;
 
 
-import org.had.hospitalinformationsystem.auth.AuthController;
-import org.had.hospitalinformationsystem.auth.AuthResponse;
-import org.had.hospitalinformationsystem.auth.JwtProvider;
+import org.had.hospitalinformationsystem.doctor.Doctor;
+import org.had.hospitalinformationsystem.doctor.DoctorRepository;
+import org.had.hospitalinformationsystem.dto.AuthResponse;
+import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
+import org.had.hospitalinformationsystem.utility.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/receptionist")
 public class ReceptionistController {
     @Autowired
     PasswordEncoder passwordEncoder;
+
     @Autowired
     UserRepository userRepository;
+
     @Autowired
     PatientRepository patientRepository;
 
+    @Autowired
+    DoctorRepository doctorRepository;
+
+    @Autowired
+    Utils utils = new Utils();
+
+
+
+    // Add Patient
+    @PostMapping("/signup/patient")
     public AuthResponse signupPatient(@RequestHeader("Authorization") String jwt, @RequestBody RegistrationDto registrationDto) throws Exception {
-        User newUser = getUser(registrationDto);
-        User savedUser = new User();
+        User newUser = utils.getUser(registrationDto);
+        User savedUser;
 
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         if(role.equals("receptionist")  && registrationDto.getRole().equals("patient")){
@@ -47,30 +60,55 @@ public class ReceptionistController {
         String token= JwtProvider.generateToken(authentication,newUser.getRole());
         return new AuthResponse(token,"Register Success",savedUser);
     }
-    private User getUser(RegistrationDto registrationDto) {
-        User newUser = new User();
-        newUser.setUserName(registrationDto.getUserName());
-        newUser.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-        newUser.setFirstName(registrationDto.getFirstName());
-        newUser.setMiddleName(registrationDto.getMiddleName());
-        newUser.setLastName(registrationDto.getLastName());
-        newUser.setAge(registrationDto.getAge());
-        newUser.setGender(registrationDto.getGender());
-        newUser.setDateOfBirth(registrationDto.getDateOfBirth());
-        newUser.setCountry(registrationDto.getCountry());
-        newUser.setState(registrationDto.getState());
-        newUser.setCity(registrationDto.getCity());
-        newUser.setAddressLine1(registrationDto.getAddressLine1());
-        newUser.setAddressLine2(registrationDto.getAddressLine2());
-        newUser.setLandmark(registrationDto.getLandmark());
-        newUser.setPinCode(registrationDto.getPinCode());
-        newUser.setContact(registrationDto.getContact());
-        newUser.setEmail(registrationDto.getEmail());
-        newUser.setProfilePicture(registrationDto.getProfilePicture());
-        newUser.setEmergencyContactName(registrationDto.getEmergencyContactName());
-        newUser.setEmergencyContactNumber(registrationDto.getEmergencyContactNumber());
-        newUser.setRole(registrationDto.getRole());
-        return newUser;
+
+    //Find Patient by UserName
+    @GetMapping("/patient/username/{userName}")
+    public Patient findPatientByUserName(@RequestHeader("Authorization") String jwt, @PathVariable String userName) throws Exception{
+        Patient newPatient=null;
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+
+        if(role.equals("receptionist")){
+            newPatient = patientRepository.findPatientByUserName(userName);
+        }
+        else{
+            throw new Exception("Patient Does not exist");
+        }
+        return newPatient;
     }
+
+    //Find Patient by Contact
+    @GetMapping("/patient/contact/{contact}")
+    public List<Patient> findPatientByContact(@RequestHeader("Authorization") String jwt, @PathVariable String contact) throws Exception{
+
+        List<Patient> newPatient=null;
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+
+        if(role.equals("receptionist")){
+            newPatient = patientRepository.findPatientByContact(contact);
+        }
+        else{
+            throw new Exception("Patient Does not exist");
+        }
+        return newPatient;
+    }
+
+    // Find Doctor by Specialization
+    @GetMapping("/doctor/{specialization}")
+    public List<Doctor>findDoctorBySpecialization(@RequestHeader("Authorization") String jwt,@PathVariable String specialization) throws Exception{
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+        List<Doctor>newDoctor = null;
+        if(role.equals("receptionist")){
+            newDoctor = doctorRepository.findDoctorBySpecialization(specialization);
+        }
+        else{
+            throw new Exception("Doctor Does not exist");
+        }
+        return newDoctor;
+
+    }
+
+    // Find Doctor by name
+
+
 
 }
