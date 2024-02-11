@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.had.hospitalinformationsystem.ward.Ward;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -50,9 +51,10 @@ public class RegistrationDto {
         private String admissionDate;
         private String dischargeDate;
 
-        //Nurse-specific field
-        private String isHeadNurse;
-        private Set<Ward> wards;
+        //Nurse-spicific field
+        private boolean headNurse;
+        private List<Long> wardIds;
+
 
 
 

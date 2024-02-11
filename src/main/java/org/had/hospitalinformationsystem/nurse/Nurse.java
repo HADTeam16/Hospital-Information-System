@@ -18,22 +18,14 @@ public class Nurse {
     @Id
     private Long nurseId;
 
-    private boolean isHeadNurse;
-
     @OneToOne
     @MapsId
     @JoinColumn(name = "userid")
     private User user;
 
-    @ManyToMany
-    @JoinTable(
-            name = "nurse_ward",
-            joinColumns = @JoinColumn(name = "nurse_id"),
-            inverseJoinColumns = @JoinColumn(name = "ward_id")
+    private boolean headNurse;
 
-
-    )
-
+    @OneToMany(mappedBy="managingNurse")
     private Set<Ward> wards = new HashSet<>();
 
 

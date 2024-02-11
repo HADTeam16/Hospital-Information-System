@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.had.hospitalinformationsystem.appointment.Appointment;
+import org.had.hospitalinformationsystem.nurse.Nurse;
 
 @Entity
 @Getter
@@ -33,5 +34,9 @@ public class Ward {
         VIP,
         DELUXE
     }
+
+    @ManyToOne
+    @JoinColumn(name = "nurse_id")
+    private Nurse managingNurse;
 
 }
