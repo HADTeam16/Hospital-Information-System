@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.auth;
+package org.had.hospitalinformationsystem.jwt;
 
 public class JwtConstant {
     public static String JWT_HEADER="Authorization";

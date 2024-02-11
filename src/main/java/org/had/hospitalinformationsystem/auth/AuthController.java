@@ -1,7 +1,11 @@
 package org.had.hospitalinformationsystem.auth;
 
+import org.had.hospitalinformationsystem.dto.AuthResponse;
+import org.had.hospitalinformationsystem.dto.ChangePasswordRequest;
+import org.had.hospitalinformationsystem.dto.LoginRequest;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.doctor.Doctor;
+import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.nurse.Nurse;
 import org.had.hospitalinformationsystem.nurse.NurseRepository;
 import org.had.hospitalinformationsystem.patient.Patient;
@@ -11,7 +15,7 @@ import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.receptionist.ReceptionistRepository;
 import org.had.hospitalinformationsystem.user.UserRepository;
-import org.had.hospitalinformationsystem.user.UserService;
+import org.had.hospitalinformationsystem.utility.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,34 +24,30 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
     @Autowired
     PasswordEncoder passwordEncoder;
-
     @Autowired
     CustomerUserDetailsServiceImplementation customerUserDetailsService;
-
-    @Autowired
-    UserService userService;
     @Autowired
     UserRepository userRepository;
-
     @Autowired
     DoctorRepository doctorRepository;
-
-    @Autowired
-    PatientRepository patientRepository;
-
+//    @Autowired
+//    PatientRepository patientRepository;
     @Autowired
     ReceptionistRepository receptionistRepository;
-
     @Autowired
     NurseRepository nurseRepository;
 
+    @Autowired
+    Utils utils = new Utils();
+
+
+    //Add Admin
     @GetMapping("/signup/admin")
     public AuthResponse createAdmin(){
         User user=new User();
@@ -61,10 +61,12 @@ public class AuthController {
         return new AuthResponse(token,"Register Success", user);
     }
 
+
+    // Add Users except Patient
     @PostMapping("/signup/user")
     public AuthResponse createUser(@RequestHeader("Authorization") String jwt,@RequestBody RegistrationDto registrationDto){
 
-        User newUser = getUser(registrationDto);
+        User newUser = utils.getUser(registrationDto);
         User savedUser = new User();
 
         String role = JwtProvider.getRoleFromJwtToken(jwt);
@@ -90,46 +92,14 @@ public class AuthController {
 
             nurseRepository.save(newNurse);
         }
-        else if(role.equals("receptionist")  && registrationDto.getRole().equals("patient")){
-            savedUser = userRepository.save(newUser);
-            Patient newPatient = new Patient();
-            newPatient.setUser(savedUser);
-            newPatient.setTemperature(registrationDto.getTemperature());
-            patientRepository.save(newPatient);
-        }
 
         Authentication authentication=new UsernamePasswordAuthenticationToken(savedUser.getUserName(),savedUser.getPassword());
         String token= JwtProvider.generateToken(authentication,newUser.getRole());
         return new AuthResponse(token,"Register Success",savedUser);
     }
 
-    private User getUser(RegistrationDto registrationDto) {
-        User newUser = new User();
-        newUser.setUserName(registrationDto.getUserName());
-        newUser.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-        newUser.setFirstName(registrationDto.getFirstName());
-        newUser.setMiddleName(registrationDto.getMiddleName());
-        newUser.setLastName(registrationDto.getLastName());
-        newUser.setAge(registrationDto.getAge());
-        newUser.setGender(registrationDto.getGender());
-        newUser.setDateOfBirth(registrationDto.getDateOfBirth());
-        newUser.setCountry(registrationDto.getCountry());
-        newUser.setState(registrationDto.getState());
-        newUser.setCity(registrationDto.getCity());
-        newUser.setAddressLine1(registrationDto.getAddressLine1());
-        newUser.setAddressLine2(registrationDto.getAddressLine2());
-        newUser.setLandmark(registrationDto.getLandmark());
-        newUser.setPinCode(registrationDto.getPinCode());
-        newUser.setContact(registrationDto.getContact());
-        newUser.setEmail(registrationDto.getEmail());
-        newUser.setProfilePicture(registrationDto.getProfilePicture());
-        newUser.setEmergencyContactName(registrationDto.getEmergencyContactName());
-        newUser.setEmergencyContactNumber(registrationDto.getEmergencyContactNumber());
-        newUser.setRole(registrationDto.getRole());
-        return newUser;
-    }
 
-
+    // Authenticate
     private Authentication authenticate(String userName, String password,String role) {
         UserDetails userDetails=customerUserDetailsService.loadUserByUsername(userName);
         if(userDetails==null){
@@ -144,8 +114,10 @@ public class AuthController {
         }
         return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
     }
-    @PostMapping("/signin/user")
-    public AuthResponse signin(@RequestBody LoginRequest loginRequest) {
+
+    // User Sign In
+    @PostMapping("/signin")
+    public AuthResponse signIn(@RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticate(loginRequest.getUserName(), loginRequest.getPassword(), loginRequest.getRole());
         String token = JwtProvider.generateToken(authentication, loginRequest.getRole());
@@ -153,6 +125,7 @@ public class AuthController {
         User user = userRepository.findByUserName(userName);
         return new AuthResponse(token, "Login Success",user);
     }
+
 
     @PutMapping("/change/password")
     public String changePassword(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
