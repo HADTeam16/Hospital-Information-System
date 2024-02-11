@@ -51,15 +51,11 @@ public class RegistrationDto {
         private String admissionDate;
         private String dischargeDate;
 
-<<<<<<< HEAD
+
         //Nurse-spicific field
         private boolean headNurse;
         private List<Long> wardIds;
-=======
-        //Nurse-specific field
-        private String isHeadNurse;
-        private Set<Ward> wards;
->>>>>>> 5486a2cf63b3d82f3ac51eb243967d104d60b10f
+
 
 
 

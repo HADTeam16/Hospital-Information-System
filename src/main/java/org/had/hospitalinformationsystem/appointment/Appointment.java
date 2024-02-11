@@ -26,6 +26,8 @@ public class Appointment {
     @JoinColumn(name = "patient_userid")
     private Patient patient;
 
+    private String purpose;
+
     private LocalDateTime slot;
 
 }
