@@ -86,10 +86,7 @@ public class AuthController {
             savedUser = userRepository.save(newUser);
             Nurse newNurse = new Nurse();
             newNurse.setUser(savedUser);
-
-            //change below lines
-//            newNurse.setWards(new HashSet<>());
-//            newNurse.setHeadNurse(Boolean.parseBoolean(registrationDto.getIsHeadNurse()));
+            newNurse.setHeadNurse(registrationDto.isHeadNurse());
 
             nurseRepository.save(newNurse);
         }
