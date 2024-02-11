@@ -50,7 +50,7 @@ public class RegistrationDto {
         private String bloodPressure;
         private String admissionDate;
         private String dischargeDate;
-
+        
         //Nurse-spicific field
         private boolean headNurse;
         private List<Long> wardIds;
