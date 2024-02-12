@@ -54,43 +54,45 @@ public class ReceptionistController {
             patientRepository.save(newPatient);
         }
         else{
-            throw new Exception("Only Patient can be added by Receptionist");
+            throw new Exception("Access Denied!!");
         }
         Authentication authentication=new UsernamePasswordAuthenticationToken(savedUser.getUserName(),savedUser.getPassword());
         String token= JwtProvider.generateToken(authentication,newUser.getRole());
         return new AuthResponse(token,"Register Success",savedUser);
     }
 
-    //Find Patient by UserName
-    @GetMapping("/patient/username/{userName}")
-    public Patient findPatientByUserName(@RequestHeader("Authorization") String jwt, @PathVariable String userName) throws Exception{
-        Patient newPatient=null;
-        String role = JwtProvider.getRoleFromJwtToken(jwt);
 
-        if(role.equals("receptionist")){
-            newPatient = patientRepository.findPatientByUserName(userName);
-        }
-        else{
-            throw new Exception("Patient Does not exist");
-        }
-        return newPatient;
-    }
 
-    //Find Patient by Contact
-    @GetMapping("/patient/contact/{contact}")
-    public List<Patient> findPatientByContact(@RequestHeader("Authorization") String jwt, @PathVariable String contact) throws Exception{
+//    //Find Patient by UserName
+//    @GetMapping("/patient/username/{str}")
+//    public Patient findPatientByUserNameAndContact(@RequestHeader("Authorization") String jwt, @PathVariable String str) throws Exception{
+//        Patient newPatient=null;
+//        String role = JwtProvider.getRoleFromJwtToken(jwt);
+//
+//        if(role.equals("receptionist")){
+//            newPatient = patientRepository.findPatientByUserName(str);
+//        }
+//        else{
+//            throw new Exception("Patient Does not exist");
+//        }
+//        return newPatient;
+//    }
 
-        List<Patient> newPatient=null;
-        String role = JwtProvider.getRoleFromJwtToken(jwt);
-
-        if(role.equals("receptionist")){
-            newPatient = patientRepository.findPatientByContact(contact);
-        }
-        else{
-            throw new Exception("Patient Does not exist");
-        }
-        return newPatient;
-    }
+//    //Find Patient by Contact
+//    @GetMapping("/patient/contact/{contact}")
+//    public List<Patient> findPatientByContact(@RequestHeader("Authorization") String jwt, @PathVariable String contact) throws Exception{
+//
+//        List<Patient> newPatient=null;
+//        String role = JwtProvider.getRoleFromJwtToken(jwt);
+//
+//        if(role.equals("receptionist")){
+//            newPatient = patientRepository.findPatientByContact(contact);
+//        }
+//        else{
+//            throw new Exception("Patient Does not exist");
+//        }
+//        return newPatient;
+//    }
 
     // Find Doctor by Specialization
     @GetMapping("/doctor/{specialization}")
@@ -104,7 +106,6 @@ public class ReceptionistController {
             throw new Exception("Doctor Does not exist");
         }
         return newDoctor;
-
     }
 
     // Find Doctor by name

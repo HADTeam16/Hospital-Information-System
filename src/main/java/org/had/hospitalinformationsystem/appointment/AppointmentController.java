@@ -24,7 +24,7 @@ public class AppointmentController {
     @Autowired
     DoctorRepository doctorRepository;
 
-    @GetMapping()
+    @GetMapping("/getallappointment")
     public List<Appointment>getAllAppointment(@RequestHeader("Authorization") String jwt){
         return appointmentRepository.findAll();
     }
