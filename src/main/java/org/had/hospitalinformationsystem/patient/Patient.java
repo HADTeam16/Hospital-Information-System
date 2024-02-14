@@ -19,7 +19,7 @@ public class Patient {
     @MapsId
     @JoinColumn(name="user_id")
     private User user;
-
+    private String purpose;
     private String temperature;
     private String bloodPressure;
     private String admissionDate;
