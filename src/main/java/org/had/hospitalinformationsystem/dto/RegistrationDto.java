@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.had.hospitalinformationsystem.ward.Ward;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +45,8 @@ public class RegistrationDto {
         private String medicalDegree; //Doc
         private String cv; //Doc
         private String drugScreeningResult; // Doc
+        private LocalTime workStart;
+        private LocalTime workEnd;
 
         //Patient-specific field
         private String temperature;

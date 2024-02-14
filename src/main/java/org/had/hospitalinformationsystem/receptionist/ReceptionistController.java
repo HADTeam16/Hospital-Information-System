@@ -108,8 +108,6 @@ public class ReceptionistController {
         return newDoctor;
     }
 
-    // Find Doctor by name
-
 
 
 }

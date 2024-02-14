@@ -46,7 +46,6 @@ public class AuthController {
     @Autowired
     Utils utils = new Utils();
 
-
     //Add Admin
     @GetMapping("/signup/admin")
     public AuthResponse createAdmin(){

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.had.hospitalinformationsystem.user.User;
 
+import java.time.LocalTime;
+
 @Entity
 @Getter
 @Setter
@@ -28,5 +30,7 @@ public class Doctor {
     private String medicalDegree; //Doc
     private String cv; //Doc
     private String drugScreeningResult; // Doc
+    private LocalTime workStart;
+    private LocalTime workEnd;
 
 }
