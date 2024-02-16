@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.appointment;
+package org.had.hospitalinformationsystem.dto;
 
 import lombok.Getter;
 import lombok.Setter;
