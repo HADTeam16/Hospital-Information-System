@@ -1,6 +1,7 @@
 package org.had.hospitalinformationsystem.appointment;
 
 import org.had.hospitalinformationsystem.doctor.DoctorService;
+import org.had.hospitalinformationsystem.dto.AppointmentDto;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.patient.Patient;
@@ -40,7 +41,6 @@ public class AppointmentController {
         return appointmentRepository.findAll();
     }
 
-
     @GetMapping("/patientDetails")
     public  List<Patient>getDoctorsAppointment(@RequestHeader("Authorization") String jwt){
         String userName= JwtProvider.getUserNameFromJwtToken(jwt);
@@ -78,5 +78,6 @@ public class AppointmentController {
     }
 
     //API to give list of available doctor at some given time slot.
+
 
 }
