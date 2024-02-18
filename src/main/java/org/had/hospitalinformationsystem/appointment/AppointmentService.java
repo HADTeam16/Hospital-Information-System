@@ -1,6 +1,6 @@
 package org.had.hospitalinformationsystem.appointment;
 
-import java.time.LocalDateTime;
+import org.had.hospitalinformationsystem.dto.AppointmentDto;
 
 public interface AppointmentService {
     Appointment createAppointment(AppointmentDto appointmentDto);
