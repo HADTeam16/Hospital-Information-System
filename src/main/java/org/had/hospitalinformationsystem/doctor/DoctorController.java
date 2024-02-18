@@ -35,11 +35,4 @@ public class DoctorController {
     }
 
 
-//    @PostMapping("/addAppointment")
-//    public String bookAppointment(@PathVariable String userName1,String userName2){
-//        Appointment appointment = new Appointment();
-//        Doctor doctor = doctorRepository.find
-//        appointment.s
-//    }
-
 }
