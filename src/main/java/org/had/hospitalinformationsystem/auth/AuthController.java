@@ -8,7 +8,6 @@ import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.nurse.Nurse;
 import org.had.hospitalinformationsystem.nurse.NurseRepository;
-import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
@@ -25,7 +24,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.csrf.InvalidCsrfTokenException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -52,7 +50,7 @@ public class AuthController {
 
 
     //Add Admin
-    @GetMapping("/signup/admin")
+    @PostMapping("/signup/admin")
     public ResponseEntity <AuthResponse> createAdmin(){
 
         if (userRepository.findAdminByRole()) {
@@ -167,34 +165,45 @@ public class AuthController {
         }
     }
 
-//    @PutMapping("/admin/changepassword")
-//    public String changePasswordByAdmin(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
-//        String role = JwtProvider.getRoleFromJwtToken(jwt);
-//        if(role.equals("admin")){
-//            User user = userRepository.findByUserName(changePasswordRequest.getUserName());
-//            String encodedNewPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
-//            user.setPassword(encodedNewPassword);
-//        }
-//    }
-//
-//    @PutMapping("/user/changepassword")
-//    public String changePassword(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
-//
-//        String oldPassword = changePasswordRequest.getOldPassword();
-//        String newPassword = changePasswordRequest.getNewPassword();
-//
-//        String userName = JwtProvider.getUserNameFromJwtToken(jwt);
-//        User currUser = userRepository.findByUserName(userName);
-//
-//        if (passwordEncoder.matches(oldPassword, currUser.getPassword())) {
-//            String encodedNewPassword = passwordEncoder.encode(newPassword);
-//            currUser.setPassword(encodedNewPassword);
-//            userRepository.save(currUser);
-//
-//            return "Password updated successfully!";
-//        } else {
-//            return "Incorrect old password. Password not updated.";
-//        }
-//    }
+    @PutMapping("/admin/changepassword")
+    public ResponseEntity< String> changePasswordByAdmin(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
+        try {
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (role.equals("admin")) {
+                User user = userRepository.findByUserName(changePasswordRequest.getUserName());
+                String encodedNewPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
+                user.setPassword(encodedNewPassword);
+                userRepository.save(user);
+                return ResponseEntity.ok("Password updated successfully");
+            } else {
+                return ResponseEntity.ok("Permission Denied");
+            }
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error");
+        }
+    }
 
+    @PutMapping("/user/changepassword")
+    public ResponseEntity< String> changePassword(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
+        try {
+            String oldPassword = changePasswordRequest.getOldPassword();
+            String newPassword = changePasswordRequest.getNewPassword();
+
+            String userName = JwtProvider.getUserNameFromJwtToken(jwt);
+            User currUser = userRepository.findByUserName(userName);
+
+            if (passwordEncoder.matches(oldPassword, currUser.getPassword())) {
+                String encodedNewPassword = passwordEncoder.encode(newPassword);
+                currUser.setPassword(encodedNewPassword);
+                userRepository.save(currUser);
+                return ResponseEntity.ok("Password updated successfully");
+            } else {
+                return ResponseEntity.ok("Check your current password");
+            }
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error");
+        }
+    }
 }

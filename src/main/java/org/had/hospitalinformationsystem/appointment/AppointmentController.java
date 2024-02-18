@@ -11,6 +11,8 @@ import org.had.hospitalinformationsystem.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -34,7 +36,12 @@ public class AppointmentController {
     @Autowired
     DoctorService doctorService;
 
-
+    @MessageMapping("/appointments")
+    @SendTo("/topic/appointments")
+    public Appointment updateAppointments(Appointment appointment) {
+        // Process the appointment and send updates to subscribers
+        return appointment;
+    }
 
     @GetMapping("/getallappointment")
     public List<Appointment>getAllAppointment(@RequestHeader("Authorization") String jwt){
