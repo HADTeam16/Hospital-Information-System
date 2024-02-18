@@ -58,32 +58,22 @@ public class AppointmentController {
 
     //API to schedule an appointment
     @PostMapping("/book")
-    public ResponseEntity<?> bookAppointment(@RequestBody AppointmentDto appointmentDto){
-//        Optional<Doctor> doctorOpt=doctorRepository.findById(appointmentDto.getDoctorId());
-//        if(appointmentDto.getSlot().toLocalTime().isBefore(doctorOpt.get().getWorkStart())||
-//        appointmentDto.getSlot().plusHours(1).toLocalTime().isAfter(doctorOpt.get().getWorkEnd())){
-//            return ResponseEntity.badRequest().body("Appointment time is outside of Doctor's working hours");
-//        }
-//        if(!doctorService.isDoctorAvailable(appointmentDto.getDoctorId(),appointmentDto.getSlot())){
-//            return ResponseEntity.badRequest().body("Doctor is not available at the  desired time.");
-//        }
-
+    public ResponseEntity<?> bookAppointment(@RequestHeader("Authorization") String jwt,@RequestBody AppointmentDto appointmentDto){
+        String userName= JwtProvider.getUserNameFromJwtToken(jwt);
+        User user = userRepository.findByUserName(userName);
+        if(!user.getRole().equals("receptionist")){
+            return ResponseEntity.badRequest().body("Only receptionist can book an appointment");
+        }
         try{
             Appointment appointment=appointmentService.createAppointment(appointmentDto);
             return ResponseEntity.ok().body("Appointment created successfully for: "+appointment.getSlot().toString());
         }
         catch(Exception e){
-            return ResponseEntity.badRequest().body("Failed to create appointment"+e.getMessage());
+            return ResponseEntity.badRequest().body("Failed to create appointment "+e.getMessage());
         }
     }
 
     //API to give list of available doctor at current time slot or approximate time slot. Instead of time we can go by indexing.
-//    @GetMapping("/available-doctors")
-//    public ResponseEntity<List<Doctor>>getAvailableDoctor(@RequestParam String specialization,
-//    @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME) LocalDateTime slot){
-//        List<Doctor> availableDoctors=doctorService.getAvailableDoctorsBySpecializationAndSlot(specialization,slot);
-//        return ResponseEntity.ok(availableDoctors);
-//    }
 
     //API to give list of available doctor at some given time slot.
 

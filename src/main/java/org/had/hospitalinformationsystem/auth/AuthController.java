@@ -91,6 +91,8 @@ public class AuthController {
                         Doctor newDoctor = new Doctor();
                         newDoctor.setUser(savedUser);
                         newDoctor.setSpecialization(registrationDto.getSpecialization());
+                        newDoctor.setWorkStart(registrationDto.getWorkStart());
+                        newDoctor.setWorkEnd(registrationDto.getWorkEnd());
                         doctorRepository.save(newDoctor);
                     }
                     case "receptionist" -> {
