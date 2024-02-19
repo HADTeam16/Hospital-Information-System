@@ -19,8 +19,19 @@ public class EmailOtpController {
 
 
     @GetMapping("/process")
-    public String processEmail() {
-        return "Email Sent";
+    public ResponseEntity< String> processEmail(@RequestHeader("Authorization") String jwt) {
+        try{
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if(role.equals("receptionist")) {
+                return ResponseEntity.ok("Email Sent");
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access denied");
+            }
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error");
+        }
     }
 
 
