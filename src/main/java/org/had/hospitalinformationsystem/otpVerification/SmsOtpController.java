@@ -1,11 +1,10 @@
 package org.had.hospitalinformationsystem.otpVerification;
 
+import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +23,33 @@ public class SmsOtpController {
     }
 
     @PostMapping("/sendotp")
-    public SmsOtpResponse sendOtp(@RequestBody SmsOtpRequest smsOtpRequest) {
-        return smsService.sendSMS(smsOtpRequest);
+    public ResponseEntity<SmsOtpResponse> sendOtp(@RequestHeader("Authorization") String jwt,@RequestBody SmsOtpRequest smsOtpRequest) {
+        try {
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if(role.equals("receptionist")) {
+                return ResponseEntity.ok(smsService.sendSMS(smsOtpRequest));
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new SmsOtpResponse(OtpStatus.ACCESSDENIED,"Access Denied"));
+            }
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new SmsOtpResponse(OtpStatus.ERROR,e.getMessage()));
+        }
     }
     @PostMapping("/validateotp")
-    public String validateOtp(@RequestBody SmsOtpValidationRequest smsOtpValidationRequest) {
-        return smsService.validateOtp(smsOtpValidationRequest);
+    public ResponseEntity< String> validateOtp(@RequestHeader("Authorization") String jwt,@RequestBody SmsOtpValidationRequest smsOtpValidationRequest) {
+        try {
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if(role.equals("receptionist")) {
+                return ResponseEntity.ok(smsService.validateOtp(smsOtpValidationRequest));
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access denied");
+            }
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ERROR");
+        }
     }
 }

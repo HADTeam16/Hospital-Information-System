@@ -2,5 +2,5 @@ package org.had.hospitalinformationsystem.otpVerification;
 
 public enum OtpStatus {
 
-    DELIVERED,FAILED
+    DELIVERED,FAILED,ACCESSDENIED,ERROR
 }
