@@ -26,9 +26,12 @@ public class AppointmentServiceImpl implements AppointmentService{
     DoctorService doctorService;
     @Override
     public Appointment createAppointment(AppointmentDto appointmentDto) {
+
         Appointment appointment=new Appointment();
         Doctor doctor=doctorRepository.findById(appointmentDto.getDoctorId()).orElseThrow();
+
         LocalDateTime nextAvailableSlot=doctorService.findNextAvailableSlot(appointmentDto.getDoctorId());
+
         if(nextAvailableSlot==null){
             throw new IllegalStateException("No available slots for today");
         }
