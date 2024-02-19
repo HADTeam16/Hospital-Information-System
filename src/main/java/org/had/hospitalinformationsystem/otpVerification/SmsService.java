@@ -1,6 +1,7 @@
 package org.had.hospitalinformationsystem.otpVerification;
 
 import java.text.DecimalFormat;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -19,7 +20,7 @@ public class SmsService {
 
     @Autowired
     private SmsTwilioConfig smsTwilioConfig;
-    Map<String, String> otpMap = new HashMap<>();
+    Map<String, OtpInfo> otpMap = new HashMap<>();
 
 
     public SmsOtpResponse sendSMS(SmsOtpRequest smsOtpRequest) {
@@ -28,7 +29,7 @@ public class SmsService {
             PhoneNumber to = new PhoneNumber(smsOtpRequest.getPhoneNumber());//to
             PhoneNumber from = new PhoneNumber(smsTwilioConfig.getTrialNumber()); // from
             String otp = generateOTP();
-            String otpMessage = "Your One-Time Password (OTP) is " + otp + " This OTP ensures the security of your personal health data.\n" +
+            String otpMessage = "Your One-Time Password (OTP) is " + otp + " This OTP ensures the security of your personal health data. This OTP is valid for 10 minutes.\n" +
                     "By giving this OTP to receptionist, you consent to the sharing of your medical information among our healthcare professionals within our Hospital for comprehensive and personalized care." +
                     "\n" +
                     "Your privacy is our priority. If you did not request this OTP or have any concerns, please contact our support team immediately.\n" +
@@ -38,23 +39,26 @@ public class SmsService {
                     .creator(to, from,
                             otpMessage)
                     .create();
-            otpMap.put(smsOtpRequest.getUsername(), otp);
+            Instant expirationTime = Instant.now().plusSeconds(600);
+            otpMap.put(smsOtpRequest.getUsername(), new OtpInfo(otp,expirationTime));
             smsOtpResponse = new SmsOtpResponse(OtpStatus.DELIVERED, otpMessage);
         } catch (Exception e) {
-            log.error("Error sending SMS: {}", e.getMessage(), e);
             smsOtpResponse = new SmsOtpResponse(OtpStatus.FAILED, e.getMessage());
         }
         return smsOtpResponse;
     }
 
     public String validateOtp(SmsOtpValidationRequest smsOtpValidationRequest) {
-        Set<String> keys = otpMap.keySet();
-        String username = null;
-        for(String key : keys)
-            username = key;
-        if (smsOtpValidationRequest.getUsername().equals(username)) {
-            otpMap.remove(username, smsOtpValidationRequest.getOtpNumber());
-            return "OTP is valid!";
+        String username = smsOtpValidationRequest.getUsername();
+        OtpInfo smsOtpInfo = otpMap.get(username);
+        if (smsOtpInfo != null && smsOtpInfo.getOtp().equals(smsOtpValidationRequest.getOtpNumber())) {
+            if (Instant.now().isBefore(smsOtpInfo.getExpirationTime())) {
+                otpMap.remove(username); // Remove OTP after successful validation
+                return "OTP is valid!";
+            } else {
+                otpMap.remove(username); // Remove expired OTP entry from the map
+                return "OTP has expired";
+            }
         } else {
             return "OTP is invalid!";
         }

@@ -10,6 +10,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -21,7 +22,7 @@ public class EmailOtpService {
     @Autowired
     private JavaMailSender sender;
 
-    Map<String, String> otpMap = new HashMap<>();
+    Map<String, OtpInfo> otpMap = new HashMap<>();
 
     public EmailOtpResponse sendEmail(EmailOtpRequest emailOtpRequest){
         EmailOtpResponse otpResponse = null;
@@ -33,7 +34,7 @@ public class EmailOtpService {
             helper.setSubject(subject);
             String otp = generateOTP();
             String message = "Dear User,<br/><br/>" +
-                    "Welcome to Pure Zen Wellness Hospital! Your One-Time Password (OTP) is <strong>" + otp + "</strong>. This OTP ensures the security of your personal health data.<br/><br/>" +
+                    "Welcome to Pure Zen Wellness Hospital! Your One-Time Password (OTP) is <strong>" + otp + "</strong>. This OTP ensures the security of your personal health data. This OTP is valid for 10 minutes.<br/><br/>" +
                     "By giving this OTP to the receptionist, you consent to the sharing of your medical information among our healthcare professionals within The Pure Zen Wellness Hospital for comprehensive and personalized care.<br/><br/>" +
                     "Your privacy is our priority. If you did not request this OTP or have any concerns, please contact our support team immediately.<br/><br/>" +
                     "Thank you for entrusting us with your health journey.<br/><br/>" +
@@ -41,7 +42,8 @@ public class EmailOtpService {
                     "Pure Zen Wellness Hospital";
 
             helper.setText(message,true);
-            otpMap.put(emailOtpRequest.getUsername(),otp);
+            Instant expirationTime = Instant.now().plusSeconds(600);
+            otpMap.put(emailOtpRequest.getUsername(),new OtpInfo(otp,expirationTime));
             sender.send(mimeMessage);
 
             otpResponse = new EmailOtpResponse(OtpStatus.DELIVERED,message);
@@ -53,15 +55,18 @@ public class EmailOtpService {
     }
 
     public String validateOtp(EmailOtpValidationRequest emailOtpValidationRequest){
-        Set<String> keys = otpMap.keySet();
-        String username = null;
-        for(String key : keys)
-            username = key;
-        if(emailOtpValidationRequest.getUsername().equals(username)){
-            otpMap.remove(username,emailOtpValidationRequest.getEmailOtpNumber());
-            return  "OTP is valid";
-        }
-        else{
+        String username = emailOtpValidationRequest.getUsername();
+        OtpInfo otpInfo = otpMap.get(username);
+
+        if (otpInfo != null && otpInfo.getOtp().equals(emailOtpValidationRequest.getEmailOtpNumber())) {
+            if (Instant.now().isBefore(otpInfo.getExpirationTime())) {
+                otpMap.remove(username);
+                return "OTP is valid";
+            } else {
+                otpMap.remove(username);
+                return "OTP has expired";
+            }
+        } else {
             return "OTP is invalid";
         }
     }
