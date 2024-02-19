@@ -32,8 +32,9 @@ public class DoctorServiceImpl implements DoctorService{
         if(!doctorOpt.isPresent()){
             return false;
         }
+
         Doctor doctor=doctorOpt.get();
-        if(desiredSlot.toLocalTime().isBefore(doctor.getWorkEnd()) ||
+        if(desiredSlot.toLocalTime().isBefore(doctor.getWorkStart()) ||
                 desiredSlot.toLocalTime().isAfter(doctor.getWorkEnd().minusMinutes(30))){
             return false;
         }
@@ -43,12 +44,14 @@ public class DoctorServiceImpl implements DoctorService{
 
     @Override
     public LocalDateTime findNextAvailableSlot(Long doctorId) {
+
         Doctor doctor = doctorRepository.findById(doctorId).orElseThrow();
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();
 
         // Attempt to find an available slot over today and the next two days
-        for (int dayOffset = 0; dayOffset < 3; dayOffset++) {
+        for (int dayOffset = 0; dayOffset < 2; dayOffset++) {
+
             LocalDate checkDate = today.plusDays(dayOffset);
             LocalDateTime workStartToday = LocalDateTime.of(checkDate, doctor.getWorkStart());
             LocalDateTime workEndToday = LocalDateTime.of(checkDate, doctor.getWorkEnd());
@@ -69,10 +72,12 @@ public class DoctorServiceImpl implements DoctorService{
             // Find the next available slot within the doctor's working hours for the day
             while (startSlot.isBefore(workEndToday)) {
                 if (isDoctorAvailable(doctorId, startSlot)) {
+
                     return startSlot; // Found an available slot
                 }
                 startSlot = startSlot.plusMinutes(30);
             }
+
         }
         return null;
     }

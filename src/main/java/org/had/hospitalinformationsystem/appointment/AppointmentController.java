@@ -65,6 +65,7 @@ public class AppointmentController {
             return ResponseEntity.badRequest().body("Only receptionist can book an appointment");
         }
         try{
+
             Appointment appointment=appointmentService.createAppointment(appointmentDto);
             return ResponseEntity.ok().body("Appointment created successfully for: "+appointment.getSlot().toString());
         }
