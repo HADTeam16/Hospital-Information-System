@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.twilioOtp;
+package org.had.hospitalinformationsystem.otpVerification;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/otp")
 @Slf4j
-public class OtpController {
+public class SmsOtpController {
 
     @Autowired
     private SmsService smsService;
@@ -23,15 +23,12 @@ public class OtpController {
         return "SMS sent";
     }
 
-    @PostMapping("/send-otp")
-    public OtpResponse sendOtp(@RequestBody OtpRequest otpRequest) {
-        log.info("inside sendOtp :: "+otpRequest.getUsername());
-        return smsService.sendSMS(otpRequest);
+    @PostMapping("/sendotp")
+    public SmsOtpResponse sendOtp(@RequestBody SmsOtpRequest smsOtpRequest) {
+        return smsService.sendSMS(smsOtpRequest);
     }
-    @PostMapping("/validate-otp")
-    public String validateOtp(@RequestBody OtpValidationRequest otpValidationRequest) {
-        log.info("inside validateOtp :: "+otpValidationRequest.getUsername()+" "+otpValidationRequest.getOtpNumber());
-        return smsService.validateOtp(otpValidationRequest);
+    @PostMapping("/validateotp")
+    public String validateOtp(@RequestBody SmsOtpValidationRequest smsOtpValidationRequest) {
+        return smsService.validateOtp(smsOtpValidationRequest);
     }
-
 }

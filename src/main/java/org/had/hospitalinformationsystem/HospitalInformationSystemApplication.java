@@ -2,7 +2,7 @@ package org.had.hospitalinformationsystem;
 
 import com.twilio.Twilio;
 import jakarta.annotation.PostConstruct;
-import org.had.hospitalinformationsystem.twilioOtp.TwilioConfig;
+import org.had.hospitalinformationsystem.otpVerification.SmsTwilioConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.boot.SpringApplication;
@@ -17,11 +17,11 @@ import java.util.Arrays;
 public class HospitalInformationSystemApplication {
 
 	@Autowired
-	private TwilioConfig twilioConfig;
+	private SmsTwilioConfig smsTwilioConfig;
 
 	@PostConstruct
 	public void setup() {
-		Twilio.init(twilioConfig.getAccountSid(), twilioConfig.getAuthToken());
+		Twilio.init(smsTwilioConfig.getAccountSid(), smsTwilioConfig.getAuthToken());
 	}
 
     public static void main(String[] args)  {

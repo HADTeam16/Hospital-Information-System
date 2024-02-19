@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.twilioOtp;
+package org.had.hospitalinformationsystem.otpVerification;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -18,15 +18,15 @@ import lombok.extern.slf4j.Slf4j;
 public class SmsService {
 
     @Autowired
-    private TwilioConfig twilioConfig;
+    private SmsTwilioConfig smsTwilioConfig;
     Map<String, String> otpMap = new HashMap<>();
 
 
-    public OtpResponse sendSMS(OtpRequest otpRequest) {
-        OtpResponse otpResponse = null;
+    public SmsOtpResponse sendSMS(SmsOtpRequest smsOtpRequest) {
+        SmsOtpResponse smsOtpResponse = null;
         try {
-            PhoneNumber to = new PhoneNumber(otpRequest.getPhoneNumber());//to
-            PhoneNumber from = new PhoneNumber(twilioConfig.getTrialNumber()); // from
+            PhoneNumber to = new PhoneNumber(smsOtpRequest.getPhoneNumber());//to
+            PhoneNumber from = new PhoneNumber(smsTwilioConfig.getTrialNumber()); // from
             String otp = generateOTP();
             String otpMessage = "Your One-Time Password (OTP) is " + otp + " This OTP ensures the security of your personal health data.\n" +
                     "By giving this OTP to receptionist, you consent to the sharing of your medical information among our healthcare professionals within our Hospital for comprehensive and personalized care." +
@@ -38,22 +38,22 @@ public class SmsService {
                     .creator(to, from,
                             otpMessage)
                     .create();
-            otpMap.put(otpRequest.getUsername(), otp);
-            otpResponse = new OtpResponse(OtpStatus.DELIVERED, otpMessage);
+            otpMap.put(smsOtpRequest.getUsername(), otp);
+            smsOtpResponse = new SmsOtpResponse(OtpStatus.DELIVERED, otpMessage);
         } catch (Exception e) {
             log.error("Error sending SMS: {}", e.getMessage(), e);
-            otpResponse = new OtpResponse(OtpStatus.FAILED, e.getMessage());
+            smsOtpResponse = new SmsOtpResponse(OtpStatus.FAILED, e.getMessage());
         }
-        return otpResponse;
+        return smsOtpResponse;
     }
 
-    public String validateOtp(OtpValidationRequest otpValidationRequest) {
+    public String validateOtp(SmsOtpValidationRequest smsOtpValidationRequest) {
         Set<String> keys = otpMap.keySet();
         String username = null;
         for(String key : keys)
             username = key;
-        if (otpValidationRequest.getUsername().equals(username)) {
-            otpMap.remove(username,otpValidationRequest.getOtpNumber());
+        if (smsOtpValidationRequest.getUsername().equals(username)) {
+            otpMap.remove(username, smsOtpValidationRequest.getOtpNumber());
             return "OTP is valid!";
         } else {
             return "OTP is invalid!";
@@ -64,5 +64,4 @@ public class SmsService {
         return new DecimalFormat("000000")
                 .format(new Random().nextInt(999999));
     }
-
 }

@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.twilioOtp;
+package org.had.hospitalinformationsystem.otpVerification;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -9,10 +9,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "twilio")
 @Data
-public class TwilioConfig {
+public class SmsTwilioConfig {
     private String accountSid;
     private String authToken;
     private String trialNumber;
-
-
 }
