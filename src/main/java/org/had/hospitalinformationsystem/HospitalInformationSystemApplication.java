@@ -1,5 +1,9 @@
 package org.had.hospitalinformationsystem;
 
+import com.twilio.Twilio;
+import jakarta.annotation.PostConstruct;
+import org.had.hospitalinformationsystem.otpVerification.SmsTwilioConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,6 +15,14 @@ import java.util.Arrays;
 
 @SpringBootApplication
 public class HospitalInformationSystemApplication {
+
+	@Autowired
+	private SmsTwilioConfig smsTwilioConfig;
+
+	@PostConstruct
+	public void setup() {
+		Twilio.init(smsTwilioConfig.getAccountSid(), smsTwilioConfig.getAuthToken());
+	}
 
     public static void main(String[] args)  {
         SpringApplication.run(HospitalInformationSystemApplication.class, args);
