@@ -9,15 +9,13 @@ import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/appointment")
@@ -36,16 +34,26 @@ public class AppointmentController {
     @Autowired
     DoctorService doctorService;
 
-    @MessageMapping("/appointments")
-    @SendTo("/topic/appointments")
-    public Appointment updateAppointments(Appointment appointment) {
-        // Process the appointment and send updates to subscribers
-        return appointment;
-    }
+//    @MessageMapping("/appointments")
+//    @SendTo("/topic/appointments")
+//    public Appointment updateAppointments(Appointment appointment) {
+//        return appointment;
+//    }
 
     @GetMapping("/getallappointment")
-    public List<Appointment>getAllAppointment(@RequestHeader("Authorization") String jwt){
-        return appointmentRepository.findAll();
+    public ResponseEntity< List<Appointment>>getAllAppointment(@RequestHeader("Authorization") String jwt){
+        try {
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if(role.equals("receptionist")) {
+                return ResponseEntity.ok(appointmentRepository.findAll());
+            }
+            else{
+                return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+        }
+        catch(Exception e){
+            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @GetMapping("/patientDetails")
