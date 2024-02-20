@@ -10,5 +10,4 @@ class HospitalInformationSystemApplicationTests {
     void contextLoads() {
     }
 
-
 }
