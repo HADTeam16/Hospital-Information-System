@@ -62,11 +62,23 @@ public class AppointmentController {
     }
 
     @GetMapping("/patientDetails")
-    public  List<Patient>getDoctorsAppointment(@RequestHeader("Authorization") String jwt){
-        String userName= JwtProvider.getUserNameFromJwtToken(jwt);
-        User user = userRepository.findByUserName(userName);
-        Doctor doctor = doctorRepository.findByUser(user);
-        return appointmentRepository.getDoctorsAppointment(doctor.getDoctorId());
+    public ResponseEntity<?> getDoctorsAppointment(@RequestHeader("Authorization") String jwt) {
+        try {
+            String userName = JwtProvider.getUserNameFromJwtToken(jwt);
+            User user = userRepository.findByUserName(userName);
+            if (user == null) {
+                return ResponseEntity.badRequest().body("User not found");
+            }
+            Doctor doctor = doctorRepository.findByUser(user);
+            if (doctor == null) {
+                return ResponseEntity.badRequest().body("Doctor not found for user: " + userName);
+            }
+            List<Patient> appointments = appointmentRepository.getDoctorsAppointment(doctor.getDoctorId());
+            return ResponseEntity.ok(appointments);
+        } catch (Exception e) {
+            // Log the exception or handle it as per your application's error handling policy
+            return ResponseEntity.internalServerError().body("An error occurred while fetching appointments: " + e.getMessage());
+        }
     }
 
     //API to schedule an appointment
