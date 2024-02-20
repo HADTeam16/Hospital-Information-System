@@ -12,6 +12,7 @@ import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.utility.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,24 +42,29 @@ public class ReceptionistController {
 
     // Add Patient
     @PostMapping("/signup/patient")
-    public AuthResponse signupPatient(@RequestHeader("Authorization") String jwt, @RequestBody RegistrationDto registrationDto) throws Exception {
-        User newUser = utils.getUser(registrationDto);
-        User savedUser;
+    public ResponseEntity<?> signupPatient(@RequestHeader("Authorization") String jwt, @RequestBody RegistrationDto registrationDto) {
+        try {
+            User newUser = utils.getUser(registrationDto);
+            User savedUser;
 
-        String role = JwtProvider.getRoleFromJwtToken(jwt);
-        if(role.equals("receptionist")  && registrationDto.getRole().equals("patient")){
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (!role.equals("receptionist") || !registrationDto.getRole().equals("patient")) {
+                throw new Exception("Access Denied!!");
+            }
+
             savedUser = userRepository.save(newUser);
             Patient newPatient = new Patient();
             newPatient.setUser(savedUser);
             newPatient.setTemperature(registrationDto.getTemperature());
             patientRepository.save(newPatient);
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getUserName(), savedUser.getPassword());
+            String token = JwtProvider.generateToken(authentication, newUser.getRole());
+
+            return ResponseEntity.ok(new AuthResponse(token, "Register Success", savedUser));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error during patient registration: " + e.getMessage());
         }
-        else{
-            throw new Exception("Access Denied!!");
-        }
-        Authentication authentication=new UsernamePasswordAuthenticationToken(savedUser.getUserName(),savedUser.getPassword());
-        String token= JwtProvider.generateToken(authentication,newUser.getRole());
-        return new AuthResponse(token,"Register Success",savedUser);
     }
 
 
@@ -96,16 +102,22 @@ public class ReceptionistController {
 
     // Find Doctor by Specialization
     @GetMapping("/doctor/{specialization}")
-    public List<Doctor>findDoctorBySpecialization(@RequestHeader("Authorization") String jwt,@PathVariable String specialization) throws Exception{
-        String role = JwtProvider.getRoleFromJwtToken(jwt);
-        List<Doctor>newDoctor = null;
-        if(role.equals("receptionist")){
-            newDoctor = doctorRepository.findDoctorBySpecialization(specialization);
+    public ResponseEntity<?> findDoctorBySpecialization(@RequestHeader("Authorization") String jwt, @PathVariable String specialization) {
+        try {
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (!role.equals("receptionist")) {
+                throw new Exception("Access Denied - Only receptionists can access this information.");
+            }
+
+            List<Doctor> doctors = doctorRepository.findDoctorBySpecialization(specialization);
+            if (doctors.isEmpty()) {
+                throw new Exception("Doctor with the specialization '" + specialization + "' does not exist.");
+            }
+
+            return ResponseEntity.ok(doctors);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error finding doctor by specialization: " + e.getMessage());
         }
-        else{
-            throw new Exception("Doctor Does not exist");
-        }
-        return newDoctor;
     }
 
 

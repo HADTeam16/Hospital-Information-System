@@ -62,11 +62,23 @@ public class AppointmentController {
     }
 
     @GetMapping("/patientDetails")
-    public  List<Patient>getDoctorsAppointment(@RequestHeader("Authorization") String jwt){
-        String userName= JwtProvider.getUserNameFromJwtToken(jwt);
-        User user = userRepository.findByUserName(userName);
-        Doctor doctor = doctorRepository.findByUser(user);
-        return appointmentRepository.getDoctorsAppointment(doctor.getDoctorId());
+    public ResponseEntity<?> getDoctorsAppointment(@RequestHeader("Authorization") String jwt) {
+        try {
+            String userName = JwtProvider.getUserNameFromJwtToken(jwt);
+            User user = userRepository.findByUserName(userName);
+            if (user == null) {
+                return ResponseEntity.badRequest().body("User not found");
+            }
+            Doctor doctor = doctorRepository.findByUser(user);
+            if (doctor == null) {
+                return ResponseEntity.badRequest().body("Doctor not found for user: " + userName);
+            }
+            List<Patient> appointments = appointmentRepository.getDoctorsAppointment(doctor.getDoctorId());
+            return ResponseEntity.ok(appointments);
+        } catch (Exception e) {
+            // Log the exception or handle it as per your application's error handling policy
+            return ResponseEntity.internalServerError().body("An error occurred while fetching appointments: " + e.getMessage());
+        }
     }
 
     //API to schedule an appointment
@@ -77,13 +89,26 @@ public class AppointmentController {
         if (!user.getRole().equals("receptionist")) {
             return ResponseEntity.badRequest().body("Only receptionist can book an appointment");
         }
+        Appointment appointment = null;
         try {
-            Appointment appointment = appointmentService.createAppointment(appointmentDto);
-            messagingTemplate.convertAndSend("/topic/appointments", appointment);
-            return ResponseEntity.ok().body("Appointment created successfully for: " + appointment.getSlot().toString());
+            appointment = appointmentService.createAppointment(appointmentDto);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to create appointment " + e.getMessage());
+            return ResponseEntity.badRequest().body("Failed to create appointment: " + e.getMessage());
         }
+
+        // Attempt to send WebSocket message in a separate try-catch to handle messaging errors specifically
+        try {
+            messagingTemplate.convertAndSend("/topic/appointments", appointment);
+        } catch (Exception e) {
+            // Log the error and continue. The appointment is booked, but the real-time notification failed.
+            // Consider logging this exception to a log file or monitoring service
+            System.err.println("Failed to send WebSocket update for appointment: " + e.getMessage());
+            // Optionally, inform the caller that the booking was successful but updates may be delayed.
+            // This is a design choice depending on how critical real-time updates are for your application.
+        }
+
+        // If we reach here, the appointment was successfully created, regardless of WebSocket success.
+        return ResponseEntity.ok().body("Appointment created successfully for: " + appointment.getSlot().toString());
     }
 
     //API to give list of available doctor at current time slot or approximate time slot. Instead of time we can go by indexing.
