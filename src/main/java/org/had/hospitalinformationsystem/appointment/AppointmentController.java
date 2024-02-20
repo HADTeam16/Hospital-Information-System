@@ -30,8 +30,10 @@ public class AppointmentController {
 
     @Autowired
     DoctorRepository doctorRepository;
+
     @Autowired
     AppointmentService appointmentService;
+
     @Autowired
     DoctorService doctorService;
 
@@ -45,7 +47,7 @@ public class AppointmentController {
     }
 
 
-    @GetMapping("/getallappointment")
+    @GetMapping("/get/all/appointments")
     public ResponseEntity< List<Appointment>>getAllAppointment(@RequestHeader("Authorization") String jwt){
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
@@ -61,7 +63,7 @@ public class AppointmentController {
         }
     }
 
-    @GetMapping("/patientDetails")
+    @GetMapping("/get/patient/details")
     public ResponseEntity<?> getDoctorsAppointment(@RequestHeader("Authorization") String jwt) {
         try {
             String userName = JwtProvider.getUserNameFromJwtToken(jwt);
@@ -76,13 +78,11 @@ public class AppointmentController {
             List<Patient> appointments = appointmentRepository.getDoctorsAppointment(doctor.getDoctorId());
             return ResponseEntity.ok(appointments);
         } catch (Exception e) {
-            // Log the exception or handle it as per your application's error handling policy
             return ResponseEntity.internalServerError().body("An error occurred while fetching appointments: " + e.getMessage());
         }
     }
 
-    //API to schedule an appointment
-    @PostMapping("/book")
+    @PostMapping("/book/appointment")
     public ResponseEntity<?> bookAppointment(@RequestHeader("Authorization") String jwt, @RequestBody AppointmentDto appointmentDto) {
         String userName = JwtProvider.getUserNameFromJwtToken(jwt);
         User user = userRepository.findByUserName(userName);
@@ -95,25 +95,11 @@ public class AppointmentController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to create appointment: " + e.getMessage());
         }
-
-        // Attempt to send WebSocket message in a separate try-catch to handle messaging errors specifically
         try {
             messagingTemplate.convertAndSend("/topic/appointments", appointment);
         } catch (Exception e) {
-            // Log the error and continue. The appointment is booked, but the real-time notification failed.
-            // Consider logging this exception to a log file or monitoring service
             System.err.println("Failed to send WebSocket update for appointment: " + e.getMessage());
-            // Optionally, inform the caller that the booking was successful but updates may be delayed.
-            // This is a design choice depending on how critical real-time updates are for your application.
         }
-
-        // If we reach here, the appointment was successfully created, regardless of WebSocket success.
         return ResponseEntity.ok().body("Appointment created successfully for: " + appointment.getSlot().toString());
     }
-
-    //API to give list of available doctor at current time slot or approximate time slot. Instead of time we can go by indexing.
-
-    //API to give list of available doctor at some given time slot.
-
-
 }
