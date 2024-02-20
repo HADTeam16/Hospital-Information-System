@@ -38,6 +38,11 @@ public class UserController {
         return userService.findUserByRole(role);
     }
 
+//    @GetMapping("/validusername")
+//    public boolean userPresentOrNot(@RequestBody String userName){
+//
+//    }
+
     //Add User Details
     @PutMapping("/update")
     public User updateUser(@RequestHeader("Authorization") String jwt,@RequestBody User user){

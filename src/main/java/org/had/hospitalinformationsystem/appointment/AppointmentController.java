@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,11 +35,15 @@ public class AppointmentController {
     @Autowired
     DoctorService doctorService;
 
-//    @MessageMapping("/appointments")
-//    @SendTo("/topic/appointments")
-//    public Appointment updateAppointments(Appointment appointment) {
-//        return appointment;
-//    }
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    @MessageMapping("/appointmentBooked")
+    @SendTo("/topic/appointments")
+    public Appointment handleAppointmentBooking(Appointment appointment) {
+        return appointment;
+    }
+
 
     @GetMapping("/getallappointment")
     public ResponseEntity< List<Appointment>>getAllAppointment(@RequestHeader("Authorization") String jwt){
@@ -66,19 +71,18 @@ public class AppointmentController {
 
     //API to schedule an appointment
     @PostMapping("/book")
-    public ResponseEntity<?> bookAppointment(@RequestHeader("Authorization") String jwt,@RequestBody AppointmentDto appointmentDto){
-        String userName= JwtProvider.getUserNameFromJwtToken(jwt);
+    public ResponseEntity<?> bookAppointment(@RequestHeader("Authorization") String jwt, @RequestBody AppointmentDto appointmentDto) {
+        String userName = JwtProvider.getUserNameFromJwtToken(jwt);
         User user = userRepository.findByUserName(userName);
-        if(!user.getRole().equals("receptionist")){
+        if (!user.getRole().equals("receptionist")) {
             return ResponseEntity.badRequest().body("Only receptionist can book an appointment");
         }
-        try{
-
-            Appointment appointment=appointmentService.createAppointment(appointmentDto);
-            return ResponseEntity.ok().body("Appointment created successfully for: "+appointment.getSlot().toString());
-        }
-        catch(Exception e){
-            return ResponseEntity.badRequest().body("Failed to create appointment "+e.getMessage());
+        try {
+            Appointment appointment = appointmentService.createAppointment(appointmentDto);
+            messagingTemplate.convertAndSend("/topic/appointments", appointment);
+            return ResponseEntity.ok().body("Appointment created successfully for: " + appointment.getSlot().toString());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to create appointment " + e.getMessage());
         }
     }
 
