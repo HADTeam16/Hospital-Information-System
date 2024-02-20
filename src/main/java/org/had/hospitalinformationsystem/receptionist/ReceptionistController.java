@@ -67,42 +67,9 @@ public class ReceptionistController {
         }
     }
 
-
-
-//    //Find Patient by UserName
-//    @GetMapping("/patient/username/{str}")
-//    public Patient findPatientByUserNameAndContact(@RequestHeader("Authorization") String jwt, @PathVariable String str) throws Exception{
-//        Patient newPatient=null;
-//        String role = JwtProvider.getRoleFromJwtToken(jwt);
-//
-//        if(role.equals("receptionist")){
-//            newPatient = patientRepository.findPatientByUserName(str);
-//        }
-//        else{
-//            throw new Exception("Patient Does not exist");
-//        }
-//        return newPatient;
-//    }
-
-//    //Find Patient by Contact
-//    @GetMapping("/patient/contact/{contact}")
-//    public List<Patient> findPatientByContact(@RequestHeader("Authorization") String jwt, @PathVariable String contact) throws Exception{
-//
-//        List<Patient> newPatient=null;
-//        String role = JwtProvider.getRoleFromJwtToken(jwt);
-//
-//        if(role.equals("receptionist")){
-//            newPatient = patientRepository.findPatientByContact(contact);
-//        }
-//        else{
-//            throw new Exception("Patient Does not exist");
-//        }
-//        return newPatient;
-//    }
-
     // Find Doctor by Specialization
-    @GetMapping("/doctor/{specialization}")
-    public ResponseEntity<?> findDoctorBySpecialization(@RequestHeader("Authorization") String jwt, @PathVariable String specialization) {
+    @GetMapping("/doctor")
+    public ResponseEntity<?> findDoctorBySpecialization(@RequestHeader("Authorization") String jwt, @RequestBody String specialization) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if (!role.equals("receptionist")) {
