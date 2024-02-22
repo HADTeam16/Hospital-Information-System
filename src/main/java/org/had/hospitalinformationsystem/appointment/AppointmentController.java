@@ -42,8 +42,14 @@ public class AppointmentController {
 
     @MessageMapping("/appointmentBooked")
     @SendTo("/topic/appointments")
-    public Appointment handleAppointmentBooking(Appointment appointment) {
-        return appointment;
+    public void handleAppointmentBooking(Appointment appointment) {
+        Doctor doctor = appointment.getDoctor();
+
+        if (doctor != null) {
+            String doctorTopic = "/topic/doctor/" + doctor.getDoctorId() + "/appointments";
+
+            messagingTemplate.convertAndSend(doctorTopic, appointment);
+        }
     }
 
 
