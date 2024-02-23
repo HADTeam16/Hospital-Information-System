@@ -38,23 +38,23 @@ public class User {
     private String profilePicture;
     private String emergencyContactName;
     private String emergencyContactNumber;
-
+    private String salt;
     private String role;
 
-    public User(String userName, String password, String firstName, String middleName, String lastName, Integer age,
-            String gender, String dateOfBirth, String contact, String email, String role) {
-        this.userName = userName;
-        this.password = password;
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
-        this.age = age;
-        this.gender = gender;
-        this.dateOfBirth = dateOfBirth;
-        this.contact = contact;
-        this.email = email;
-        this.role = role;
-    }
+//    public User(String userName, String password, String firstName, String middleName, String lastName, Integer age,
+//            String gender, String dateOfBirth, String contact, String email, String role) {
+//        this.userName = userName;
+//        this.password = password;
+//        this.firstName = firstName;
+//        this.middleName = middleName;
+//        this.lastName = lastName;
+//        this.age = age;
+//        this.gender = gender;
+//        this.dateOfBirth = dateOfBirth;
+//        this.contact = contact;
+//        this.email = email;
+//        this.role = role;
+//    }
 
 
 }

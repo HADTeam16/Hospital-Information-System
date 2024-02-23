@@ -23,15 +23,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
     @Autowired
     CustomerUserDetailsServiceImplementation customerUserDetailsService;
     @Autowired
@@ -48,7 +45,6 @@ public class AuthController {
     @Autowired
     Utils utils = new Utils();
 
-
     //Add Admin
     @PostMapping("/signup/admin")
     public ResponseEntity <AuthResponse> createAdmin(){
@@ -59,7 +55,9 @@ public class AuthController {
         try {
             User user = new User();
             user.setUserName("admin");
-            user.setPassword(passwordEncoder.encode("1234"));
+            String salt = user.getUserName() + "gfdsdfedfvfsJKJHGKJBBNK";
+            user.setSalt(salt);
+            user.setPassword(Utils.hashPassword("1234",salt));
             user.setRole("admin");
             user.setEmail("admin@gmail.com");
             userRepository.save(user);
@@ -82,7 +80,6 @@ public class AuthController {
         try {
             User newUser = utils.getUser(registrationDto);
             User savedUser = new User();
-
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if(role.equals("admin")){
                 switch (registrationDto.getRole()) {
@@ -136,10 +133,13 @@ public class AuthController {
     // Authenticate
     private Authentication authenticate(String userName, String password,String role) {
         UserDetails userDetails=customerUserDetailsService.loadUserByUsername(userName);
+        User currUser = userRepository.findByUserName(userName);
         if(userDetails==null){
             throw new BadCredentialsException("invalid username");
         }
-        if(!passwordEncoder.matches(password,userDetails.getPassword())){
+
+        String salt = currUser.getSalt();
+        if(!Utils.verifyPassword(password,userDetails.getPassword(),salt)){
             throw new BadCredentialsException("password not matched");
         }
         User user=userRepository.findByUserName(userDetails.getUsername());
@@ -160,7 +160,7 @@ public class AuthController {
             return ResponseEntity.ok(new AuthResponse(token, "Login Success", user));
         }
         catch(AuthenticationException e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Invalid username or password", null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, e.getMessage(), null));
         }
         catch(Exception e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Error", null));
@@ -173,7 +173,7 @@ public class AuthController {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if (role.equals("admin")) {
                 User user = userRepository.findByUserName(changePasswordRequest.getUserName());
-                String encodedNewPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
+                String encodedNewPassword = Utils.hashPassword(changePasswordRequest.getNewPassword(),user.getSalt());
                 user.setPassword(encodedNewPassword);
                 userRepository.save(user);
                 return ResponseEntity.ok("Password updated successfully");
@@ -195,8 +195,8 @@ public class AuthController {
             String userName = JwtProvider.getUserNameFromJwtToken(jwt);
             User currUser = userRepository.findByUserName(userName);
 
-            if (passwordEncoder.matches(oldPassword, currUser.getPassword())) {
-                String encodedNewPassword = passwordEncoder.encode(newPassword);
+            if (Utils.verifyPassword(oldPassword, currUser.getPassword(),currUser.getSalt())) {
+                String encodedNewPassword = Utils.hashPassword(newPassword,currUser.getSalt());
                 currUser.setPassword(encodedNewPassword);
                 userRepository.save(currUser);
                 return ResponseEntity.ok("Password updated successfully");
