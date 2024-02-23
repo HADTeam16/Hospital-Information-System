@@ -6,16 +6,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
+
 @Service
 public class Utils {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+    public static String generateRandomString(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder randomString = new StringBuilder(length);
+        SecureRandom random = new SecureRandom();
+
+        for (int i = 0; i < length; i++) {
+            int randomIndex = random.nextInt(characters.length());
+            char randomChar = characters.charAt(randomIndex);
+            randomString.append(randomChar);
+        }
+
+        return randomString.toString();
+    }
 
     public User getUser(RegistrationDto registrationDto) {
         User newUser = new User();
         newUser.setUserName(registrationDto.getUserName());
-        newUser.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        String salt = generateRandomString(27);
+        newUser.setSalt(salt);
+        newUser.setPassword(hashPassword(registrationDto.getPassword(),salt));
         newUser.setFirstName(registrationDto.getFirstName());
         newUser.setMiddleName(registrationDto.getMiddleName());
         newUser.setLastName(registrationDto.getLastName());
@@ -38,4 +60,29 @@ public class Utils {
         return newUser;
     }
 
+    private static final int ITERATIONS = 10000;
+    private static final int KEY_LENGTH = 256;
+    private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
+
+    public static boolean verifyPassword(String providedPassword, String storedPasswordHash, String salt) {
+        String newHash = hashPassword(providedPassword, salt);
+        return newHash.equals(storedPasswordHash);
+    }
+
+    public static String hashPassword(String password, String salt) {
+        char[] passwordChars = password.toCharArray();
+        byte[] saltBytes = Base64.getDecoder().decode(salt);
+
+        PBEKeySpec spec = new PBEKeySpec(passwordChars, saltBytes, ITERATIONS, KEY_LENGTH);
+
+        try {
+            SecretKeyFactory skf = SecretKeyFactory.getInstance(ALGORITHM);
+            byte[] hash = skf.generateSecret(spec).getEncoded();
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new RuntimeException("Error hashing password.", e);
+        } finally {
+            spec.clearPassword();
+        }
+    }
 }
