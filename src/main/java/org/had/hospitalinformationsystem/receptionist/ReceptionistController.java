@@ -1,6 +1,8 @@
 package org.had.hospitalinformationsystem.receptionist;
 
 
+import org.had.hospitalinformationsystem.concern.Concern;
+import org.had.hospitalinformationsystem.concern.ConcernRepository;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.dto.AuthResponse;
@@ -36,6 +38,9 @@ public class ReceptionistController {
     DoctorRepository doctorRepository;
 
     @Autowired
+    ConcernRepository concernRepository;
+
+    @Autowired
     Utils utils = new Utils();
 
 
@@ -46,21 +51,21 @@ public class ReceptionistController {
         try {
             User newUser = utils.getUser(registrationDto);
             User savedUser;
-
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if (!role.equals("receptionist") || !registrationDto.getRole().equals("patient")) {
                 throw new Exception("Access Denied!!");
             }
-
             savedUser = userRepository.save(newUser);
             Patient newPatient = new Patient();
             newPatient.setUser(savedUser);
             newPatient.setTemperature(registrationDto.getTemperature());
             patientRepository.save(newPatient);
-
+            Concern currPatientConcern = new Concern();
+            currPatientConcern.setPatient(newPatient);
+            currPatientConcern.setConcern(true);
+            concernRepository.save(currPatientConcern);
             Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getUserName(), savedUser.getPassword());
             String token = JwtProvider.generateToken(authentication, newUser.getRole());
-
             return ResponseEntity.ok(new AuthResponse(token, "Register Success", savedUser));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error during patient registration: " + e.getMessage());
@@ -86,7 +91,4 @@ public class ReceptionistController {
             return ResponseEntity.badRequest().body("Error finding doctor by specialization: " + e.getMessage());
         }
     }
-
-
-
 }
