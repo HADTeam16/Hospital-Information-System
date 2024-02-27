@@ -29,6 +29,7 @@ public class Ward {
     @JoinColumn(name = "appointment_id", referencedColumnName = "appointmentId")
     private Appointment appointment;
 
+
     public enum VipDeluxeStatus {
         STANDARD,
         VIP,
