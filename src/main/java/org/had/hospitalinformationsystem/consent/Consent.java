@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.concern;
+package org.had.hospitalinformationsystem.consent;
 
 
 import jakarta.persistence.*;
@@ -9,8 +9,8 @@ import org.had.hospitalinformationsystem.patient.Patient;
 @Getter
 @Setter
 @Entity
-@Table(name = "concern")
-public class Concern {
+@Table(name = "consent")
+public class Consent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
