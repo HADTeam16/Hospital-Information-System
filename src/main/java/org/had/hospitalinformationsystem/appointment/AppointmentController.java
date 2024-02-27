@@ -93,21 +93,25 @@ public class AppointmentController {
     public ResponseEntity<?> bookAppointment(@RequestHeader("Authorization") String jwt, @RequestBody AppointmentDto appointmentDto) {
         String userName = JwtProvider.getUserNameFromJwtToken(jwt);
         User user = userRepository.findByUserName(userName);
+        AppointmentResponseDto appointmentResponseDto = new AppointmentResponseDto();
         if (!user.getRole().equals("receptionist")) {
-            return ResponseEntity.badRequest().body("Only receptionist can book an appointment");
+            appointmentResponseDto.setResponse("Only receptionist can book an appointment");
+            return ResponseEntity.badRequest().body(appointmentResponseDto);
         }
         Appointment appointment = null;
         try {
             appointment = appointmentService.createAppointment(appointmentDto);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to create appointment: " + e.getMessage());
+            appointmentResponseDto.setResponse("Failed to create appointment: " + e.getMessage());
+            return ResponseEntity.badRequest().body(appointmentResponseDto);
         }
         try {
             messagingTemplate.convertAndSend("/topic/appointments", appointment);
         } catch (Exception e) {
-            System.err.println("Failed to send WebSocket update for appointment: " + e.getMessage());
+            appointmentResponseDto.setResponse("Failed to send WebSocket update for appointment: " + e.getMessage());
+            return ResponseEntity.ok().body(appointmentResponseDto);
         }
-        AppointmentResponseDto appointmentResponseDto = new AppointmentResponseDto();
+
         appointmentResponseDto.setResponse("Appointment created successfully for: " + appointment.getSlot().toString());
         return ResponseEntity.ok().body(appointmentResponseDto);
     }
