@@ -74,7 +74,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/get/all/appointments/by/date")
-    public ResponseEntity<List<Appointment>>getAllAppointmentByDate(@RequestHeader("Authorization") String jwt,@RequestBody @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
+    public ResponseEntity<List<Appointment>>getAllAppointmentByDate(@RequestHeader("Authorization") String jwt,@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
         try{
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             String userName = JwtProvider.getUserNameFromJwtToken(jwt);
