@@ -1,8 +1,8 @@
 package org.had.hospitalinformationsystem.receptionist;
 
 
-import org.had.hospitalinformationsystem.concern.Concern;
-import org.had.hospitalinformationsystem.concern.ConcernRepository;
+import org.had.hospitalinformationsystem.consent.Consent;
+import org.had.hospitalinformationsystem.consent.ConsentRepository;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.dto.AuthResponse;
@@ -38,7 +38,7 @@ public class ReceptionistController {
     DoctorRepository doctorRepository;
 
     @Autowired
-    ConcernRepository concernRepository;
+    ConsentRepository consentRepository;
 
     @Autowired
     Utils utils = new Utils();
@@ -60,10 +60,10 @@ public class ReceptionistController {
             newPatient.setUser(savedUser);
             newPatient.setTemperature(registrationDto.getTemperature());
             patientRepository.save(newPatient);
-            Concern currPatientConcern = new Concern();
-            currPatientConcern.setPatient(newPatient);
-            currPatientConcern.setConcern(true);
-            concernRepository.save(currPatientConcern);
+            Consent currPatientConsent = new Consent();
+            currPatientConsent.setPatient(newPatient);
+            currPatientConsent.setConcern(true);
+            consentRepository.save(currPatientConsent);
             Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getUserName(), savedUser.getPassword());
             String token = JwtProvider.generateToken(authentication, newUser.getRole());
             return ResponseEntity.ok(new AuthResponse(token, "Register Success", savedUser));

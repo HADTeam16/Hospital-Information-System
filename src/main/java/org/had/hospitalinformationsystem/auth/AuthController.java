@@ -135,16 +135,16 @@ public class AuthController {
         UserDetails userDetails=customerUserDetailsService.loadUserByUsername(userName);
         User currUser = userRepository.findByUserName(userName);
         if(userDetails==null){
-            throw new BadCredentialsException("invalid username");
+            throw new BadCredentialsException("Invalid Username or password");
         }
 
         String salt = currUser.getSalt();
         if(!Utils.verifyPassword(password,userDetails.getPassword(),salt)){
-            throw new BadCredentialsException("password not matched");
+            throw new BadCredentialsException("Invalid Username or password");
         }
         User user=userRepository.findByUserName(userDetails.getUsername());
         if(!user.getRole().matches(role)){
-            throw new BadCredentialsException("role not matched");
+            throw new BadCredentialsException("Invalid Username or password");
         }
         return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
     }
