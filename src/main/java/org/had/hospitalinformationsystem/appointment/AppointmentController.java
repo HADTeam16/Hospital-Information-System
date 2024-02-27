@@ -2,6 +2,7 @@ package org.had.hospitalinformationsystem.appointment;
 
 import org.had.hospitalinformationsystem.doctor.DoctorService;
 import org.had.hospitalinformationsystem.dto.AppointmentDto;
+import org.had.hospitalinformationsystem.dto.AppointmentResponseDto;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.patient.Patient;
@@ -106,6 +107,8 @@ public class AppointmentController {
         } catch (Exception e) {
             System.err.println("Failed to send WebSocket update for appointment: " + e.getMessage());
         }
-        return ResponseEntity.ok().body("Appointment created successfully for: " + appointment.getSlot().toString());
+        AppointmentResponseDto appointmentResponseDto = new AppointmentResponseDto();
+        appointmentResponseDto.setResponse("Appointment created successfully for: " + appointment.getSlot().toString());
+        return ResponseEntity.ok().body(appointmentResponseDto);
     }
 }
