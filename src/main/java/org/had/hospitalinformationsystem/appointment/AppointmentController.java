@@ -10,6 +10,7 @@ import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -17,6 +18,8 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -69,6 +72,28 @@ public class AppointmentController {
             return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
+    @GetMapping("/get/all/appointments/by/date")
+    public ResponseEntity<List<Appointment>>getAllAppointmentByDate(@RequestHeader("Authorization") String jwt,@RequestBody @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
+        try{
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            String userName = JwtProvider.getUserNameFromJwtToken(jwt);
+            User user = userRepository.findByUserName(userName);
+
+            if(role.equals("doctor")){
+                LocalDateTime startDate = date.atStartOfDay();
+                LocalDateTime endDate = startDate.plusDays(1);
+                return ResponseEntity.ok(appointmentRepository.findByDoctorIdAndAppointmentDate(user.getId(),startDate,endDate));
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+        }
+        catch(Exception e){
+           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
 
     @GetMapping("/get/patient/details")
     public ResponseEntity<?> getDoctorsAppointment(@RequestHeader("Authorization") String jwt) {
