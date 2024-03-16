@@ -62,7 +62,7 @@ public class ReceptionistController {
             patientRepository.save(newPatient);
             Consent currPatientConsent = new Consent();
             currPatientConsent.setPatient(newPatient);
-            currPatientConsent.setConcern(true);
+            currPatientConsent.setConcent(true);
             consentRepository.save(currPatientConsent);
             Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getUserName(), savedUser.getPassword());
             String token = JwtProvider.generateToken(authentication, newUser.getRole());
