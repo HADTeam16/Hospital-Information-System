@@ -14,12 +14,12 @@ public class Consent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long concernId;
+    private long concentId;
 
     @OneToOne
     @JoinColumn(name="patient_userid")
     private Patient patient;
 
-    private boolean isConcern;
+    private boolean isConcent;
 
 }
