@@ -11,7 +11,12 @@ import java.util.List;
 @Repository
 public interface PrescriptionRepository extends JpaRepository<Prescription,Long> {
 
-    @Query("SELECT p.prescription FROM Prescription p WHERE p.appointment.appointmentId = :appointmentId")
-    public List<String> findPrescription(Long appointmentId);
+//    @Query("SELECT p.prescription FROM Prescription p WHERE p.appointment.appointmentId = :appointmentId")
+//    public List<String> findPrescription(Long appointmentId);
+//
+    //yeh one to many ke liye tha ab bss one to one hai
+
+    @Query("SELECT p From Prescription p where p.appointment.appointmentId= :appointmentId")
+    public Prescription findPrescriptionByAppointmentID(Long appointmentId);
 
 }
