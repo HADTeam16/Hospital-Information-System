@@ -1,5 +1,6 @@
 package org.had.hospitalinformationsystem.appointment;
 
+import com.twilio.rest.microvisor.v1.App;
 import org.had.hospitalinformationsystem.appointment.Appointment;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,5 +22,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
 
     @Query("SELECT a FROM Appointment a WHERE a.doctor.doctorId = :doctorId " + "AND a.slot >= :startDate AND a.slot < :endDate")
     List<Appointment> findByDoctorIdAndAppointmentDate(Long doctorId, LocalDateTime startDate, LocalDateTime endDate);
+
+    Appointment findByAppointmentId(Long appointmentId);
+    @Query("SELECT a FROM Appointment a where a.patient.id= :patientId AND a.slot< :startDate")
+    List<Appointment> findAllAppointmentforPatient(Long patientId,LocalDateTime startDate);
 
 }

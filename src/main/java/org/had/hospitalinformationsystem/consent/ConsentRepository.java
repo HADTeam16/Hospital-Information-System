@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface ConsentRepository extends JpaRepository<Consent,Long> {
 
     @Query("SELECT c FROM Consent c WHERE c.patient.id = :patientId")
-    Consent getConcernByPatientId(Long patientId);
+    Consent getConcentByPatientId(Long patientId);
 }

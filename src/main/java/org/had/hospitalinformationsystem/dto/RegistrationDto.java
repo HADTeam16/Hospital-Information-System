@@ -54,7 +54,7 @@ public class RegistrationDto {
         private String admissionDate;
         private String dischargeDate;
         
-        //Nurse-spicific field
+        //Nurse-specific field
         private boolean headNurse;
         private List<Long> wardIds;
 

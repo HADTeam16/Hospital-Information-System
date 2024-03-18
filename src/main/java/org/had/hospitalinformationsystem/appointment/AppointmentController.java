@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -123,7 +124,7 @@ public class AppointmentController {
             appointmentResponseDto.setResponse("Only receptionist can book an appointment");
             return ResponseEntity.badRequest().body(appointmentResponseDto);
         }
-        Appointment appointment = null;
+        Appointment appointment;
         try {
             appointment = appointmentService.createAppointment(appointmentDto);
         } catch (Exception e) {
@@ -140,4 +141,22 @@ public class AppointmentController {
         appointmentResponseDto.setResponse("Appointment created successfully for: " + appointment.getSlot().toString());
         return ResponseEntity.ok().body(appointmentResponseDto);
     }
+    @GetMapping("/get/all/previous/appointment/for/patient")
+    public ResponseEntity<List<Appointment>>getAllAppointmentForPatient(@RequestHeader("Authorization") String jwt,@RequestParam("patientId") Long patientId,@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date){
+        try{
+            String role=JwtProvider.getRoleFromJwtToken(jwt);
+            if(role.equals("doctor")){
+                List<Appointment> appointments=appointmentRepository.findAllAppointmentforPatient(patientId,date);
+                //System.out.println(appointments);
+                return ResponseEntity.ok(appointments);
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
 }
