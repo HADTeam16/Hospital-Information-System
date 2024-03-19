@@ -14,19 +14,11 @@ import java.util.Set;
 @Setter
 @Table(name = "nurse")
 public class Nurse {
-
     @Id
     private Long nurseId;
-
     @OneToOne
     @MapsId
     @JoinColumn(name = "userid")
     private User user;
-
     private boolean headNurse;
-
-    @OneToMany(mappedBy="managingNurse")
-    private Set<Ward> wards = new HashSet<>();
-
-
 }

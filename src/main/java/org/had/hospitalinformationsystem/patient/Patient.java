@@ -24,9 +24,7 @@ public class Patient {
     private String bloodPressure;
     private String admissionDate;
     private String dischargeDate;
-
-
-
+    private Boolean needWard;
 
 
 
