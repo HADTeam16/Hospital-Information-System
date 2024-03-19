@@ -49,9 +49,7 @@ public class DoctorController {
     public String assignWard(@RequestHeader("Authorization") String jwt,@PathVariable long appointmentId){
         Appointment appointment=appointmentRepository.findByAppointmentId(appointmentId);
         Patient patient=appointment.getPatient();
-        patient.setNeedWard(true);
-        patient.setLastAppointmentId(appointmentId);
         patientRepository.save(patient);
-        return "Ward will be shortly assigned to patient.";
+        return "WardDetails will be shortly assigned to patient.";
     }
 }

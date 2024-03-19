@@ -3,11 +3,7 @@ package org.had.hospitalinformationsystem.nurse;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.had.hospitalinformationsystem.ward.Ward;
 import org.had.hospitalinformationsystem.user.User;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Getter
