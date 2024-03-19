@@ -56,7 +56,7 @@ public class RegistrationDto {
         
         //Nurse-specific field
         private boolean headNurse;
-        private List<Long> wardIds;
+
 
 
 

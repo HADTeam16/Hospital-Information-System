@@ -6,6 +6,7 @@ import org.had.hospitalinformationsystem.dto.AppointmentResponseDto;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.patient.Patient;
+import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.user.UserRepository;
@@ -41,6 +42,9 @@ public class AppointmentController {
 
     @Autowired
     DoctorService doctorService;
+
+    @Autowired
+    PatientRepository patientRepository;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;

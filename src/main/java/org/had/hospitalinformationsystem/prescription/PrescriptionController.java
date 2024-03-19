@@ -3,6 +3,7 @@ package org.had.hospitalinformationsystem.prescription;
 import org.had.hospitalinformationsystem.appointment.Appointment;
 import org.had.hospitalinformationsystem.appointment.AppointmentRepository;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
+import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ public class PrescriptionController {
 
     @Autowired
     AppointmentRepository appointmentRepository;
+    @Autowired
+    PatientRepository patientRepository;
 
 
     @PostMapping("/add/prescription/{appointmentId}")
