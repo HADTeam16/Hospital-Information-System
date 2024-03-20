@@ -50,7 +50,7 @@ public class DoctorController {
         Appointment appointment=appointmentRepository.findByAppointmentId(appointmentId);
         Patient patient=appointment.getPatient();
         patient.setNeedWard(true);
-        patient.setLastAppointmentId(appointmentId);
+        //patient.setLastAppointmentId(appointmentId);
         patientRepository.save(patient);
         return "Ward will be shortly assigned to patient.";
     }
