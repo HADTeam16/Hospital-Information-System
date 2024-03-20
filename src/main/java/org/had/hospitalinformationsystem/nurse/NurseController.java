@@ -33,13 +33,13 @@ public class NurseController {
 
         if(nurse.get().isHeadNurse()){
 
-            return ResponseEntity.ok(patientRepository.findPatientWhoNeedsWard());
+            return ResponseEntity.ok(null);
         }
         else{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
-//    @GetMapping("/assign/ward/{patientId}")
+//    @GetMapping("/assign/needWard/{patientId}")
 //    public ResponseEntity<String> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable Long PatiendId){
 //
 //    }

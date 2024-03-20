@@ -3,11 +3,9 @@ package org.had.hospitalinformationsystem.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.had.hospitalinformationsystem.ward.Ward;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -49,10 +47,14 @@ public class RegistrationDto {
         private LocalTime workEnd;
 
         //Patient-specific field
+        private LocalDateTime registrationDateAndTime;
+
+        //Appointment field
         private String temperature;
         private String bloodPressure;
         private String admissionDate;
         private String dischargeDate;
+        private String purpose;
         
         //Nurse-specific field
         private boolean headNurse;
