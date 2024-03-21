@@ -13,12 +13,12 @@ public class WardController {
     WardRepository wardRepository;
 
     @GetMapping("/available/ward")
-    public List<WardDetails> availableWard(@RequestHeader("Authorization") String jwt){
+    public List<Ward> availableWard(@RequestHeader("Authorization") String jwt){
         return wardRepository.findAvailableWard();
     }
 
     @GetMapping("/booked/ward")
-    public List<WardDetails> bookedWard(@RequestHeader("Authorization") String jwt){
+    public List<Ward> bookedWard(@RequestHeader("Authorization") String jwt){
         return wardRepository.findBookedWard();
     }
 }

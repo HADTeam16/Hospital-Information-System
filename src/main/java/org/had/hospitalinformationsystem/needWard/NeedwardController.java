@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/need/ward")
-public class WardController {
+public class NeedwardController {
 
     @Autowired
     AppointmentRepository appointmentRepository;

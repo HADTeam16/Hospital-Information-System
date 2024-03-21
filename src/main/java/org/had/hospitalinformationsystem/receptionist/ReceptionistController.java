@@ -8,11 +8,14 @@ import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.dto.AuthResponse;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
+import org.had.hospitalinformationsystem.nurse.Nurse;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.utility.Utils;
+import org.had.hospitalinformationsystem.ward.WardController;
+import org.had.hospitalinformationsystem.ward.WardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -43,8 +46,11 @@ public class ReceptionistController {
     @Autowired
     Utils utils = new Utils();
 
+    @Autowired
+    WardService wardService;
 
-
+    @Autowired
+    ReceptionistRepository receptionistRepository;
     // Add Patient
     @PostMapping("/signup/patient")
     public ResponseEntity<?> signupPatient(@RequestHeader("Authorization") String jwt, @RequestBody RegistrationDto registrationDto) {
@@ -72,7 +78,7 @@ public class ReceptionistController {
     }
 
     // Find Doctor by Specialization
-    @GetMapping("/doctor")
+    @GetMapping("find/doctor/by/specialization")
     public ResponseEntity<?> findDoctorBySpecialization(@RequestHeader("Authorization") String jwt, @RequestBody String specialization) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
@@ -90,4 +96,28 @@ public class ReceptionistController {
             return ResponseEntity.badRequest().body("Error finding doctor by specialization: " + e.getMessage());
         }
     }
+    @GetMapping("/create/ward")
+    public ResponseEntity<String> createWard(@RequestHeader("Authorization") String jwt){
+        String role=JwtProvider.getRoleFromJwtToken(jwt);
+        if(role.equals("receptionist")){
+            wardService.createInitialWards();
+            return ResponseEntity.ok("Wards created successfully");
+        }
+        else{
+            return ResponseEntity.badRequest().body("Only Receptionist can create wards");
+        }
+    }
+    @GetMapping("/get/all/receptionist")
+    public ResponseEntity<List<Receptionist>> getAllReceptionist(@RequestHeader("Authorization") String jwt){
+        String userName=JwtProvider.getUserNameFromJwtToken(jwt);
+        User user=userRepository.findByUserName(userName);
+        if(user.getRole().equals("admin")){
+            List<Receptionist> receptionists=receptionistRepository.findAll();
+            return ResponseEntity.ok().body(receptionists);
+        }
+        else{
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
 }
