@@ -26,5 +26,10 @@ public class Appointment {
     private Patient patient;
     private String purpose;
     private LocalDateTime slot;
+    private String temperature;
+    private String bloodPressure;
+    private String admissionDate;
+    private String dischargeDate;
+    private Boolean needWard;
 
 }
