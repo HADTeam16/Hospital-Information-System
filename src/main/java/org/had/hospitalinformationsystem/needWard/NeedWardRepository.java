@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NeedWardRepository extends JpaRepository<NeedWard,Long> {
@@ -17,4 +18,7 @@ public interface NeedWardRepository extends JpaRepository<NeedWard,Long> {
 
     @Query("Select n FROM NeedWard n")
     List<NeedWard> returnNeedWards();
+
+
+//    void delete(Optional<NeedWard> needWard);
 }
