@@ -14,6 +14,7 @@ public class NurseServiceImplementation implements NurseService{
     @Override
     public List<Patient> getPatientsFromNeedWard(List<NeedWard> needWards) {
         List<Patient> patients=new ArrayList<>();
+        
         for(NeedWard needWard:needWards){
             patients.add(needWard.getAppointment().getPatient());
         }
