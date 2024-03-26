@@ -57,6 +57,7 @@ public class Utils {
         newUser.setEmergencyContactName(registrationDto.getEmergencyContactName());
         newUser.setEmergencyContactNumber(registrationDto.getEmergencyContactNumber());
         newUser.setRole(registrationDto.getRole());
+        newUser.setDisable(true);
         return newUser;
     }
 

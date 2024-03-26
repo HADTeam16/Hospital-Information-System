@@ -32,7 +32,7 @@ public class RegistrationDto {
         private String profilePicture;
         private String emergencyContactName;
         private String emergencyContactNumber;
-
+        private boolean isDisable;
         private String role;
 
         // Doctor-specific field

@@ -25,6 +25,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -55,6 +57,7 @@ public class AuthController {
         try {
             User user = new User();
             user.setUserName("admin");
+            user.setDisable(false);
             String salt = user.getUserName() + "gfdsdfedfvfsJKJHGKJBBNK";
             user.setSalt(salt);
             user.setPassword(Utils.hashPassword("1234",salt));
@@ -79,6 +82,7 @@ public class AuthController {
     public ResponseEntity< AuthResponse> createUser(@RequestHeader("Authorization") String jwt,@RequestBody RegistrationDto registrationDto){
         try {
             User newUser = utils.getUser(registrationDto);
+            newUser.setDisable(false);
             User savedUser = new User();
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if(role.equals("admin")){
@@ -157,6 +161,9 @@ public class AuthController {
             String token = JwtProvider.generateToken(authentication, loginRequest.getRole());
             String userName = JwtProvider.getUserNameFromJwtTokenUnfiltered(token);
             User user = userRepository.findByUserName(userName);
+            if(user.isDisable()){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Access Denied",null));
+            }
             return ResponseEntity.ok(new AuthResponse(token, "Login Success", user));
         }
         catch(AuthenticationException e){
@@ -186,7 +193,7 @@ public class AuthController {
         }
     }
 
-    @PutMapping("/user/changepassword")
+    @PutMapping("/user/change/password")
     public ResponseEntity< String> changePassword(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
         try {
             String oldPassword = changePasswordRequest.getOldPassword();
@@ -208,4 +215,88 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error");
         }
     }
+
+    @PutMapping("/toggle/user/status/{userId}")
+    public ResponseEntity<String>toggleUserLogInStatus(@RequestHeader("Authorization") String jwt, @PathVariable Long userId){
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+        if(role.equals("admin")){
+            Optional<User> currUser = userRepository.findById(userId);
+            if(currUser.isPresent()){
+                User user = currUser.get();
+                user.setDisable(!user.isDisable());
+                userRepository.save(user);
+                return ResponseEntity.ok("Status changed successfully");
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user present");
+            }
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Denied");
+        }
+    }
+
+    @PutMapping("/update/user/{userId}")
+    public ResponseEntity<AuthResponse> updateUser(@RequestHeader("Authorization") String jwt, @PathVariable Long userId,@RequestBody RegistrationDto registrationDto) {
+        try {
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (role.equals("admin")) {
+                Optional<User> optionalUser = userRepository.findById(userId);
+                if (optionalUser.isPresent()) {
+                    User user = optionalUser.get();
+                    user.setFirstName(registrationDto.getFirstName());
+                    user.setMiddleName(registrationDto.getMiddleName());
+                    user.setLastName(registrationDto.getLastName());
+                    user.setAge(registrationDto.getAge());
+                    user.setGender(registrationDto.getGender());
+                    user.setDateOfBirth(registrationDto.getDateOfBirth());
+                    user.setCountry(registrationDto.getCountry());
+                    user.setState(registrationDto.getState());
+                    user.setCity(registrationDto.getCity());
+                    user.setAddressLine1(registrationDto.getAddressLine1());
+                    user.setAddressLine2(registrationDto.getAddressLine2());
+                    user.setLandmark(registrationDto.getLandmark());
+                    user.setPinCode(registrationDto.getPinCode());
+                    user.setContact(registrationDto.getContact());
+                    user.setProfilePicture(registrationDto.getProfilePicture());
+                    user.setEmergencyContactName(registrationDto.getEmergencyContactName());
+                    user.setEmergencyContactNumber(registrationDto.getEmergencyContactNumber());
+
+                    switch (user.getRole()) {
+                        case "doctor" -> {
+                            Doctor doctor = doctorRepository.findByUser(user);
+                            if (doctor != null) {
+                                doctor.setSpecialization(registrationDto.getSpecialization());
+                                doctor.setWorkStart(registrationDto.getWorkStart());
+                                doctor.setWorkEnd(registrationDto.getWorkEnd());
+                                doctorRepository.save(doctor);
+                            }
+                        }
+                        case "receptionist" -> {
+                            // Update receptionist specific details if any
+                        }
+                        case "nurse" -> {
+                            Nurse nurse = nurseRepository.findByUser(user);
+                            if (nurse != null) {
+                                nurse.setHeadNurse(registrationDto.isHeadNurse());
+                                nurseRepository.save(nurse);
+                            }
+                        }
+                    }
+                    // Save updated user
+                    User savedUser = userRepository.save(user);
+                    return ResponseEntity.ok(new AuthResponse("", "User updated successfully", savedUser));
+                } else {
+                    return ResponseEntity.notFound().build();
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse("", "Access Denied", null));
+            }
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AuthResponse("",  e.getMessage() + "Error updating user", null));
+        }
+
+    }
+
 }
