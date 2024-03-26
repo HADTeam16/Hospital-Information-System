@@ -3,10 +3,13 @@ package org.had.hospitalinformationsystem.appointment;
 import org.had.hospitalinformationsystem.doctor.DoctorService;
 import org.had.hospitalinformationsystem.dto.AppointmentDto;
 import org.had.hospitalinformationsystem.dto.AppointmentResponseDto;
+import org.had.hospitalinformationsystem.dto.PrescriptionsAndRecords;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
+import org.had.hospitalinformationsystem.prescription.PrescriptionRepository;
+import org.had.hospitalinformationsystem.records.RecordsRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.user.UserRepository;
@@ -45,6 +48,12 @@ public class AppointmentController {
 
     @Autowired
     PatientRepository patientRepository;
+
+    @Autowired
+    RecordsRepository recordsRepository;
+
+    @Autowired
+    PrescriptionRepository prescriptionRepository;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -158,6 +167,22 @@ public class AppointmentController {
             }
         }
         catch(Exception e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
+    @GetMapping("/get/appointment/prescription/records/{appointmentId}")
+    public ResponseEntity<PrescriptionsAndRecords> getAppointmentPrescriptionAndRecords(
+            @RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId) {
+
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+
+        if (role.equals("doctor")) {
+            List<String> records = recordsRepository.findRecordsImageByAppointmentId(appointmentId);
+            List<String> prescription = prescriptionRepository.findPrescriptionImageByAppointmentID(appointmentId);
+            PrescriptionsAndRecords appointmentDetails = new PrescriptionsAndRecords(records, prescription);
+            return ResponseEntity.ok(appointmentDetails);
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
