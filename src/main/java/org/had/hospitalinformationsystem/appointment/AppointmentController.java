@@ -3,6 +3,7 @@ package org.had.hospitalinformationsystem.appointment;
 import org.had.hospitalinformationsystem.doctor.DoctorService;
 import org.had.hospitalinformationsystem.dto.AppointmentDto;
 import org.had.hospitalinformationsystem.dto.AppointmentResponseDto;
+import org.had.hospitalinformationsystem.dto.PrescriptionsAndRecords;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.patient.Patient;
@@ -170,12 +171,20 @@ public class AppointmentController {
         }
     }
 
-//    @GetMapping("/get/appointment/prescription/records/{appointmentId}")
-//    public ResponseEntity<List<String>>getAppointmentPrescriptionAndRecords(@RequestHeader("Authorization") String jwt,@PathVariable Long appointmentId){
-//
-//        List<String> ans = recordsRepository.findRecordsImageByAppointmentId(appointmentId);
-//        ans.addAll(prescriptionRepository.findPrescriptionImageByAppointmentID(appointmentId));
-//        return ResponseEntity.ok(ans);
-//    }
+    @GetMapping("/get/appointment/prescription/records/{appointmentId}")
+    public ResponseEntity<PrescriptionsAndRecords> getAppointmentPrescriptionAndRecords(
+            @RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId) {
+
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+
+        if (role.equals("doctor")) {
+            List<String> records = recordsRepository.findRecordsImageByAppointmentId(appointmentId);
+            List<String> prescription = prescriptionRepository.findPrescriptionImageByAppointmentID(appointmentId);
+            PrescriptionsAndRecords appointmentDetails = new PrescriptionsAndRecords(records, prescription);
+            return ResponseEntity.ok(appointmentDetails);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
 
 }
