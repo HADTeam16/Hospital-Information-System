@@ -40,6 +40,7 @@ public class User {
     private String emergencyContactNumber;
     private String salt;
     private String role;
+    private boolean isDisable;
 
 //    public User(String userName, String password, String firstName, String middleName, String lastName, Integer age,
 //            String gender, String dateOfBirth, String contact, String email, String role) {
