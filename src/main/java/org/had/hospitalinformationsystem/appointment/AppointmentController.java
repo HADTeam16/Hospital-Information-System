@@ -7,6 +7,8 @@ import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
+import org.had.hospitalinformationsystem.prescription.PrescriptionRepository;
+import org.had.hospitalinformationsystem.records.RecordsRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.user.UserRepository;
@@ -45,6 +47,12 @@ public class AppointmentController {
 
     @Autowired
     PatientRepository patientRepository;
+
+    @Autowired
+    RecordsRepository recordsRepository;
+
+    @Autowired
+    PrescriptionRepository prescriptionRepository;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -161,5 +169,13 @@ public class AppointmentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
+
+//    @GetMapping("/get/appointment/prescription/records/{appointmentId}")
+//    public ResponseEntity<List<String>>getAppointmentPrescriptionAndRecords(@RequestHeader("Authorization") String jwt,@PathVariable Long appointmentId){
+//
+//        List<String> ans = recordsRepository.findRecordsImageByAppointmentId(appointmentId);
+//        ans.addAll(prescriptionRepository.findPrescriptionImageByAppointmentID(appointmentId));
+//        return ResponseEntity.ok(ans);
+//    }
 
 }
