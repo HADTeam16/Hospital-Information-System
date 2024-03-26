@@ -40,6 +40,10 @@ public class AppointmentServiceImpl implements AppointmentService{
         appointment.setPatient(patient);
         appointment.setPurpose(appointmentDto.getPurpose());
         appointment.setSlot(nextAvailableSlot);
+        appointment.setTemperature(appointment.getTemperature());
+        appointment.setBloodPressure(appointment.getBloodPressure());
+        appointment.setWeight(appointment.getWeight());
+        appointment.setHeight(appointment.getHeight());
         return appointmentRepository.save(appointment);
     }
 

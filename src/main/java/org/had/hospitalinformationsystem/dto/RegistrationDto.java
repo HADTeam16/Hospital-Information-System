@@ -48,13 +48,12 @@ public class RegistrationDto {
 
         //Patient-specific field
         private LocalDateTime registrationDateAndTime;
-
-        //Appointment field
         private String temperature;
         private String bloodPressure;
-        private String admissionDate;
-        private String dischargeDate;
-        private String purpose;
+        private String weight;
+        private String height;
+        //Appointment field
+
         
         //Nurse-specific field
         private boolean headNurse;

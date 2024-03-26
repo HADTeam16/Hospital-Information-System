@@ -22,5 +22,8 @@ public class Patient {
     @JoinColumn(name="user_id")
     private User user;
     private LocalDateTime registrationDateAndTime;
-
+    private String temperature;
+    private String bloodPressure;
+    private String weight;
+    private String height;
 }

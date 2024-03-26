@@ -64,6 +64,10 @@ public class ReceptionistController {
             savedUser = userRepository.save(newUser);
             Patient newPatient = new Patient();
             newPatient.setUser(savedUser);
+            newPatient.setTemperature(registrationDto.getTemperature());
+            newPatient.setBloodPressure(registrationDto.getBloodPressure());
+            newPatient.setHeight(registrationDto.getHeight());
+            newPatient.setWeight(registrationDto.getWeight());
             patientRepository.save(newPatient);
             Consent currPatientConsent = new Consent();
             currPatientConsent.setPatient(newPatient);

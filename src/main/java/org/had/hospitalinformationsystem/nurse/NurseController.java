@@ -1,5 +1,6 @@
 package org.had.hospitalinformationsystem.nurse;
 
+import org.had.hospitalinformationsystem.dto.WardPatientDetails;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.needWard.NeedWard;
 import org.had.hospitalinformationsystem.needWard.NeedWardRepository;
@@ -10,6 +11,7 @@ import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.ward.Ward;
 import org.had.hospitalinformationsystem.ward.WardRepository;
+import org.hibernate.sql.ast.tree.AbstractUpdateOrDeleteStatement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -117,6 +119,28 @@ public class NurseController {
             }
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
+    @PutMapping("/update/assigned/ward/patient/details/{wardId}")
+    ResponseEntity<String>updateAssignedWardPatientDetails(@RequestHeader("Authorization") String jwt, @PathVariable Long wardId, @RequestBody WardPatientDetails wardPatientDetails){
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+        if(role.equals("nurse")){
+            Optional<Patient> patientO = patientRepository.findById(wardRepository.findById(wardId).get().getPatient().getId());
+            if(patientO.isPresent()){
+                Patient patient = patientO.get();
+                patient.setTemperature(wardPatientDetails.getTemperature());
+                patient.setBloodPressure(wardPatientDetails.getBloodPressure());
+                patient.setWeight(wardPatientDetails.getWeight());
+                patientRepository.save(patient);
+                return ResponseEntity.ok("Updated");
+            }
+            else{
+                return ResponseEntity.ok("Failed");
+            }
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Denied");
         }
     }
 
