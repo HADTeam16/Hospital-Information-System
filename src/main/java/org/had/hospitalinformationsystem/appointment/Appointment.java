@@ -28,8 +28,8 @@ public class Appointment {
     private LocalDateTime slot;
     private String temperature;
     private String bloodPressure;
-    private String admissionDate;
-    private String dischargeDate;
+    private String weight;
+    private String height;
     private Boolean needWard;
 
 }
