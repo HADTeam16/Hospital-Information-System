@@ -21,28 +21,30 @@ public class RecordsController {
     AppointmentRepository appointmentRepository;
 
     @PostMapping("/add/records/{appointmentId}")
-    public ResponseEntity<Records>uploadRecords(@RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId, @RequestBody String recordImage){
+    public ResponseEntity<String>uploadRecords(@RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId, @RequestBody List<String> arr){
         try{
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if(role.equals("doctor")){
                 Appointment currAppointment = appointmentRepository.findByAppointmentId(appointmentId);
                 if(currAppointment != null){
-                    Records newRecord = new Records();
-                    newRecord.setRecordImage(recordImage);
-                    newRecord.setAppointment(currAppointment);
-                    recordsRepository.save(newRecord);
-                    return ResponseEntity.ok(newRecord);
+                    for(String recordImage : arr) {
+                        Records newRecord = new Records();
+                        newRecord.setRecordImage(recordImage);
+                        newRecord.setAppointment(currAppointment);
+                        recordsRepository.save(newRecord);
+                    }
+                    return ResponseEntity.ok("Success");
                 }
                 else{
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed");
                 }
             }
             else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed");
             }
         }
         catch(Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed");
         }
     }
 
