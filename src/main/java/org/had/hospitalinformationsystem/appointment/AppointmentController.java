@@ -180,7 +180,8 @@ public class AppointmentController {
         if (role.equals("doctor")) {
             List<String> records = recordsRepository.findRecordsImageByAppointmentId(appointmentId);
             List<String> prescription = prescriptionRepository.findPrescriptionImageByAppointmentID(appointmentId);
-            PrescriptionsAndRecords appointmentDetails = new PrescriptionsAndRecords(records, prescription);
+            Appointment appointment = appointmentRepository.findByAppointmentId(appointmentId);
+            PrescriptionsAndRecords appointmentDetails = new PrescriptionsAndRecords(records, prescription,appointment);
             return ResponseEntity.ok(appointmentDetails);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
