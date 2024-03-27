@@ -20,6 +20,6 @@ public interface PrescriptionRepository extends JpaRepository<Prescription,Long>
     public Prescription findPrescriptionByAppointmentID(Long appointmentId);
 
     @Query("SELECT p.prescription From Prescription p where p.appointment.appointmentId= :appointmentId")
-    public List<String> findPrescriptionImageByAppointmentID(Long appointmentId);
+    public String findPrescriptionImageByAppointmentID(Long appointmentId);
 
 }

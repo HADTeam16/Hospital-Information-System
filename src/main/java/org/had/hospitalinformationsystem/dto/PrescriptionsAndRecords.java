@@ -10,10 +10,10 @@ import java.util.List;
 @Setter
 public class PrescriptionsAndRecords {
     private List<String> records;
-    private List<String> prescription;
+    private String prescription;
     private Appointment appointment;
 
-    public PrescriptionsAndRecords(List<String> records, List<String> prescription,Appointment appointment) {
+    public PrescriptionsAndRecords(List<String> records, String prescription,Appointment appointment) {
         this.records = records;
         this.prescription = prescription;
         this.appointment = appointment;
