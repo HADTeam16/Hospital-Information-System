@@ -144,7 +144,8 @@ public class AppointmentController {
             return ResponseEntity.badRequest().body(appointmentResponseDto);
         }
         try {
-            messagingTemplate.convertAndSend("/topic/appointments", appointment);
+            Doctor doctor = appointment.getDoctor();
+            messagingTemplate.convertAndSendToUser(doctor.getUser().getUserName(),"/topic/appointments", appointment);
         } catch (Exception e) {
             appointmentResponseDto.setResponse("Failed to send WebSocket update for appointment: " + e.getMessage());
             return ResponseEntity.ok().body(appointmentResponseDto);
