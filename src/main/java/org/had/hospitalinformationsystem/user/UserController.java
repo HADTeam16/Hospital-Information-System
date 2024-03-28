@@ -159,10 +159,12 @@ public class UserController {
                         case "doctor" -> {
                             Doctor doctor = doctorRepository.findByUser(user);
                             if (doctor != null) {
+                                ans.setMedicalLicenseNumber(doctor.getMedicalLicenseNumber());
                                 ans.setSpecialization(doctor.getSpecialization());
+                                ans.setExperience(doctor.getExperience());
                                 ans.setWorkStart(doctor.getWorkStart());
                                 ans.setWorkEnd(doctor.getWorkEnd());
-                                doctorRepository.save(doctor);
+
                             }
                         }
                         case "receptionist" -> {
@@ -172,7 +174,6 @@ public class UserController {
                             Nurse nurse = nurseRepository.findByUser(user);
                             if (nurse != null) {
                                 ans.setHeadNurse(nurse.isHeadNurse());
-                                nurseRepository.save(nurse);
                             }
                         }
                     }
@@ -225,6 +226,8 @@ public class UserController {
                                 doctor.setSpecialization(registrationDto.getSpecialization());
                                 doctor.setWorkStart(registrationDto.getWorkStart());
                                 doctor.setWorkEnd(registrationDto.getWorkEnd());
+                                doctor.setMedicalLicenseNumber(registrationDto.getMedicalLicenseNumber());
+                                doctor.setExperience(registrationDto.getExperience());
                                 doctorRepository.save(doctor);
                             }
                         }
