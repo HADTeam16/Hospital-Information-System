@@ -8,5 +8,6 @@ public interface DoctorService {
     boolean isDoctorAvailable(Long doctorId, LocalDateTime desiredSlot);
 
     LocalDateTime findNextAvailableSlot(Long doctorId);
+    List<Doctor> getDoctorsWhoAreSurgeon(List<Doctor> doctors);
 
 }

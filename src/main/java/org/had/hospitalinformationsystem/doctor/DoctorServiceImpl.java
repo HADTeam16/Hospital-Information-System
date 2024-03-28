@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -80,5 +81,16 @@ public class DoctorServiceImpl implements DoctorService{
 
         }
         return null;
+    }
+
+    @Override
+    public List<Doctor> getDoctorsWhoAreSurgeon(List<Doctor> doctors) {
+        List<Doctor> surgeons=new ArrayList<>();
+        for(Doctor doctor:doctors){
+            if(doctor.getSpecialization().contains("surgeon")){
+                surgeons.add(doctor);
+            }
+        }
+        return surgeons;
     }
 }
