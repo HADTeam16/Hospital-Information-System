@@ -138,11 +138,10 @@ public class UserController {
                 Optional<User> optionalUser = userRepository.findById(userId);
                 if(optionalUser.isPresent()){
                     User user = optionalUser.get();
-                    ans.setUserName(user.getUserName());
-                    ans.setEmail(user.getEmail());
                     ans.setFirstName(user.getFirstName());
                     ans.setMiddleName(user.getMiddleName());
                     ans.setLastName(user.getLastName());
+                    ans.setAge(user.getAge());
                     ans.setGender(user.getGender());
                     ans.setDateOfBirth(user.getDateOfBirth());
                     ans.setCountry(user.getCountry());
