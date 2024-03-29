@@ -82,6 +82,9 @@ public class AuthController {
     public ResponseEntity< AuthResponse> createUser(@RequestHeader("Authorization") String jwt,@RequestBody RegistrationDto registrationDto){
         try {
             User newUser = utils.getUser(registrationDto);
+            if(newUser.isValid()){
+                return ResponseEntity.ok(new AuthResponse("", "Add All details", newUser));
+            }
             newUser.setDisable(false);
             User savedUser = new User();
             String role = JwtProvider.getRoleFromJwtToken(jwt);

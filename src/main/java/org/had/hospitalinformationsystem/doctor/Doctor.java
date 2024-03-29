@@ -25,24 +25,26 @@ public class Doctor {
     @MapsId
     @JoinColumn(name="user_id")
     private User user;
-
+    @Column(nullable = false)
     private String medicalLicenseNumber;
+    @Column(nullable = false)
     private String specialization;
     @Lob
-    @Column(columnDefinition="LONGTEXT")
+    @Column(columnDefinition="LONGTEXT", nullable = false)
     private String boardCertification; // Doc
+    @Column(nullable = false)
     private String experience;
     @Lob
-    @Column(columnDefinition="LONGTEXT")
+    @Column(columnDefinition="LONGTEXT", nullable = false)
     private String medicalDegree; //Doc
     @Lob
-    @Column(columnDefinition="LONGTEXT")
+    @Column(columnDefinition="LONGTEXT", nullable = false)
     private String cv; //Doc
     @Lob
-    @Column(columnDefinition="LONGTEXT")
+    @Column(columnDefinition="LONGTEXT",nullable = false)
     private String drugScreeningResult; // Doc
+    @Column(nullable = false)
     private LocalTime workStart;
+    @Column(nullable = false)
     private LocalTime workEnd;
-
-
 }
