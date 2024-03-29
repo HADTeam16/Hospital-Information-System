@@ -234,8 +234,7 @@ public class AuthController {
                 return ResponseEntity.ok("Status changed successfully");
             }
             else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user present");
-            }
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user present");}
         }
         else{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Denied");
