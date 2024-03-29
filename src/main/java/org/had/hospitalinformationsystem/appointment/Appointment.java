@@ -23,6 +23,8 @@ public class Appointment {
     @ManyToOne
     @JoinColumn(name = "patient_userid")
     private Patient patient;
+    @Lob
+    @Column(columnDefinition="LONGTEXT")
     private String purpose;
     private LocalDateTime slot;
     private String temperature;

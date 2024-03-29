@@ -1,5 +1,6 @@
 package org.had.hospitalinformationsystem.prescription;
 
+import jakarta.persistence.Lob;
 import org.had.hospitalinformationsystem.appointment.Appointment;
 import org.had.hospitalinformationsystem.appointment.AppointmentRepository;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;

@@ -28,10 +28,18 @@ public class Doctor {
 
     private String medicalLicenseNumber;
     private String specialization;
+    @Lob
+    @Column(columnDefinition="LONGTEXT")
     private String boardCertification; // Doc
     private String experience;
+    @Lob
+    @Column(columnDefinition="LONGTEXT")
     private String medicalDegree; //Doc
+    @Lob
+    @Column(columnDefinition="LONGTEXT")
     private String cv; //Doc
+    @Lob
+    @Column(columnDefinition="LONGTEXT")
     private String drugScreeningResult; // Doc
     private LocalTime workStart;
     private LocalTime workEnd;
