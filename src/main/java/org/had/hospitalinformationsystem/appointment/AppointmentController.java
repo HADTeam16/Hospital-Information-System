@@ -155,11 +155,11 @@ public class AppointmentController {
         return ResponseEntity.ok().body(appointmentResponseDto);
     }
     @GetMapping("/get/all/previous/appointment/for/patient")
-    public ResponseEntity<List<Long>>getAllPreviousAppointmentForPatient(@RequestHeader("Authorization") String jwt,@RequestParam("patientId") Long patientId,@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date){
+    public ResponseEntity<List<LocalDateTime>>getAllPreviousAppointmentForPatient(@RequestHeader("Authorization") String jwt,@RequestParam("patientId") Long patientId,@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date){
         try{
             String role=JwtProvider.getRoleFromJwtToken(jwt);
             if(role.equals("doctor")){
-                List<Long> appointments=appointmentRepository.findAllPreviousAppointmentForPatient(patientId,date);
+                List<LocalDateTime> appointments=appointmentRepository.findAllPreviousAppointmentForPatient(patientId,date);
                 //System.out.println(appointments);
                 return ResponseEntity.ok(appointments);
             }
