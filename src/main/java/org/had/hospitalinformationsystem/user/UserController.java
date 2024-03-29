@@ -7,6 +7,8 @@ import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.nurse.Nurse;
 import org.had.hospitalinformationsystem.nurse.NurseRepository;
+import org.had.hospitalinformationsystem.receptionist.Receptionist;
+import org.had.hospitalinformationsystem.receptionist.ReceptionistRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.user.UserService;
@@ -35,6 +37,9 @@ public class UserController {
 
     @Autowired
     DoctorRepository doctorRepository;
+
+    @Autowired
+    ReceptionistRepository receptionistRepository;
 
     @GetMapping("/allUsers")
     public ResponseEntity<List<User>> getAllUsers(@RequestHeader("Authorization") String jwt) {
@@ -130,50 +135,27 @@ public class UserController {
     }
 
     @GetMapping("/get/user/{userId}")
-    public ResponseEntity<RegistrationDto>getUser(@RequestHeader("Authorization") String jwt, @PathVariable Long userId){
+    public ResponseEntity<?>getUser(@RequestHeader("Authorization") String jwt, @PathVariable Long userId){
         try{
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if(role.equals("admin")){
-                RegistrationDto ans = new RegistrationDto();
+                User ans = new User();
                 Optional<User> optionalUser = userRepository.findById(userId);
                 if(optionalUser.isPresent()){
                     User user = optionalUser.get();
-                    ans.setUserName(user.getUserName());
-                    ans.setEmail(user.getEmail());
-                    ans.setFirstName(user.getFirstName());
-                    ans.setMiddleName(user.getMiddleName());
-                    ans.setLastName(user.getLastName());
-                    ans.setGender(user.getGender());
-                    ans.setDateOfBirth(user.getDateOfBirth());
-                    ans.setCountry(user.getCountry());
-                    ans.setState(user.getState());
-                    ans.setCity(user.getCity());
-                    ans.setAddressLine1(user.getAddressLine1());
-                    ans.setAddressLine2(user.getAddressLine2());
-                    ans.setLandmark(user.getLandmark());
-                    ans.setPinCode(user.getPinCode());
-                    ans.setContact(user.getContact());
-                    ans.setProfilePicture(user.getProfilePicture());
-                    ans.setEmergencyContactName(user.getEmergencyContactName());
-                    ans.setEmergencyContactNumber(user.getEmergencyContactNumber());
                     switch (user.getRole()) {
                         case "doctor" -> {
                             Doctor doctor = doctorRepository.findByUser(user);
-                            if (doctor != null) {
-                                ans.setSpecialization(doctor.getSpecialization());
-                                ans.setWorkStart(doctor.getWorkStart());
-                                ans.setWorkEnd(doctor.getWorkEnd());
-                                doctorRepository.save(doctor);
-                            }
+                            return ResponseEntity.ok(doctor);
                         }
                         case "receptionist" -> {
-                            // Update receptionist specific details if any
+                            Receptionist receptionist = receptionistRepository.findByUser(user);
+                            return ResponseEntity.ok(receptionist);
                         }
                         case "nurse" -> {
                             Nurse nurse = nurseRepository.findByUser(user);
                             if (nurse != null) {
-                                ans.setHeadNurse(nurse.isHeadNurse());
-                                nurseRepository.save(nurse);
+                                return ResponseEntity.ok(nurse);
                             }
                         }
                     }
@@ -226,6 +208,8 @@ public class UserController {
                                 doctor.setSpecialization(registrationDto.getSpecialization());
                                 doctor.setWorkStart(registrationDto.getWorkStart());
                                 doctor.setWorkEnd(registrationDto.getWorkEnd());
+                                doctor.setMedicalLicenseNumber(registrationDto.getMedicalLicenseNumber());
+                                doctor.setExperience(registrationDto.getExperience());
                                 doctorRepository.save(doctor);
                             }
                         }

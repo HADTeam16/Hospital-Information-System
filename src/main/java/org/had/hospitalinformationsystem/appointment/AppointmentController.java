@@ -1,6 +1,7 @@
 package org.had.hospitalinformationsystem.appointment;
 
 import org.had.hospitalinformationsystem.doctor.DoctorService;
+import org.had.hospitalinformationsystem.dto.AppointmentDataDto;
 import org.had.hospitalinformationsystem.dto.AppointmentDto;
 import org.had.hospitalinformationsystem.dto.AppointmentResponseDto;
 import org.had.hospitalinformationsystem.dto.PrescriptionsAndRecords;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -144,7 +146,8 @@ public class AppointmentController {
             return ResponseEntity.badRequest().body(appointmentResponseDto);
         }
         try {
-            messagingTemplate.convertAndSend("/topic/appointments", appointment);
+            Doctor doctor = appointment.getDoctor();
+            messagingTemplate.convertAndSendToUser(doctor.getUser().getUserName(),"/topic/appointments", appointment);
         } catch (Exception e) {
             appointmentResponseDto.setResponse("Failed to send WebSocket update for appointment: " + e.getMessage());
             return ResponseEntity.ok().body(appointmentResponseDto);
@@ -154,13 +157,20 @@ public class AppointmentController {
         return ResponseEntity.ok().body(appointmentResponseDto);
     }
     @GetMapping("/get/all/previous/appointment/for/patient")
-    public ResponseEntity<List<Long>>getAllPreviousAppointmentForPatient(@RequestHeader("Authorization") String jwt,@RequestParam("patientId") Long patientId,@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date){
+    public ResponseEntity<List<AppointmentDataDto>>getAllPreviousAppointmentForPatient(@RequestHeader("Authorization") String jwt, @RequestParam("patientId") Long patientId, @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date){
         try{
             String role=JwtProvider.getRoleFromJwtToken(jwt);
             if(role.equals("doctor")){
-                List<Long> appointments=appointmentRepository.findAllPreviousAppointmentForPatient(patientId,date);
-                //System.out.println(appointments);
-                return ResponseEntity.ok(appointments);
+                List<Object[]> appointments=appointmentRepository.findAllPreviousAppointmentForPatient(patientId,date);
+
+                List<AppointmentDataDto> appointmentDataDtos = new ArrayList<>();
+                for (Object[] appointment : appointments) {
+                    AppointmentDataDto dto = new AppointmentDataDto();
+                    dto.setAppointmentId((Long) appointment[0]); // Assuming appointmentId is at index 0
+                    dto.setDateTime((LocalDateTime) appointment[1]); // Assuming dateTime is at index 1
+                    appointmentDataDtos.add(dto);
+                }
+                return ResponseEntity.ok(appointmentDataDtos);
             }
             else{
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);

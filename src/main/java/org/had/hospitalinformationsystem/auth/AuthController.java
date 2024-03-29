@@ -91,6 +91,12 @@ public class AuthController {
                         savedUser = userRepository.save(newUser);
                         Doctor newDoctor = new Doctor();
                         newDoctor.setUser(savedUser);
+                        newDoctor.setBoardCertification(registrationDto.getBoardCertification());
+                        newDoctor.setCv(registrationDto.getCv());
+                        newDoctor.setDrugScreeningResult(registrationDto.getDrugScreeningResult());
+                        newDoctor.setExperience(registrationDto.getExperience());
+                        newDoctor.setMedicalDegree(registrationDto.getMedicalDegree());
+                        newDoctor.setMedicalLicenseNumber(registrationDto.getMedicalLicenseNumber());
                         newDoctor.setSpecialization(registrationDto.getSpecialization());
                         newDoctor.setWorkStart(registrationDto.getWorkStart());
                         newDoctor.setWorkEnd(registrationDto.getWorkEnd());
@@ -228,8 +234,7 @@ public class AuthController {
                 return ResponseEntity.ok("Status changed successfully");
             }
             else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user present");
-            }
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user present");}
         }
         else{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Denied");
