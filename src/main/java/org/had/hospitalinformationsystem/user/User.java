@@ -19,43 +19,44 @@ public class User {
     @Column(unique = true)
     private String userName;
     private String password;
+    @Column(nullable = false)
     private String firstName;
     private String middleName;
     private String lastName;
+    @Column(nullable = false)
     private Integer age;
+    @Column(nullable = false)
     private String gender;
+    @Column(nullable = false)
     private String dateOfBirth;
+    @Column(nullable = false)
     private String country;
+    @Column(nullable = false)
     private String state;
+    @Column(nullable = false)
     private String city;
+    @Column(nullable = false)
     private String addressLine1;
     private String addressLine2;
     private String landmark;
+    @Column(nullable = false)
     private String pinCode;
+    @Column(nullable = false)
     private String contact;
     @Column(unique = true)
     private String email;
+    @Lob
+    @Column(columnDefinition="LONGTEXT")
     private String profilePicture;
+    @Column(nullable = false)
     private String emergencyContactName;
+    @Column(nullable = false)
     private String emergencyContactNumber;
     private String salt;
+    @Column(nullable = false)
     private String role;
     private boolean isDisable;
 
-//    public User(String userName, String password, String firstName, String middleName, String lastName, Integer age,
-//            String gender, String dateOfBirth, String contact, String email, String role) {
-//        this.userName = userName;
-//        this.password = password;
-//        this.firstName = firstName;
-//        this.middleName = middleName;
-//        this.lastName = lastName;
-//        this.age = age;
-//        this.gender = gender;
-//        this.dateOfBirth = dateOfBirth;
-//        this.contact = contact;
-//        this.email = email;
-//        this.role = role;
-//    }
 
 
 }
