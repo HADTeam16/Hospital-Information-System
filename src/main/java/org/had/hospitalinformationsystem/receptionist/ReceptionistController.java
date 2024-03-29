@@ -61,6 +61,7 @@ public class ReceptionistController {
             if (!role.equals("receptionist") || !registrationDto.getRole().equals("patient")) {
                 throw new Exception("Access Denied!!");
             }
+            newUser.setPassword("");
             savedUser = userRepository.save(newUser);
             Patient newPatient = new Patient();
             newPatient.setUser(savedUser);

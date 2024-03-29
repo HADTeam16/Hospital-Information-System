@@ -56,4 +56,25 @@ public class User {
     @Column(nullable = false)
     private String role;
     private boolean isDisable;
+
+    public boolean isValid() {
+        // Check if all required fields are present
+        if (userName == null || password == null || firstName == null || age == null || gender == null ||
+                dateOfBirth == null || country == null || state == null || city == null || addressLine1 == null ||
+                pinCode == null || contact == null || email == null ||  role == null) {
+            return false;
+        }
+        if (!gender.equalsIgnoreCase("male") && !gender.equalsIgnoreCase("female") &&
+                !gender.equalsIgnoreCase("dontSpecify")) {
+            return false;
+        }
+        if (!contact.matches("\\d{10}")) {
+            return false;
+        }
+
+        if (emergencyContactName != null && !emergencyContactNumber.matches("\\d{10}")) {
+            return false;
+        }
+        return true;
+    }
 }
