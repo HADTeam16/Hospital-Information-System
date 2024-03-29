@@ -35,6 +35,8 @@ public class User {
     private String contact;
     @Column(unique = true)
     private String email;
+    @Lob
+    @Column(columnDefinition="LONGTEXT")
     private String profilePicture;
     private String emergencyContactName;
     private String emergencyContactNumber;

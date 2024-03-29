@@ -19,7 +19,8 @@ public class Records {
     @ManyToOne
     @JoinColumn(name = "appointment_id")
     private Appointment appointment;
-
+    @Lob
+    @Column(columnDefinition="LONGTEXT")
     private String recordImage;
 
 
