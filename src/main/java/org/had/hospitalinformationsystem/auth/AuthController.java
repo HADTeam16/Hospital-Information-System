@@ -25,6 +25,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -63,6 +64,20 @@ public class AuthController {
             user.setPassword(Utils.hashPassword("1234",salt));
             user.setRole("admin");
             user.setEmail("admin@gmail.com");
+            user.setAddressLine1("address");
+            user.setAge(69);
+            user.setCity("Ecity");
+            user.setContact("7418529638");
+            user.setCountry("India");
+            user.setDateOfBirth("cvcbnxgfhd");
+            user.setEmail("email");
+            user.setEmergencyContactNumber("7418529639");
+            user.setEmergencyContactName("HAD");
+            user.setFirstName("HAD");
+            user.setGender("male");
+            user.setLandmark("Ecity");
+            user.setPinCode("560100");
+            user.setState("Karnataka");
             userRepository.save(user);
             Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword());
             String token = JwtProvider.generateToken(authentication, user.getRole());
@@ -226,7 +241,7 @@ public class AuthController {
     }
 
     @PutMapping("/toggle/user/status/{userId}")
-    public ResponseEntity<String>toggleUserLogInStatus(@RequestHeader("Authorization") String jwt, @PathVariable Long userId){
+    public ResponseEntity<?> toggleUserLogInStatus(@RequestHeader("Authorization") String jwt, @PathVariable Long userId){
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         if(role.equals("admin")){
             Optional<User> currUser = userRepository.findById(userId);
@@ -234,13 +249,14 @@ public class AuthController {
                 User user = currUser.get();
                 user.setDisable(!user.isDisable());
                 userRepository.save(user);
-                return ResponseEntity.ok("Status changed successfully");
+                return ResponseEntity.ok(java.util.Map.of("message", "Status changed successfully", "status", user.isDisable()));
             }
             else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user present");}
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(java.util.Map.of("error", "No user present"));
+            }
         }
         else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Denied");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Access Denied"));
         }
     }
 }
