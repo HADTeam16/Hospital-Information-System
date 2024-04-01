@@ -38,7 +38,7 @@ public class Utils {
         Auth auth = new Auth();
         newUser.setUserName(registrationDto.getUserName());
         String salt = generateRandomString(27);
-        newUser.setSalt(salt);
+        auth.setSalt(salt);
         auth.setPassword(hashPassword(registrationDto.getPassword(),salt));
         newUser.setAuth(auth);
         newUser.setFirstName(registrationDto.getFirstName());

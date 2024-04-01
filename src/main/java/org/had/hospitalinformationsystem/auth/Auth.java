@@ -15,4 +15,5 @@ public class Auth {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long authId;
     private String password;
+    private String salt;
 }
