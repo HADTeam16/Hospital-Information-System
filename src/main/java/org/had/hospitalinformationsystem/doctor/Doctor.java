@@ -20,7 +20,6 @@ public class Doctor {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long doctorId;
-
     @OneToOne
     @MapsId
     @JoinColumn(name="user_id")

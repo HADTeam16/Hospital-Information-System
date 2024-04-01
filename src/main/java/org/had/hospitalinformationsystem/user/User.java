@@ -1,5 +1,4 @@
 package org.had.hospitalinformationsystem.user;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,13 +47,14 @@ public class User {
     @Lob
     @Column(columnDefinition="LONGTEXT")
     private String profilePicture;
+    @Column(nullable = false)
     private String emergencyContactName;
+    @Column(nullable = false)
     private String emergencyContactNumber;
     private String salt;
     @Column(nullable = false)
     private String role;
     private boolean isDisable;
-
 
     public boolean isValid() {
         // Check if all required fields are present
@@ -76,6 +76,4 @@ public class User {
         }
         return true;
     }
-
-
 }
