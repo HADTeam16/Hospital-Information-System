@@ -21,12 +21,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
     @Query ("SELECT a FROM Appointment a WHERE a.doctor.doctorId=:doctorId AND a.slot>=:start AND a.slot<:end")
     List<Appointment> findByDoctorIdAndSlotBetween(Long doctorId, LocalDateTime start,LocalDateTime end);
 
-    @Query("SELECT a FROM Appointment a WHERE a.doctor.doctorId = :doctorId " + "AND a.slot >= :startDate AND a.slot < :endDate")
+    @Query("SELECT a FROM Appointment a WHERE a.doctor.doctorId = :doctorId " + "AND a.slot >= :startDate AND a.slot < :endDate ORDER BY a.slot")
     List<Appointment> findByDoctorIdAndAppointmentDate(Long doctorId, LocalDateTime startDate, LocalDateTime endDate);
 
     Appointment findByAppointmentId(Long appointmentId);
 
-    @Query("SELECT a.appointmentId, a.slot FROM Appointment a where a.patient.id= :patientId AND a.slot< :startDate")
+    @Query("SELECT a.appointmentId, a.slot FROM Appointment a where a.patient.id= :patientId AND a.slot< :startDate ORDER BY a.slot DESC")
     List<Object[]> findAllPreviousAppointmentForPatient(Long patientId, LocalDateTime startDate);
 
 }
