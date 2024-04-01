@@ -25,6 +25,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -82,8 +83,8 @@ public class AuthController {
     public ResponseEntity< AuthResponse> createUser(@RequestHeader("Authorization") String jwt,@RequestBody RegistrationDto registrationDto){
         try {
             User newUser = utils.getUser(registrationDto);
-            if(newUser.isValid()){
-                return ResponseEntity.ok(new AuthResponse("", "Add All details", newUser));
+            if(!newUser.isValid()){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse("", "Add All details", newUser));
             }
             newUser.setDisable(false);
             User savedUser = new User();
@@ -120,7 +121,7 @@ public class AuthController {
                         nurseRepository.save(newNurse);
                     }
                     default -> {
-                        return ResponseEntity.ok( new AuthResponse("", "Access Denied", savedUser));
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Access Denied",null));
                     }
                 }
                 Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getUserName(), savedUser.getPassword());
@@ -128,7 +129,7 @@ public class AuthController {
                 return ResponseEntity.ok( new AuthResponse(token, "Register Success", savedUser));
             }
             else {
-                return ResponseEntity.ok(new AuthResponse("", "Access Denied", savedUser));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Access denied",null));
             }
         }
         catch(BadCredentialsException e){
@@ -138,7 +139,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Error adding User",null));
         }
         catch(Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Error",null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Error" + e.getMessage(),null));
         }
     }
 
@@ -226,7 +227,7 @@ public class AuthController {
     }
 
     @PutMapping("/toggle/user/status/{userId}")
-    public ResponseEntity<String>toggleUserLogInStatus(@RequestHeader("Authorization") String jwt, @PathVariable Long userId){
+    public ResponseEntity<?> toggleUserLogInStatus(@RequestHeader("Authorization") String jwt, @PathVariable Long userId){
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         if(role.equals("admin")){
             Optional<User> currUser = userRepository.findById(userId);
@@ -234,13 +235,14 @@ public class AuthController {
                 User user = currUser.get();
                 user.setDisable(!user.isDisable());
                 userRepository.save(user);
-                return ResponseEntity.ok("Status changed successfully");
+                return ResponseEntity.ok(Map.of("message", "Status changed successfully", "status", user.isDisable()));
             }
             else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user present");}
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No user present"));
+            }
         }
         else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Denied");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Access Denied"));
         }
     }
 }
