@@ -23,6 +23,6 @@ public class CustomerUserDetailsServiceImplementation implements UserDetailsServ
             throw new UsernameNotFoundException("user not found with email "+ userName);
         }
         List<GrantedAuthority> authorities=new ArrayList<>();
-        return new org.springframework.security.core.userdetails.User(user.getUserName(),user.getPassword(),authorities);
+        return new org.springframework.security.core.userdetails.User(user.getUserName(),user.getAuth().getPassword(),authorities);
     }
 }

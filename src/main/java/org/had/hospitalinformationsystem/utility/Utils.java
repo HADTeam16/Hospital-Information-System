@@ -1,5 +1,6 @@
 package org.had.hospitalinformationsystem.utility;
 
+import org.had.hospitalinformationsystem.auth.Auth;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +35,12 @@ public class Utils {
 
     public User getUser(RegistrationDto registrationDto) {
         User newUser = new User();
+        Auth auth = new Auth();
         newUser.setUserName(registrationDto.getUserName());
         String salt = generateRandomString(27);
         newUser.setSalt(salt);
-        newUser.setPassword(hashPassword(registrationDto.getPassword(),salt));
+        auth.setPassword(hashPassword(registrationDto.getPassword(),salt));
+        newUser.setAuth(auth);
         newUser.setFirstName(registrationDto.getFirstName());
         newUser.setMiddleName(registrationDto.getMiddleName());
         newUser.setLastName(registrationDto.getLastName());

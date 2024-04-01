@@ -44,6 +44,9 @@ public class AuthController {
     ReceptionistRepository receptionistRepository;
     @Autowired
     NurseRepository nurseRepository;
+    @Autowired
+    AuthRepository authRepository;
+
 
     @Autowired
     Utils utils = new Utils();
@@ -61,7 +64,10 @@ public class AuthController {
             user.setDisable(false);
             String salt = user.getUserName() + "gfdsdfedfvfsJKJHGKJBBNK";
             user.setSalt(salt);
-            user.setPassword(Utils.hashPassword("1234",salt));
+            Auth auth = new Auth();
+            authRepository.save(auth);
+            auth.setPassword(Utils.hashPassword("1234",salt));
+            user.setAuth(auth);
             user.setRole("admin");
             user.setEmail("admin@gmail.com");
             user.setAddressLine1("address");
@@ -79,15 +85,13 @@ public class AuthController {
             user.setPinCode("560100");
             user.setState("Karnataka");
             userRepository.save(user);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword());
-            String token = JwtProvider.generateToken(authentication, user.getRole());
-            return ResponseEntity.ok(new AuthResponse(token, "Register Success", user));
+            return ResponseEntity.ok(new AuthResponse("", "Register Success", user));
         }
         catch(AuthenticationException e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Error adding Admin", null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Error adding Admin: "+e.getMessage(), null));
         }
         catch(Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Error", null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Error: "+e.getMessage(), null));
         }
     }
 
@@ -107,6 +111,7 @@ public class AuthController {
                 switch (registrationDto.getRole()) {
                     case "doctor" -> {
                         savedUser = userRepository.save(newUser);
+                        authRepository.save(newUser.getAuth());
                         Doctor newDoctor = new Doctor();
                         newDoctor.setUser(savedUser);
                         newDoctor.setBoardCertification(registrationDto.getBoardCertification());
@@ -127,8 +132,6 @@ public class AuthController {
                         receptionistRepository.save(newReceptionist);
                     }
                     case "nurse" -> {
-
-
                         savedUser = userRepository.save(newUser);
                         Nurse newNurse = new Nurse();
                         newNurse.setUser(savedUser);
@@ -140,9 +143,7 @@ public class AuthController {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Access Denied",null));
                     }
                 }
-                Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getUserName(), savedUser.getPassword());
-                String token = JwtProvider.generateToken(authentication, newUser.getRole());
-                return ResponseEntity.ok( new AuthResponse(token, "Register Success", savedUser));
+                return ResponseEntity.ok( new AuthResponse("", "Register Success", savedUser));
             }
             else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Access denied",null));
@@ -190,6 +191,7 @@ public class AuthController {
             if(user.isDisable()){
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Access Denied",null));
             }
+            user.setAuth(null);
             return ResponseEntity.ok(new AuthResponse(token, "Login Success", user));
         }
         catch(AuthenticationException e){
@@ -207,7 +209,7 @@ public class AuthController {
             if (role.equals("admin")) {
                 User user = userRepository.findByUserName(changePasswordRequest.getUserName());
                 String encodedNewPassword = Utils.hashPassword(changePasswordRequest.getNewPassword(),user.getSalt());
-                user.setPassword(encodedNewPassword);
+                user.getAuth().setPassword(encodedNewPassword);
                 userRepository.save(user);
                 return ResponseEntity.ok("Password updated successfully");
             } else {
@@ -228,9 +230,9 @@ public class AuthController {
             String userName = JwtProvider.getUserNameFromJwtToken(jwt);
             User currUser = userRepository.findByUserName(userName);
 
-            if (Utils.verifyPassword(oldPassword, currUser.getPassword(),currUser.getSalt())) {
+            if (Utils.verifyPassword(oldPassword, currUser.getAuth().getPassword(),currUser.getSalt())) {
                 String encodedNewPassword = Utils.hashPassword(newPassword,currUser.getSalt());
-                currUser.setPassword(encodedNewPassword);
+                currUser.getAuth().setPassword(encodedNewPassword);
                 userRepository.save(currUser);
                 return ResponseEntity.ok("Password updated successfully");
             } else {
