@@ -127,6 +127,8 @@ public class AuthController {
                         receptionistRepository.save(newReceptionist);
                     }
                     case "nurse" -> {
+
+
                         savedUser = userRepository.save(newUser);
                         Nurse newNurse = new Nurse();
                         newNurse.setUser(savedUser);
