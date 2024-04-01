@@ -79,9 +79,7 @@ public class AuthController {
             user.setPinCode("560100");
             user.setState("Karnataka");
             userRepository.save(user);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword());
-            String token = JwtProvider.generateToken(authentication, user.getRole());
-            return ResponseEntity.ok(new AuthResponse(token, "Register Success", user));
+            return ResponseEntity.ok(new AuthResponse("", "Register Success", user));
         }
         catch(AuthenticationException e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Error adding Admin", null));
@@ -138,9 +136,7 @@ public class AuthController {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Access Denied",null));
                     }
                 }
-                Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getUserName(), savedUser.getPassword());
-                String token = JwtProvider.generateToken(authentication, newUser.getRole());
-                return ResponseEntity.ok( new AuthResponse(token, "Register Success", savedUser));
+                return ResponseEntity.ok( new AuthResponse("", "Register Success", savedUser));
             }
             else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Access denied",null));

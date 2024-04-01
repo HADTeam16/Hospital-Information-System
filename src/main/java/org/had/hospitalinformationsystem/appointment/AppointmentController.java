@@ -198,4 +198,6 @@ public class AppointmentController {
         }
     }
 
+//    @DeleteMapping("/delete/appomt")
+
 }
