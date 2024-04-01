@@ -23,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -69,6 +70,7 @@ public class ReceptionistController {
             newPatient.setBloodPressure(registrationDto.getBloodPressure());
             newPatient.setHeight(registrationDto.getHeight());
             newPatient.setWeight(registrationDto.getWeight());
+            newPatient.setRegistrationDateAndTime(LocalDateTime.now());
             patientRepository.save(newPatient);
             Consent currPatientConsent = new Consent();
             currPatientConsent.setPatient(newPatient);
@@ -81,10 +83,9 @@ public class ReceptionistController {
             return ResponseEntity.badRequest().body("Error during patient registration: " + e.getMessage());
         }
     }
-
-    // Find Doctor by Specialization
-    @GetMapping("find/doctor/by/specialization")
-    public ResponseEntity<?> findDoctorBySpecialization(@RequestHeader("Authorization") String jwt, @RequestBody String specialization) {
+    
+    @GetMapping("/find/doctor/by/specialization/{specialization}")
+    public ResponseEntity<?> findDoctorBySpecialization(@RequestHeader("Authorization") String jwt, @PathVariable String specialization) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if (!role.equals("receptionist")) {
