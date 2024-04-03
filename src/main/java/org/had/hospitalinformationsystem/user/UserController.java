@@ -92,8 +92,8 @@ public class UserController {
         }
     }
 
-    @GetMapping("/valid/username")
-    public boolean userPresentOrNot(@RequestHeader("Authorization") String jwt, @RequestBody String userName) {
+    @GetMapping("/valid/username/{userName}")
+    public boolean userPresentOrNot(@RequestHeader("Authorization") String jwt, @PathVariable String userName) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if ("receptionist".equals(role)) {

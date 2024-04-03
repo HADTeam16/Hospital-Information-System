@@ -1,6 +1,7 @@
 package org.had.hospitalinformationsystem.utility;
 
 import org.had.hospitalinformationsystem.auth.Auth;
+import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,5 +89,41 @@ public class Utils {
         } finally {
             spec.clearPassword();
         }
+    }
+
+    public boolean isValid(User user) {
+        // Check if all required fields are present
+        if (user.getUserName() == null || user.getFirstName() == null || user.getAge() == null || user.getGender() == null ||
+                user.getDateOfBirth() == null || user.getCountry() == null || user.getState() == null || user.getCity() == null || user.getAddressLine1() == null ||
+                user.getPinCode() == null || user.getContact() == null || user.getEmail() == null ||  user.getRole() == null) {
+            return false;
+        }
+        if (!user.getGender().equalsIgnoreCase("male") && !user.getGender().equalsIgnoreCase("female") &&
+                !user.getGender().equalsIgnoreCase("dontSpecify")) {
+            return false;
+        }
+        if (!user.getContact().matches("\\d{10}")) {
+            return false;
+        }
+
+        if (user.getEmergencyContactName() != null && !user.getEmergencyContactNumber().matches("\\d{10}")) {
+            return false;
+        }
+        return true;
+    }
+
+    public static Doctor getDoctor(RegistrationDto registrationDto, User newUser) {
+        Doctor newDoctor = new Doctor();
+        newDoctor.setUser(newUser);
+        newDoctor.setBoardCertification(registrationDto.getBoardCertification());
+        newDoctor.setCv(registrationDto.getCv());
+        newDoctor.setDrugScreeningResult(registrationDto.getDrugScreeningResult());
+        newDoctor.setExperience(registrationDto.getExperience());
+        newDoctor.setMedicalDegree(registrationDto.getMedicalDegree());
+        newDoctor.setMedicalLicenseNumber(registrationDto.getMedicalLicenseNumber());
+        newDoctor.setSpecialization(registrationDto.getSpecialization());
+        newDoctor.setWorkStart(registrationDto.getWorkStart());
+        newDoctor.setWorkEnd(registrationDto.getWorkEnd());
+        return newDoctor;
     }
 }

@@ -70,7 +70,7 @@ public class OtController {
             return ResponseEntity.badRequest().body(null);
         }
     }
-    @PostMapping("/book/ot/{otId}")
+    @PutMapping("/book/ot/{otId}")
     ResponseEntity<?> bookOt(@RequestHeader("Authorization") String jwt,@PathVariable Long otId,@RequestBody Set<Long> surgeonIds){
         String role= JwtProvider.getRoleFromJwtToken(jwt);
         if(role.equals("receptionist")){
@@ -100,7 +100,7 @@ public class OtController {
         }
     }
     //free ot
-    @GetMapping("/free/ot/{otId}")
+    @PutMapping("/free/ot/{otId}")
     ResponseEntity<?> freeOt(@RequestHeader("Authorization") String jwt,@PathVariable Long otId){
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         // Check if the user has the correct role to free an OT

@@ -109,7 +109,7 @@ public class AppointmentController {
         }
     }
 
-
+//--------------------------------------------------------------check below api
     @GetMapping("/get/patient/details")
     public ResponseEntity<?> getDoctorsAppointment(@RequestHeader("Authorization") String jwt) {
         try {
