@@ -85,6 +85,7 @@ public class AuthController {
             user.setPinCode("560100");
             user.setState("Karnataka");
             userRepository.save(user);
+            user.setAuth(null);
             return ResponseEntity.ok(new AuthResponse("", "Register Success", user));
         }
         catch(AuthenticationException e){
@@ -101,28 +102,17 @@ public class AuthController {
     public ResponseEntity< AuthResponse> createUser(@RequestHeader("Authorization") String jwt,@RequestBody RegistrationDto registrationDto){
         try {
             User newUser = utils.getUser(registrationDto);
-            if(!newUser.isValid()){
+            if(!utils.isValid(newUser)){
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse("", "Add All details", newUser));
             }
             newUser.setDisable(false);
-//            User savedUser = new User();
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if(role.equals("admin")){
                 switch (registrationDto.getRole()) {
                     case "doctor" -> {
                         userRepository.save(newUser);
                         authRepository.save(newUser.getAuth());
-                        Doctor newDoctor = new Doctor();
-                        newDoctor.setUser(newUser);
-                        newDoctor.setBoardCertification(registrationDto.getBoardCertification());
-                        newDoctor.setCv(registrationDto.getCv());
-                        newDoctor.setDrugScreeningResult(registrationDto.getDrugScreeningResult());
-                        newDoctor.setExperience(registrationDto.getExperience());
-                        newDoctor.setMedicalDegree(registrationDto.getMedicalDegree());
-                        newDoctor.setMedicalLicenseNumber(registrationDto.getMedicalLicenseNumber());
-                        newDoctor.setSpecialization(registrationDto.getSpecialization());
-                        newDoctor.setWorkStart(registrationDto.getWorkStart());
-                        newDoctor.setWorkEnd(registrationDto.getWorkEnd());
+                        Doctor newDoctor = Utils.getDoctor(registrationDto, newUser);
                         doctorRepository.save(newDoctor);
                     }
                     case "receptionist" -> {
@@ -151,7 +141,7 @@ public class AuthController {
             }
         }
         catch(BadCredentialsException e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Invalid Token",null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Operation Failed due to Bad Credential",null));
         }
         catch (AuthenticationException e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Error adding User",null));
@@ -160,7 +150,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Error" + e.getMessage(),null));
         }
     }
-
 
     // Authenticate
     private Authentication authenticate(String userName, String password,String role) {
@@ -203,7 +192,7 @@ public class AuthController {
         }
     }
 
-    @PutMapping("/admin/changepassword")
+    @PutMapping("/admin/change/password")
     public ResponseEntity< String> changePasswordByAdmin(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);

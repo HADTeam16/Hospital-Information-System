@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/emailotp")
+@RequestMapping("/api/email/otp")
 @Slf4j
 public class EmailOtpController {
 
@@ -35,7 +35,7 @@ public class EmailOtpController {
     }
 
 
-    @PostMapping("/sendotp")
+    @PostMapping("/send/otp")
     public ResponseEntity <EmailOtpResponse> sendOtp(@RequestHeader("Authorization") String jwt, @RequestBody EmailOtpRequest emailOtpRequest) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
@@ -51,7 +51,7 @@ public class EmailOtpController {
         }
     }
 
-    @PostMapping("/validateotp")
+    @PostMapping("/validate/otp")
     public ResponseEntity <String> validateOtp(@RequestHeader("Authorization") String jwt, @RequestBody EmailOtpValidationRequest emailOtpValidationRequest){
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);

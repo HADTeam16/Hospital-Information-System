@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/otp")
+@RequestMapping("/sms/otp")
 @Slf4j
 public class SmsOtpController {
 
@@ -22,7 +22,7 @@ public class SmsOtpController {
         return "SMS sent";
     }
 
-    @PostMapping("/sendotp")
+    @PostMapping("/send/otp")
     public ResponseEntity<SmsOtpResponse> sendOtp(@RequestHeader("Authorization") String jwt,@RequestBody SmsOtpRequest smsOtpRequest) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
@@ -37,7 +37,7 @@ public class SmsOtpController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new SmsOtpResponse(OtpStatus.ERROR,e.getMessage()));
         }
     }
-    @PostMapping("/validateotp")
+    @PostMapping("/validate/otp")
     public ResponseEntity< String> validateOtp(@RequestHeader("Authorization") String jwt,@RequestBody SmsOtpValidationRequest smsOtpValidationRequest) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
