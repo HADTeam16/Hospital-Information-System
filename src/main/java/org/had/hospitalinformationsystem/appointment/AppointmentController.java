@@ -197,5 +197,4 @@ public class AppointmentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
-
 }
