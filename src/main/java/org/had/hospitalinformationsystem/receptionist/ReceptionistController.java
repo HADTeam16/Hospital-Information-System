@@ -62,7 +62,7 @@ public class ReceptionistController {
             if (!role.equals("receptionist") || !registrationDto.getRole().equals("patient")) {
                 throw new Exception("Access Denied!!");
             }
-            newUser.setPassword("");
+            newUser.getAuth().setPassword("");
             savedUser = userRepository.save(newUser);
             Patient newPatient = new Patient();
             newPatient.setUser(savedUser);
@@ -76,9 +76,7 @@ public class ReceptionistController {
             currPatientConsent.setPatient(newPatient);
             currPatientConsent.setConcent(true);
             consentRepository.save(currPatientConsent);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getUserName(), savedUser.getPassword());
-            String token = JwtProvider.generateToken(authentication, newUser.getRole());
-            return ResponseEntity.ok(new AuthResponse(token, "Register Success", savedUser));
+            return ResponseEntity.ok(new AuthResponse("", "Register Success", savedUser));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error during patient registration: " + e.getMessage());
         }
