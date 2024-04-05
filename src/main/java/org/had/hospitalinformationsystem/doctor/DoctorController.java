@@ -1,6 +1,5 @@
 package org.had.hospitalinformationsystem.doctor;
 
-
 import org.had.hospitalinformationsystem.appointment.Appointment;
 import org.had.hospitalinformationsystem.appointment.AppointmentRepository;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
@@ -14,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -48,6 +49,7 @@ public class DoctorController {
             return ResponseEntity.badRequest().body("Failed to retrieve doctors: " + e.getMessage());
         }
     }
+
     @GetMapping("/recommend/ward/{appointmentId}")
     public ResponseEntity<?> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable long appointmentId){
         String role=JwtProvider.getRoleFromJwtToken(jwt);
@@ -70,6 +72,5 @@ public class DoctorController {
         else{
             return ResponseEntity.badRequest().body("wrong details have been put");
         }
-
     }
 }
