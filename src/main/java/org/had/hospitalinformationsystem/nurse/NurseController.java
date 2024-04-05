@@ -1,5 +1,6 @@
 package org.had.hospitalinformationsystem.nurse;
 
+import org.apache.coyote.Response;
 import org.had.hospitalinformationsystem.dto.WardPatientDetails;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.needWard.NeedWard;
@@ -141,6 +142,35 @@ public class NurseController {
         }
         else{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Denied");
+        }
+    }
+
+    @GetMapping("/is/head/nurse/{nurseId}")
+    ResponseEntity<String>isNurseIsAHeadNurse(@RequestHeader("Authorization")String jwt,@PathVariable Long nurseId){
+        try {
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (role.equals("nurse")) {
+                Optional<Nurse> isNurse = nurseRepository.findById(nurseId);
+                if(isNurse.isPresent()){
+                    Nurse nurse = isNurse.get();
+                    boolean isHeadNurse = nurse.isHeadNurse();
+                    if(isHeadNurse){
+                        return ResponseEntity.ok("yes");
+                    }
+                    else{
+                        return ResponseEntity.ok("no");
+                    }
+                }
+                else{
+                    return ResponseEntity.ok("No nurse present with the given Id");
+                }
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Denied");
+            }
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
         }
     }
 
