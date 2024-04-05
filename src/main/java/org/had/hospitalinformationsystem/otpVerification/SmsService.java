@@ -43,6 +43,7 @@ public class SmsService {
             otpMap.put(smsOtpRequest.getUsername(), new OtpInfo(otp,expirationTime));
             smsOtpResponse = new SmsOtpResponse(OtpStatus.DELIVERED, otpMessage);
         } catch (Exception e) {
+            //System.out.println(e.getMessage());
             smsOtpResponse = new SmsOtpResponse(OtpStatus.FAILED, e.getMessage());
         }
         return smsOtpResponse;

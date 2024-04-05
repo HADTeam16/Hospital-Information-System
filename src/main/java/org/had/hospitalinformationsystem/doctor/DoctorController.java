@@ -6,14 +6,12 @@ import org.had.hospitalinformationsystem.appointment.AppointmentRepository;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.needWard.NeedWard;
 import org.had.hospitalinformationsystem.needWard.NeedWardRepository;
-import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.print.Doc;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -51,15 +49,27 @@ public class DoctorController {
         }
     }
     @GetMapping("/recommend/ward/{appointmentId}")
-    public String assignWard(@RequestHeader("Authorization") String jwt,@PathVariable long appointmentId){
-        Appointment appointment=appointmentRepository.findByAppointmentId(appointmentId);
-        //Patient patient=appointment.getPatient();
-        NeedWard needWard=new NeedWard();
-        needWard.setAppointment(appointment);
-        needWard.setRequestTime(LocalDateTime.now());
-        //patient.setLastAppointmentId(appointmentId);
-        //patientRepository.save(patient);
-        needWardRepository.save(needWard);
-        return "WardDetails will be shortly assigned to patient.";
+    public ResponseEntity<?> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable long appointmentId){
+        String role=JwtProvider.getRoleFromJwtToken(jwt);
+        if(role.equals("doctor")){
+            Appointment appointment=appointmentRepository.findByAppointmentId(appointmentId);
+            if(appointment==null){
+                return ResponseEntity.badRequest().body("Appointment id not found");
+            }
+            //Patient patient=appointment.getPatient();
+            NeedWard needWard=new NeedWard();
+
+            needWard.setAppointment(appointment);
+            needWard.setRequestTime(LocalDateTime.now());
+            //patient.setLastAppointmentId(appointmentId);
+            //patientRepository.save(patient);
+            needWardRepository.save(needWard);
+            return ResponseEntity.ok().body("WardDetails will be shortly assigned to patient.");
+
+        }
+        else{
+            return ResponseEntity.badRequest().body("wrong details have been put");
+        }
+
     }
 }

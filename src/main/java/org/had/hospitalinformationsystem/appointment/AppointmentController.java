@@ -22,6 +22,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -157,7 +158,7 @@ public class AppointmentController {
         return ResponseEntity.ok().body(appointmentResponseDto);
     }
     @GetMapping("/get/all/previous/appointment/for/patient")
-    public ResponseEntity<List<AppointmentDataDto>>getAllPreviousAppointmentForPatient(@RequestHeader("Authorization") String jwt, @RequestParam("patientId") Long patientId, @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date){
+    public ResponseEntity<?>getAllPreviousAppointmentForPatient(@RequestHeader("Authorization") String jwt, @RequestParam("patientId") Long patientId, @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date){
         try{
             String role=JwtProvider.getRoleFromJwtToken(jwt);
             if(role.equals("doctor")){
@@ -173,11 +174,14 @@ public class AppointmentController {
                 return ResponseEntity.ok(appointmentDataDtos);
             }
             else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("null");
             }
         }
+        catch(HttpClientErrorException.BadRequest e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
         catch(Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 

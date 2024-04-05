@@ -42,14 +42,14 @@ public class NurseController {
 
     //this api will help you find patients in needWard table
     @GetMapping("patients/who/needs/ward")
-    public ResponseEntity<List<NeedWard>>  patientsNeedWard(@RequestHeader("Authorization") String jwt){
+    public ResponseEntity<?>  patientsNeedWard(@RequestHeader("Authorization") String jwt){
         String role= JwtProvider.getRoleFromJwtToken(jwt);
 
         String userName=JwtProvider.getUserNameFromJwtToken(jwt);
         User user=userRepository.findByUserName(userName);
         Optional<Nurse> nurse=nurseRepository.findById(user.getId());
         if(!role.equals("nurse")){
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body("Wrong user have been provided to see.");
 
         }
         if(nurse.get().isHeadNurse()){
@@ -91,7 +91,7 @@ public class NurseController {
     }
 
     @GetMapping("/assign/ward/{wardId}/{needWardId}")
-    ResponseEntity<Ward> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable Long wardId, @PathVariable Long needWardId) {
+    ResponseEntity<?> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable Long wardId, @PathVariable Long needWardId) {
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         String userName = JwtProvider.getUserNameFromJwtToken(jwt);
         User user = userRepository.findByUserName(userName);
@@ -118,7 +118,7 @@ public class NurseController {
                 return ResponseEntity.notFound().build();
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only head nurse can assign ward to patient");
         }
     }
 
