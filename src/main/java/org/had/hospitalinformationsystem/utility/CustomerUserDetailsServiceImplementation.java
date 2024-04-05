@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.auth;
+package org.had.hospitalinformationsystem.utility;
 
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;

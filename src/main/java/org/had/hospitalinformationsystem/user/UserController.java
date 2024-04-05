@@ -186,7 +186,6 @@ public class UserController {
                     user.setFirstName(registrationDto.getFirstName());
                     user.setMiddleName(registrationDto.getMiddleName());
                     user.setLastName(registrationDto.getLastName());
-                    user.setAge(registrationDto.getAge());
                     user.setGender(registrationDto.getGender());
                     user.setDateOfBirth(registrationDto.getDateOfBirth());
                     user.setCountry(registrationDto.getCountry());

@@ -4,7 +4,12 @@ import org.had.hospitalinformationsystem.auth.Auth;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.user.User;
+import org.had.hospitalinformationsystem.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +18,17 @@ import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.time.LocalTime;
 import java.util.Base64;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class Utils {
-
+    @Autowired
+    CustomerUserDetailsServiceImplementation customerUserDetailsService;
+    @Autowired
+    UserRepository userRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
     public static String generateRandomString(int length) {
@@ -32,37 +43,6 @@ public class Utils {
         }
 
         return randomString.toString();
-    }
-
-    public User getUser(RegistrationDto registrationDto) {
-        User newUser = new User();
-        Auth auth = new Auth();
-        newUser.setUserName(registrationDto.getUserName());
-        String salt = generateRandomString(27);
-        auth.setSalt(salt);
-        auth.setPassword(hashPassword(registrationDto.getPassword(),salt));
-        newUser.setAuth(auth);
-        newUser.setFirstName(registrationDto.getFirstName());
-        newUser.setMiddleName(registrationDto.getMiddleName());
-        newUser.setLastName(registrationDto.getLastName());
-        newUser.setAge(registrationDto.getAge());
-        newUser.setGender(registrationDto.getGender());
-        newUser.setDateOfBirth(registrationDto.getDateOfBirth());
-        newUser.setCountry(registrationDto.getCountry());
-        newUser.setState(registrationDto.getState());
-        newUser.setCity(registrationDto.getCity());
-        newUser.setAddressLine1(registrationDto.getAddressLine1());
-        newUser.setAddressLine2(registrationDto.getAddressLine2());
-        newUser.setLandmark(registrationDto.getLandmark());
-        newUser.setPinCode(registrationDto.getPinCode());
-        newUser.setContact(registrationDto.getContact());
-        newUser.setEmail(registrationDto.getEmail());
-        newUser.setProfilePicture(registrationDto.getProfilePicture());
-        newUser.setEmergencyContactName(registrationDto.getEmergencyContactName());
-        newUser.setEmergencyContactNumber(registrationDto.getEmergencyContactNumber());
-        newUser.setRole(registrationDto.getRole());
-        newUser.setDisable(true);
-        return newUser;
     }
 
     private static final int ITERATIONS = 10000;
@@ -91,28 +71,142 @@ public class Utils {
         }
     }
 
-    public boolean isValid(User user) {
-        // Check if all required fields are present
-        if (user.getUserName() == null || user.getFirstName() == null || user.getAge() == null || user.getGender() == null ||
-                user.getDateOfBirth() == null || user.getCountry() == null || user.getState() == null || user.getCity() == null || user.getAddressLine1() == null ||
-                user.getPinCode() == null || user.getContact() == null || user.getEmail() == null ||  user.getRole() == null) {
-            return false;
-        }
-        if (!user.getGender().equalsIgnoreCase("male") && !user.getGender().equalsIgnoreCase("female") &&
-                !user.getGender().equalsIgnoreCase("dontSpecify")) {
-            return false;
-        }
-        if (!user.getContact().matches("\\d{10}")) {
-            return false;
-        }
-
-        if (user.getEmergencyContactName() != null && !user.getEmergencyContactNumber().matches("\\d{10}")) {
-            return false;
-        }
-        return true;
+    public static boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 
-    public static Doctor getDoctor(RegistrationDto registrationDto, User newUser) {
+    public Object getUser(RegistrationDto registrationDto) {
+        if (registrationDto == null) {
+            return "Registration data is missing";
+        }
+        String[] fields = {
+                registrationDto.getFirstName(),
+                registrationDto.getGender(),
+                registrationDto.getDateOfBirth(),
+                registrationDto.getCountry(),
+                registrationDto.getState(),
+                registrationDto.getCity(),
+                registrationDto.getAddressLine1(),
+                registrationDto.getPinCode(),
+                registrationDto.getContact(),
+                registrationDto.getEmail(),
+                registrationDto.getProfilePicture(),
+                registrationDto.getRole()
+        };
+        String[] fieldNames = {
+                "First Name",
+                "Gender",
+                "Date of Birth",
+                "Country",
+                "State",
+                "City",
+                "Address Line 1",
+                "Pin Code",
+                "Contact",
+                "Email",
+                "Profile Picture",
+                "Role"
+        };
+
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i] == null) {
+                return fieldNames[i] + " is missing";
+            }
+        }
+        String gender = registrationDto.getGender();
+        if(!gender.equalsIgnoreCase("male") && !gender.equalsIgnoreCase("female") && !gender.equals("notSpecified")){
+            return "Select Gender form the given value:(male,female,notSpecified)";
+        }
+        String pinCode = registrationDto.getPinCode();
+        if(pinCode.length()!=6){
+            return "Please, Enter Valid Pin code";
+        }
+        if (!pinCode.matches("\\d+")) {
+            return "Pin code must contain digits only";
+        }
+        String contact = registrationDto.getContact();
+        if(contact.length()!=10){
+            return "Please, Enter Valid Contact Number";
+        }
+        if (!contact.matches("\\d+")) {
+            return "Contact number must contain digits only";
+        }
+        if(!isValidEmail(registrationDto.getEmail())){
+            return "Please, Enter Valid Email";
+        }
+
+
+        User newUser = new User();
+        Auth auth = new Auth();
+        newUser.setUserName(registrationDto.getUserName());
+        String salt = generateRandomString(27);
+        auth.setSalt(salt);
+        auth.setPassword(hashPassword(registrationDto.getPassword(), salt));
+        newUser.setAuth(auth);
+        newUser.setFirstName(registrationDto.getFirstName());
+        newUser.setMiddleName(registrationDto.getMiddleName());
+        newUser.setLastName(registrationDto.getLastName());
+        newUser.setGender(registrationDto.getGender());
+        newUser.setDateOfBirth(registrationDto.getDateOfBirth());
+        newUser.setCountry(registrationDto.getCountry());
+        newUser.setState(registrationDto.getState());
+        newUser.setCity(registrationDto.getCity());
+        newUser.setAddressLine1(registrationDto.getAddressLine1());
+        newUser.setAddressLine2(registrationDto.getAddressLine2());
+        newUser.setLandmark(registrationDto.getLandmark());
+        newUser.setPinCode(registrationDto.getPinCode());
+        newUser.setContact(registrationDto.getContact());
+        newUser.setEmail(registrationDto.getEmail());
+        newUser.setProfilePicture(registrationDto.getProfilePicture());
+        newUser.setEmergencyContactName(registrationDto.getEmergencyContactName());
+        newUser.setEmergencyContactNumber(registrationDto.getEmergencyContactNumber());
+        newUser.setRole(registrationDto.getRole());
+        newUser.setDisable(true);
+        return newUser;
+    }
+
+    public static Object getDoctor(RegistrationDto registrationDto, User newUser) {
+        String[] fields = {
+                registrationDto.getBoardCertification(),
+                registrationDto.getCv(),
+                registrationDto.getDrugScreeningResult(),
+                registrationDto.getExperience(),
+                registrationDto.getMedicalDegree(),
+                registrationDto.getMedicalLicenseNumber(),
+                registrationDto.getSpecialization()
+        };
+        String[] fieldNames = {
+                "Board Certification",
+                "CV",
+                "Drug Screening Result",
+                "Experience",
+                "Medical Degree",
+                "Medical License Number",
+                "Specialization",
+        };
+        LocalTime[] fields2= {
+                registrationDto.getWorkStart(),
+                registrationDto.getWorkEnd()
+        };
+        String[] fieldNames2 = {
+                "Work Start",
+                "Work End"
+        };
+
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i] == null) {
+                return fieldNames[i] + " is missing";
+            }
+        }
+        for (int i = 0; i < fields2.length; i++) {
+            if (fields2[i] == null) {
+                return fieldNames2[i] + " is missing";
+            }
+        }
+
         Doctor newDoctor = new Doctor();
         newDoctor.setUser(newUser);
         newDoctor.setBoardCertification(registrationDto.getBoardCertification());
@@ -126,4 +220,25 @@ public class Utils {
         newDoctor.setWorkEnd(registrationDto.getWorkEnd());
         return newDoctor;
     }
+
+
+
+    public Authentication authenticate(String userName, String password, String role) {
+        UserDetails userDetails=customerUserDetailsService.loadUserByUsername(userName);
+        User currUser = userRepository.findByUserName(userName);
+        if(userDetails==null){
+            throw new BadCredentialsException("Invalid Username or password");
+        }
+
+        String salt = currUser.getAuth().getSalt();
+        if(!Utils.verifyPassword(password,userDetails.getPassword(),salt)){
+            throw new BadCredentialsException("Invalid Username or password");
+        }
+        User user=userRepository.findByUserName(userDetails.getUsername());
+        if(!user.getRole().matches(role)){
+            throw new BadCredentialsException("Invalid Username or password");
+        }
+        return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+    }
 }
+
