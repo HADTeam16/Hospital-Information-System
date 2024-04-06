@@ -9,6 +9,7 @@ import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.nurse.Nurse;
 import org.had.hospitalinformationsystem.nurse.NurseRepository;
 import org.had.hospitalinformationsystem.otpVerification.EmailOtpValidationRequest;
+import org.had.hospitalinformationsystem.otpVerification.ForgetPasswordEmailResponse;
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
@@ -292,7 +293,13 @@ public class AuthController {
             EmailOtpValidationRequest emailOtpValidationRequest = new EmailOtpValidationRequest();
             emailOtpValidationRequest.setUsername(user.getUserName());
             emailOtpValidationRequest.setEmailOtpNumber(otp);
-            return ResponseEntity.ok(authService.validateOtp(emailOtpValidationRequest));
+            ForgetPasswordEmailResponse response = authService.validateOtp(emailOtpValidationRequest,emailId);
+            if(response.getIsSent()==1){
+                return ResponseEntity.ok(response.getStatus());
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response.getStatus());
+            }
         }
         catch(Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error");

@@ -2,6 +2,7 @@ package org.had.hospitalinformationsystem.auth;
 
 import org.had.hospitalinformationsystem.otpVerification.EmailOtpResponse;
 import org.had.hospitalinformationsystem.otpVerification.EmailOtpValidationRequest;
+import org.had.hospitalinformationsystem.otpVerification.ForgetPasswordEmailResponse;
 import org.had.hospitalinformationsystem.user.User;
 
 public interface AuthService {
@@ -14,5 +15,5 @@ public interface AuthService {
 
     EmailOtpResponse sendEmailForForgetPassword(User user);
 
-    String validateOtp(EmailOtpValidationRequest emailOtpValidationRequest);
+    ForgetPasswordEmailResponse validateOtp(EmailOtpValidationRequest emailOtpValidationRequest, String email);
 }
