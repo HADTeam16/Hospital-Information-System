@@ -24,7 +24,7 @@ public class EmailOtpService {
 
     Map<String, OtpInfo> otpMap = new HashMap<>();
 
-    public EmailOtpResponse sendEmail(EmailOtpRequest emailOtpRequest){
+    public EmailOtpResponse sendEmailForConsent(EmailOtpRequest emailOtpRequest){
         EmailOtpResponse otpResponse = null;
         try {
             MimeMessage mimeMessage = sender.createMimeMessage();
@@ -71,7 +71,7 @@ public class EmailOtpService {
         }
     }
 
-    private String generateOTP() {
+    private static String generateOTP() {
         return new DecimalFormat("000000")
                 .format(new Random().nextInt(999999));
     }

@@ -32,9 +32,6 @@ public class User {
     private String lastName;
 
     @Column(nullable = false)
-    private Integer age;
-
-    @Column(nullable = false)
     private String gender;
 
     @Column(nullable = false)
