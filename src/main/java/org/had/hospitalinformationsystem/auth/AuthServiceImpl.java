@@ -1,43 +1,24 @@
 package org.had.hospitalinformationsystem.auth;
 
-import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.had.hospitalinformationsystem.doctor.Doctor;
-import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.dto.AuthResponse;
 import org.had.hospitalinformationsystem.dto.ChangePasswordRequest;
 import org.had.hospitalinformationsystem.dto.LoginRequest;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.nurse.Nurse;
-import org.had.hospitalinformationsystem.nurse.NurseRepository;
 import org.had.hospitalinformationsystem.otpVerification.*;
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
-import org.had.hospitalinformationsystem.receptionist.ReceptionistRepository;
 import org.had.hospitalinformationsystem.user.User;
-import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.utility.Utils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.security.SecureRandom;
-import java.text.DecimalFormat;
-import java.time.Instant;
 import java.util.*;
 
 
