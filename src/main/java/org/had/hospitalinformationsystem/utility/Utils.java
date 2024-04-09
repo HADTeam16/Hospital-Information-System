@@ -218,25 +218,5 @@ public class Utils {
         newDoctor.setWorkEnd(registrationDto.getWorkEnd());
         return newDoctor;
     }
-
-
-
-    public Authentication authenticate(String userName, String password, String role) {
-        UserDetails userDetails=customerUserDetailsService.loadUserByUsername(userName);
-        User currUser = userRepository.findByUserName(userName);
-        if(userDetails==null){
-            throw new BadCredentialsException("Invalid Username or password");
-        }
-
-        String salt = currUser.getAuth().getSalt();
-        if(!Utils.verifyPassword(password,userDetails.getPassword(),salt)){
-            throw new BadCredentialsException("Invalid Username or password");
-        }
-        User user=userRepository.findByUserName(userDetails.getUsername());
-        if(!user.getRole().matches(role)){
-            throw new BadCredentialsException("Invalid Username or password");
-        }
-        return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
-    }
 }
 

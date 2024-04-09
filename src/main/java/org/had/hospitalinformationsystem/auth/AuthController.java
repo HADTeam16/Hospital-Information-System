@@ -12,7 +12,6 @@ import org.had.hospitalinformationsystem.otpVerification.ForgetPasswordEmailResp
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
-import org.had.hospitalinformationsystem.utility.CustomerUserDetailsServiceImplementation;
 import org.had.hospitalinformationsystem.utility.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
