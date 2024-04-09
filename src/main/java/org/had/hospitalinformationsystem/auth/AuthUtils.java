@@ -71,7 +71,7 @@ public class AuthUtils {
     }
 
     protected EmailOtpResponse sendEmailWithNewPassword(String username, String password, String email){
-        EmailOtpResponse otpResponse = null;
+        EmailOtpResponse otpResponse;
         try {
             MimeMessage mimeMessage = sender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -111,7 +111,7 @@ public class AuthUtils {
         user.setCity("Ecity");
         user.setContact("7418529638");
         user.setCountry("India");
-        user.setDateOfBirth("cvcbnxgfhd");
+        user.setDateOfBirth("19021999");
         user.setEmail("email");
         user.setEmergencyContactNumber("7418529639");
         user.setEmergencyContactName("HAD");
@@ -191,7 +191,7 @@ public class AuthUtils {
         sendEmail(email, username, password, name, subject, messageTemplate);
     }
 
-    protected EmailOtpResponse sendEmailForForgetPassword(String email, String username, String password, String name) {
+    protected EmailOtpResponse sendEmailForForgetPassword(String email, String username, String name) {
         EmailOtpResponse otpResponse;
         try {
             String subject = "OTP for changing password";
@@ -202,7 +202,7 @@ public class AuthUtils {
                     "Best regards,<br/>" +
                     "Pure Zen Wellness Hospital";
 
-            sendEmail(email, username, password, name, subject, message);
+            sendEmail(email, username, "", name, subject, message);
 
             Instant expirationTime = Instant.now().plusSeconds(600);
             otpMap.put(username, new OtpInfo(otp, expirationTime));

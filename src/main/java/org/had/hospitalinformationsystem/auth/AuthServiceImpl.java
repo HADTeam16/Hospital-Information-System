@@ -186,7 +186,7 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
         try{
             User currUser = userRepository.findUserByEmail(emailId);
             if(currUser != null){
-                return ResponseEntity.ok(sendEmailForForgetPassword(currUser.getEmail(), currUser.getUserName(), "", currUser.getFirstName()));
+                return ResponseEntity.ok(sendEmailForForgetPassword(currUser.getEmail(), currUser.getUserName(), currUser.getFirstName()));
             }
             else{
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Please Enter the Registered email");
