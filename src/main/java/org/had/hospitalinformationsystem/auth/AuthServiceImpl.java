@@ -1,289 +1,238 @@
 package org.had.hospitalinformationsystem.auth;
 
-import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.had.hospitalinformationsystem.doctor.Doctor;
-import org.had.hospitalinformationsystem.doctor.DoctorRepository;
+import org.had.hospitalinformationsystem.dto.AuthResponse;
+import org.had.hospitalinformationsystem.dto.ChangePasswordRequest;
+import org.had.hospitalinformationsystem.dto.LoginRequest;
+import org.had.hospitalinformationsystem.dto.RegistrationDto;
+import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.nurse.Nurse;
-import org.had.hospitalinformationsystem.nurse.NurseRepository;
 import org.had.hospitalinformationsystem.otpVerification.*;
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
-import org.had.hospitalinformationsystem.receptionist.ReceptionistRepository;
 import org.had.hospitalinformationsystem.user.User;
-import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.utility.Utils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.security.SecureRandom;
-import java.text.DecimalFormat;
-import java.time.Instant;
 import java.util.*;
 
 
 @Service
 @Slf4j
-public class AuthServiceImpl implements AuthService{
+public class AuthServiceImpl extends AuthUtils implements AuthService {
 
-    Map<String, OtpInfo> otpMap = new HashMap<>();
-
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    DoctorRepository doctorRepository;
-    @Autowired
-    ReceptionistRepository receptionistRepository;
-    @Autowired
-    NurseRepository nurseRepository;
-    @Autowired
-    AuthRepository authRepository;
-
-    @Autowired
-    private JavaMailSender sender;
-
-    private static String generateOTP() {
-        return new DecimalFormat("000000")
-                .format(new Random().nextInt(999999));
-    }
-
-    private void sendEmail(String email, String username, String password, String name, String subject, String messageTemplate) {
+    @Override
+    public ResponseEntity<AuthResponse> createAdmin() {
         try {
-            MimeMessage mimeMessage = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            helper.setTo(email);
-            helper.setSubject(subject);
+            if (userRepository.findAdminByRole()) {
+                return ResponseEntity.badRequest().body(new AuthResponse(null, "Admin already exists, cannot add another admin", null));
+            }
+            User user = createUserWithAdminDetails();
+            userRepository.save(user);
 
-            String message = String.format(messageTemplate, name, username, password);
-
-            helper.setText(message, true);
-            sender.send(mimeMessage);
-        } catch (Exception ignored) {
+            return ResponseEntity.ok(new AuthResponse("", "Registration Successful", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new AuthResponse(null, "Error: " + e.getMessage(), null));
         }
     }
 
-    private void handleException(Exception e) {
-        if (e instanceof DataIntegrityViolationException) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already exists with the same email. Try using a different email", e);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error: " + e.getMessage(), e);
-        }
-    }
-
-    private static String generateRandomString() {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        StringBuilder randomString = new StringBuilder(10);
-        SecureRandom random = new SecureRandom();
-
-        for (int i = 0; i < 10; i++) {
-
-            int randomIndex = random.nextInt(characters.length());
-            char randomChar = characters.charAt(randomIndex);
-            randomString.append(randomChar);
-        }
-        return randomString.toString();
-    }
-
-    private EmailOtpResponse sendEmailWithNewPassword(String username,String password,String email){
-        EmailOtpResponse otpResponse = null;
+    @Override
+    public ResponseEntity<Object> createUser(String jwt,  RegistrationDto registrationDto) {
         try {
-            MimeMessage mimeMessage = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            helper.setTo(email);
-            String subject = "Recover your account";
-            helper.setSubject(subject);
-            String message = "Dear "+ username+",<br/>" +
-                    "We request you to kindly login with your new credentials and change your Password. <br/>" +
-                    "Steps to follow: Login -> Go to your Profile -> Click on Change Password <br/>" +
-                    "<strong> Username: " + username + "</strong> <br/>" +
-                    "<strong> Password: " + password + "</strong> <br/>" +
-                    "Best regards,<br/>" +
-                    "Pure Zen Wellness Hospital";
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (!role.equals("admin")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Access denied", null));
+            }
 
-            helper.setText(message,true);
-            sender.send(mimeMessage);
-            otpResponse = new EmailOtpResponse(OtpStatus.DELIVERED,message);
+            Object result = utils.getUser(registrationDto);
+            if (result instanceof String) {
+                return ResponseEntity.badRequest().body(new AuthResponse(null, (String) result, null));
+            }
+
+            User newUser = (User) result;
+            newUser.setDisable(false);
+
+            switch (registrationDto.getRole()) {
+                case "doctor":
+                    Object doctorResult = Utils.getDoctor(registrationDto, newUser);
+                    if (doctorResult instanceof String) {
+                        return ResponseEntity.badRequest().body(new AuthResponse(null, (String) doctorResult, null));
+                    } else {
+                        Doctor newDoctor = (Doctor) doctorResult;
+                        saveUserAndDoctor(newUser, newDoctor);
+                    }
+                    break;
+                case "receptionist":
+                    Receptionist newReceptionist = new Receptionist();
+                    newReceptionist.setUser(newUser);
+                    saveUserAndReceptionist(newUser, newReceptionist);
+                    break;
+                case "nurse":
+                    Nurse newNurse = new Nurse();
+                    newNurse.setUser(newUser);
+                    newNurse.setHeadNurse(registrationDto.isHeadNurse());
+                    saveUserAndNurse(newUser, newNurse);
+                    break;
+                default:
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Role doesn't exist", null));
+            }
+            newUser.setAuth(null);
+            try {
+                sendEmailWithAccountDetails(registrationDto.getEmail(), registrationDto.getUserName(), registrationDto.getPassword(), registrationDto.getFirstName());
+                return ResponseEntity.ok(new AuthResponse("", "Registration Success", newUser));
+            }
+            catch(Exception e){
+                return ResponseEntity.ok(new AuthResponse("", "User added Successfully, But failed to send mail", newUser));
+            }
+
+        }
+        catch(DataIntegrityViolationException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,e.getMessage(),null));
+        }
+        catch(BadCredentialsException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Operation Failed due to Bad Credential",null));
+        }
+        catch (AuthenticationException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Error adding User",null));
         }
         catch(Exception e){
-            otpResponse = new EmailOtpResponse(OtpStatus.FAILED,e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Error: " + e.getMessage(),null));
         }
-        return otpResponse;
     }
 
-    public User createUserWithAdminDetails() {
-        User user = new User();
-        Auth auth = new Auth();
-        user.setUserName("admin");
-        user.setDisable(false);
-        String salt = user.getUserName() + "gfdsdfedfvfsJKJHGKJBBNK";
-        auth.setSalt(salt);
-        auth.setPassword(Utils.hashPassword("1234", salt));
-        user.setAuth(auth);
-        user.setRole("admin");
-        user.setEmail("admin@gmail.com");
-        user.setAddressLine1("address");
-        user.setCity("Ecity");
-        user.setContact("7418529638");
-        user.setCountry("India");
-        user.setDateOfBirth("cvcbnxgfhd");
-        user.setEmail("email");
-        user.setEmergencyContactNumber("7418529639");
-        user.setEmergencyContactName("HAD");
-        user.setFirstName("HAD");
-        user.setGender("male");
-        user.setLandmark("Ecity");
-        user.setPinCode("560100");
-        user.setState("Karnataka");
-        return user;
-    }
-
-    public void saveUserAndDoctor(User newUser, Doctor newDoctor) {
+    @Override
+    public ResponseEntity< AuthResponse>signIn( LoginRequest loginRequest) {
         try {
-            authRepository.save(newUser.getAuth());
-            userRepository.save(newUser);
-            doctorRepository.save(newDoctor);
-        } catch (Exception e) {
-            handleException(e);
+            Authentication authentication = authenticate(loginRequest.getUserName(), loginRequest.getPassword(), loginRequest.getRole());
+            String token = JwtProvider.generateToken(authentication, loginRequest.getRole());
+            String userName = JwtProvider.getUserNameFromJwtTokenUnfiltered(token);
+            User user = userRepository.findByUserName(userName);
+            if(user.isDisable()){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Access Denied: Kindly Contact to admin",null));
+            }
+            user.setAuth(null);
+            return ResponseEntity.ok(new AuthResponse(token, "Login Success", user));
+        }
+        catch(AuthenticationException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Log In invalid, Log out and Try again", null));
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Error: "+e.getMessage(), null));
         }
     }
 
-    public void saveUserAndReceptionist(User newUser, Receptionist newReceptionist) {
+    @Override
+    public ResponseEntity< String> changePasswordByAdmin(String jwt, ChangePasswordRequest changePasswordRequest) {
         try {
-            authRepository.save(newUser.getAuth());
-            userRepository.save(newUser);
-            receptionistRepository.save(newReceptionist);
-        } catch (Exception e) {
-            handleException(e);
-        }
-    }
-
-    public void saveUserAndNurse(User newUser, Nurse newNurse) {
-        try {
-            authRepository.save(newUser.getAuth());
-            userRepository.save(newUser);
-            nurseRepository.save(newNurse);
-        } catch (Exception e) {
-            handleException(e);
-        }
-    }
-
-    @Override
-    public void sendEmailWithAccountDetails(String email, String username, String password, String name) {
-        String subject = "Your account has been created successfully";
-        String messageTemplate = "Hello Mr/Mrs "+name+",<br/><br/>" +
-                "Your account has been created successfully. Happy to have you on board. Your LogIn Credentials are as below <br/>" +
-                "<strong> Username: %s </strong> <br/>" +
-                "<strong> Password: %s </strong> <br/>" +
-                "We request you to kindly login and change your Password. <br/>" +
-                "Steps to follow: Login -> Go to your Profile -> Click on Change Password <br/>" +
-                "Best regards,<br/>" +
-                "Pure Zen Wellness Hospital";
-        sendEmail(email, username, password, name, subject, messageTemplate);
-    }
-
-    @Override
-    public void sendEmailWithNewPasswordDetails(String email, String username, String password, String name) {
-        String subject = "New Log in Credentials";
-        String messageTemplate = "Hello Mr/Mrs "+name+",<br/><br/>" +
-                "As per your request, your password has been changed successfully.<br/> <br/>" +
-                "<strong> Username: %s </strong> <br/>" +
-                "<strong> Password: %s </strong> <br/><br/>" +
-                "We request you to kindly login with your new credentials and change your Password. <br/>" +
-                "Steps to follow: Login -> Go to your Profile -> Click on Change Password <br/>" +
-                "Best regards,<br/>" +
-                "Pure Zen Wellness Hospital";
-
-        sendEmail(email, username, password, name, subject, messageTemplate);
-    }
-
-    @Override
-    public void sendEmailWithAcknowledgementOfPasswordChange(String email, String username, String password, String name) {
-        String subject = "Password Change Successfully";
-        String messageTemplate = "Hello Mr/Mrs "+name+",<br/><br/>" +
-                "This is a conformation that the password for your Pure zen wellness hospital account %s has just changed. <br/><br/>" +
-                "If you didn't change your password, contact admin.<br/>" +
-                "Best regards,<br/>" +
-                "Pure Zen Wellness Hospital";
-
-        sendEmail(email, username, password, name, subject, messageTemplate);
-    }
-
-    @Override
-    public EmailOtpResponse sendEmailForForgetPassword(String email, String username, String password, String name) {
-        EmailOtpResponse otpResponse;
-        try {
-            String subject = "OTP for changing password";
-            String otp = generateOTP();
-            String message = "Dear " + name + ",<br/>" +
-                    "The OTP to reset your Pure Zen Wellness Hospital account password is " + otp +
-                    ". Valid for the next 10 minutes only.<br/>" +
-                    "Best regards,<br/>" +
-                    "Pure Zen Wellness Hospital";
-
-            sendEmail(email, username, password, name, subject, message);
-
-            Instant expirationTime = Instant.now().plusSeconds(600);
-            otpMap.put(username, new OtpInfo(otp, expirationTime));
-
-            otpResponse = new EmailOtpResponse(OtpStatus.DELIVERED, message);
-        } catch (Exception e) {
-            otpResponse = new EmailOtpResponse(OtpStatus.FAILED, e.getMessage());
-        }
-        return otpResponse;
-    }
-
-    @Override
-    public ForgetPasswordEmailResponse validateOtp(EmailOtpValidationRequest emailOtpValidationRequest,String email){
-        String username = emailOtpValidationRequest.getUsername();
-        OtpInfo otpInfo = otpMap.get(username);
-        ForgetPasswordEmailResponse response = new ForgetPasswordEmailResponse();
-        if (otpInfo != null && otpInfo.getOtp().equals(emailOtpValidationRequest.getEmailOtpNumber())) {
-            if (Instant.now().isBefore(otpInfo.getExpirationTime())) {
-                otpMap.remove(username);
-
-                String password = generateRandomString();
-                EmailOtpResponse emailResponse = sendEmailWithNewPassword(username,password,email);
-
-                if(emailResponse.getStatus().equals(OtpStatus.DELIVERED)){
-                    response.setStatus("Email has been sent successfully with new credentials");
-                    response.setPassword(password);
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (role.equals("admin")) {
+                User user = userRepository.findByUserName(changePasswordRequest.getUserName());
+                String encodedNewPassword = Utils.hashPassword(changePasswordRequest.getNewPassword(),user.getAuth().getSalt());
+                user.getAuth().setPassword(encodedNewPassword);
+                userRepository.save(user);
+                try {
+                    sendEmailWithNewPasswordDetails(user.getEmail(), user.getUserName(), changePasswordRequest.getNewPassword(), user.getFirstName());
+                    return ResponseEntity.ok("Password updated successfully");
                 }
-                else{
-                    response.setStatus("Failed to send email... Try Again....");
-                    response.setPassword(null);
-                    response.setIsSent(1);
+                catch(Exception e){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unable to send the mail to the user, Kindly do it manually ");
                 }
             } else {
-                otpMap.remove(username);
-                response.setStatus("OTP expired");
-                response.setPassword(null);
-                response.setIsSent(0);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Permission Denied");
             }
-        } else {
-            response.setStatus("Invalid OTP");
-            response.setPassword(null);
-            response.setIsSent(0);
         }
-        return response;
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error: "+e.getMessage());
+        }
     }
 
     @Override
-    public Authentication authenticate(String userName, String password, String role) {
-        User user = userRepository.findByUserName(userName);
-        if(!Utils.verifyPassword(password,user.getAuth().getPassword(),user.getAuth().getSalt()) || !user.getRole().matches(role)){
-            throw new BadCredentialsException("Invalid Username or password");
+    public ResponseEntity< String> changePasswordByUser(String jwt, ChangePasswordRequest changePasswordRequest) {
+        try {
+            String oldPassword = changePasswordRequest.getOldPassword();
+            String newPassword = changePasswordRequest.getNewPassword();
+
+            String userName = JwtProvider.getUserNameFromJwtToken(jwt);
+            User currUser = userRepository.findByUserName(userName);
+
+            if (Utils.verifyPassword(oldPassword, currUser.getAuth().getPassword(),currUser.getAuth().getSalt())) {
+                String encodedNewPassword = Utils.hashPassword(newPassword,currUser.getAuth().getSalt());
+                currUser.getAuth().setPassword(encodedNewPassword);
+                userRepository.save(currUser);
+                try {
+                    sendEmailWithAcknowledgementOfPasswordChange(currUser.getEmail(), currUser.getUserName(), changePasswordRequest.getNewPassword(), currUser.getFirstName());
+                    return ResponseEntity.ok("Password updated successfully");
+                }
+                catch(Exception e){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unable to send the mail to the user, Kindly do it manually ");
+                }
+            } else {
+                return ResponseEntity.ok("Check your current password");
+            }
         }
-        List<GrantedAuthority> authorities=new ArrayList<>();
-        UserDetails userDetails= new org.springframework.security.core.userdetails.User(user.getUserName(),user.getAuth().getPassword(),authorities);
-        return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error");
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> sendOtpForForgetPasswordByUser(String emailId){
+        try{
+            User currUser = userRepository.findUserByEmail(emailId);
+            if(currUser != null){
+                return ResponseEntity.ok(sendEmailForForgetPassword(currUser.getEmail(), currUser.getUserName(), currUser.getFirstName()));
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Please Enter the Registered email");
+            }
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> validateOtpForForgetPasswordByUser(String emailId, String otp){
+        try{
+            User user = userRepository.findUserByEmail(emailId);
+            EmailOtpValidationRequest emailOtpValidationRequest = new EmailOtpValidationRequest();
+            emailOtpValidationRequest.setUsername(user.getUserName());
+            emailOtpValidationRequest.setEmailOtpNumber(otp);
+            ForgetPasswordEmailResponse response = validateOtp(emailOtpValidationRequest,emailId);
+            if(response.getIsSent()==1){
+                return ResponseEntity.ok(response.getStatus());
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response.getStatus());
+            }
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error");
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> toggleUserLogInStatus(String jwt,Long userId){
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+        if(role.equals("admin")){
+            Optional<User> currUser = userRepository.findById(userId);
+            if(currUser.isPresent()){
+                User user = currUser.get();
+                user.setDisable(!user.isDisable());
+                userRepository.save(user);
+                return ResponseEntity.ok(Map.of("message", "Status changed successfully", "status", user.isDisable()));
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "No user present"));
+            }
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Access Denied"));
+        }
     }
 }
