@@ -14,8 +14,10 @@ import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.text.DecimalFormat;
 import java.time.LocalTime;
 import java.util.Base64;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,22 +28,39 @@ public class Utils {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    private static final int ITERATIONS = 10000;
-    private static final int KEY_LENGTH = 256;
-    private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
+    public static String generateOTP() {
+        return new DecimalFormat("000000")
+                .format(new Random().nextInt(999999));
+    }
 
-    private static String generateRandomString() {
+    public static String generateRandomString(int length) {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        StringBuilder randomString = new StringBuilder(27);
+        StringBuilder randomString = new StringBuilder(length);
         SecureRandom random = new SecureRandom();
 
-        for (int i = 0; i < 27; i++) {
+        for (int i = 0; i < length; i++) {
             int randomIndex = random.nextInt(characters.length());
             char randomChar = characters.charAt(randomIndex);
             randomString.append(randomChar);
         }
         return randomString.toString();
     }
+
+
+
+
+
+
+
+
+
+
+
+    private static final int ITERATIONS = 10000;
+    private static final int KEY_LENGTH = 256;
+    private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
+
+
 
     private static boolean isValidEmail(String email) {
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
@@ -136,7 +155,7 @@ public class Utils {
         User newUser = new User();
         Auth auth = new Auth();
         newUser.setUserName(registrationDto.getUserName());
-        String salt = generateRandomString();
+        String salt = generateRandomString(27);
         auth.setSalt(salt);
         auth.setPassword(hashPassword(registrationDto.getPassword(), salt));
         newUser.setAuth(auth);
