@@ -7,16 +7,11 @@ import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.nurse.Nurse;
-import org.had.hospitalinformationsystem.nurse.NurseRepository;
 import org.had.hospitalinformationsystem.otpVerification.EmailOtpValidationRequest;
 import org.had.hospitalinformationsystem.otpVerification.ForgetPasswordEmailResponse;
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
 import org.had.hospitalinformationsystem.user.User;
-import org.had.hospitalinformationsystem.doctor.DoctorRepository;
-import org.had.hospitalinformationsystem.patient.PatientRepository;
-import org.had.hospitalinformationsystem.receptionist.ReceptionistRepository;
 import org.had.hospitalinformationsystem.user.UserRepository;
-import org.had.hospitalinformationsystem.utility.CustomerUserDetailsServiceImplementation;
 import org.had.hospitalinformationsystem.utility.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -35,19 +30,7 @@ import java.util.Optional;
 public class AuthController {
 
     @Autowired
-    CustomerUserDetailsServiceImplementation customerUserDetailsService;
-    @Autowired
     UserRepository userRepository;
-    @Autowired
-    DoctorRepository doctorRepository;
-    @Autowired
-    PatientRepository patientRepository;
-    @Autowired
-    ReceptionistRepository receptionistRepository;
-    @Autowired
-    NurseRepository nurseRepository;
-    @Autowired
-    AuthRepository authRepository;
     @Autowired
     AuthService authService;
 
@@ -55,132 +38,70 @@ public class AuthController {
     Utils utils = new Utils();
 
     @PostMapping("/signup/admin")
-    public ResponseEntity <AuthResponse> createAdmin(){
-
-        if (userRepository.findAdminByRole()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null, "Admin already exist, Can not add another admin", null));
-        }
+    public ResponseEntity<AuthResponse> createAdmin() {
         try {
-            User user = new User();
-            Auth auth = new Auth();
-            user.setUserName("admin");
-            user.setDisable(false);
-            String salt = user.getUserName() + "gfdsdfedfvfsJKJHGKJBBNK";
-            auth.setSalt(salt);
-            auth.setPassword(Utils.hashPassword("1234",salt));
-            user.setAuth(auth);
-            user.setRole("admin");
-            user.setEmail("admin@gmail.com");
-            user.setAddressLine1("address");
-            user.setCity("Ecity");
-            user.setContact("7418529638");
-            user.setCountry("India");
-            user.setDateOfBirth("cvcbnxgfhd");
-            user.setEmail("email");
-            user.setEmergencyContactNumber("7418529639");
-            user.setEmergencyContactName("HAD");
-            user.setFirstName("HAD");
-            user.setGender("male");
-            user.setLandmark("Ecity");
-            user.setPinCode("560100");
-            user.setState("Karnataka");
-            authRepository.save(auth);
+            if (userRepository.findAdminByRole()) {
+                return ResponseEntity.badRequest().body(new AuthResponse(null, "Admin already exists, cannot add another admin", null));
+            }
+            User user = authService.createUserWithAdminDetails();
             userRepository.save(user);
-            user.setAuth(null);
-            return ResponseEntity.ok(new AuthResponse("", "Register Success", user));
-        }
-        catch(BadCredentialsException e){
-            return  ResponseEntity.status(HttpStatus.FORBIDDEN).body(new AuthResponse(null,"Authentication request is rejected: ",null));
-        }
-        catch(AuthenticationException e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Error adding Admin: "+e.getMessage(), null));
-        }
-        catch(Exception e){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new AuthResponse(null, "Error: "+e.getMessage(), null));
+
+            return ResponseEntity.ok(new AuthResponse("", "Registration Successful", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new AuthResponse(null, "Error: " + e.getMessage(), null));
         }
     }
 
     @PostMapping("/signup/user")
-    public ResponseEntity< Object> createUser(@RequestHeader("Authorization") String jwt,@RequestBody RegistrationDto registrationDto){
+    public ResponseEntity<Object> createUser(@RequestHeader("Authorization") String jwt, @RequestBody RegistrationDto registrationDto) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
-            if(role.equals("admin")){
-                Object result = utils.getUser(registrationDto);
-                if(result instanceof String){
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,(String) result,null));
-                }
-                else {
-                    User newUser = (User) result;
-                    newUser.setDisable(false);
-                    switch (registrationDto.getRole()) {
-                        case "doctor" -> {
-                            Object doctorResult = Utils.getDoctor(registrationDto, newUser);
-                            if(doctorResult instanceof String){
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,(String) doctorResult,null));
-                            }
-                            else{
-                                Doctor newDoctor = (Doctor) doctorResult;
-                                try {
-                                    authRepository.save(newUser.getAuth());
-                                    userRepository.save(newUser);
-                                    doctorRepository.save(newDoctor);
-                                }
-                                catch(DataIntegrityViolationException e){
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,"User already present with the same Email. Try using different email",null));
-                                }
-                                catch(Exception e){
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,"Error: "+e.getMessage(),null));
-                                }
-                            }
-                        }
-                        case "receptionist" -> {
-                            Receptionist newReceptionist = new Receptionist();
-                            newReceptionist.setUser(newUser);
-                            try {
-                                authRepository.save(newUser.getAuth());
-                                userRepository.save(newUser);
-                                receptionistRepository.save(newReceptionist);
-                            }
-                            catch(DataIntegrityViolationException e){
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,"User already present with the same Email. Try using different email",null));
-                            }
-                            catch(Exception e){
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,"Error: "+e.getMessage(),null));
-                            }
-                        }
-                        case "nurse" -> {
-                            Nurse newNurse = new Nurse();
-                            newNurse.setUser(newUser);
-                            newNurse.setHeadNurse(registrationDto.isHeadNurse());
-                            try {
-                                authRepository.save(newUser.getAuth());
-                                userRepository.save(newUser);
-                                nurseRepository.save(newNurse);
-                            }
-                            catch(DataIntegrityViolationException e){
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,"User already present with the same Email. Try using different email",null));
-                            }
-                            catch(Exception e){
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,"Error: "+e.getMessage(),null));
-                            }
-                        }
-                        default -> {
-                            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Role Doesn't exist", null));
-                        }
-                    }
-                    newUser.setAuth(null);
-                    try {
-                        authService.sendEmailWithAccountDetails(registrationDto.getEmail(), registrationDto.getUserName(), registrationDto.getPassword(), registrationDto.getFirstName());
-                    }
-                    catch(Exception e){
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,"Unable to send the mail to the user, Kindly do it manually ",null));
-                    }
-                    return ResponseEntity.ok(new AuthResponse("", "Register Success", newUser));
-                }
+            if (!role.equals("admin")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Access denied", null));
             }
-            else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Access denied",null));
+
+            Object result = utils.getUser(registrationDto);
+            if (result instanceof String) {
+                return ResponseEntity.badRequest().body(new AuthResponse(null, (String) result, null));
             }
+
+            User newUser = (User) result;
+            newUser.setDisable(false);
+
+            switch (registrationDto.getRole()) {
+                case "doctor":
+                    Object doctorResult = Utils.getDoctor(registrationDto, newUser);
+                    if (doctorResult instanceof String) {
+                        return ResponseEntity.badRequest().body(new AuthResponse(null, (String) doctorResult, null));
+                    } else {
+                        Doctor newDoctor = (Doctor) doctorResult;
+                        authService.saveUserAndDoctor(newUser, newDoctor);
+                    }
+                    break;
+                case "receptionist":
+                    Receptionist newReceptionist = new Receptionist();
+                    newReceptionist.setUser(newUser);
+                    authService.saveUserAndReceptionist(newUser, newReceptionist);
+                    break;
+                case "nurse":
+                    Nurse newNurse = new Nurse();
+                    newNurse.setUser(newUser);
+                    newNurse.setHeadNurse(registrationDto.isHeadNurse());
+                    authService.saveUserAndNurse(newUser, newNurse);
+                    break;
+                default:
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Role doesn't exist", null));
+            }
+            newUser.setAuth(null);
+            try {
+                authService.sendEmailWithAccountDetails(registrationDto.getEmail(), registrationDto.getUserName(), registrationDto.getPassword(), registrationDto.getFirstName());
+                return ResponseEntity.ok(new AuthResponse("", "Registration Success", newUser));
+            }
+            catch(Exception e){
+                return ResponseEntity.ok(new AuthResponse("", "User added Successfully, But failed to send mail", newUser));
+            }
+
         }
         catch(DataIntegrityViolationException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,e.getMessage(),null));
@@ -199,7 +120,7 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity< AuthResponse>signIn(@RequestBody LoginRequest loginRequest) {
         try {
-            Authentication authentication = utils.authenticate(loginRequest.getUserName(), loginRequest.getPassword(), loginRequest.getRole());
+            Authentication authentication = authService.authenticate(loginRequest.getUserName(), loginRequest.getPassword(), loginRequest.getRole());
             String token = JwtProvider.generateToken(authentication, loginRequest.getRole());
             String userName = JwtProvider.getUserNameFromJwtTokenUnfiltered(token);
             User user = userRepository.findByUserName(userName);
@@ -274,9 +195,9 @@ public class AuthController {
     @PostMapping("/user/forget/password/send/otp/{emailId}")
     public ResponseEntity<?> sendOtpForForgetPasswordByUser(@PathVariable String emailId){
         try{
-            User user = userRepository.findUserByEmail(emailId);
-            if(user != null){
-                return ResponseEntity.ok(authService.sendEmailForForgetPassword(user));
+            User currUser = userRepository.findUserByEmail(emailId);
+            if(currUser != null){
+                return ResponseEntity.ok(authService.sendEmailForForgetPassword(currUser.getEmail(), currUser.getUserName(), "", currUser.getFirstName()));
             }
             else{
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Please Enter the Registered email");

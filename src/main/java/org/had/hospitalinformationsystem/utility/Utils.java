@@ -6,10 +6,6 @@ import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,30 +22,33 @@ import java.util.regex.Pattern;
 @Service
 public class Utils {
     @Autowired
-    CustomerUserDetailsServiceImplementation customerUserDetailsService;
-    @Autowired
     UserRepository userRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    private static final int ITERATIONS = 10000;
+    private static final int KEY_LENGTH = 256;
+    private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
 
-    public static String generateRandomString(int length) {
+    private static String generateRandomString() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        StringBuilder randomString = new StringBuilder(length);
+        StringBuilder randomString = new StringBuilder(27);
         SecureRandom random = new SecureRandom();
 
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < 27; i++) {
             int randomIndex = random.nextInt(characters.length());
             char randomChar = characters.charAt(randomIndex);
             randomString.append(randomChar);
         }
-
         return randomString.toString();
     }
 
-    private static final int ITERATIONS = 10000;
-    private static final int KEY_LENGTH = 256;
-    private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
+    private static boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
 
     public static boolean verifyPassword(String providedPassword, String storedPasswordHash, String salt) {
         String newHash = hashPassword(providedPassword, salt);
@@ -71,13 +70,6 @@ public class Utils {
         } finally {
             spec.clearPassword();
         }
-    }
-
-    public static boolean isValidEmail(String email) {
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-        Pattern pattern = Pattern.compile(emailRegex);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
     }
 
     public Object getUser(RegistrationDto registrationDto) {
@@ -144,7 +136,7 @@ public class Utils {
         User newUser = new User();
         Auth auth = new Auth();
         newUser.setUserName(registrationDto.getUserName());
-        String salt = generateRandomString(27);
+        String salt = generateRandomString();
         auth.setSalt(salt);
         auth.setPassword(hashPassword(registrationDto.getPassword(), salt));
         newUser.setAuth(auth);
@@ -221,26 +213,6 @@ public class Utils {
         newDoctor.setWorkStart(registrationDto.getWorkStart());
         newDoctor.setWorkEnd(registrationDto.getWorkEnd());
         return newDoctor;
-    }
-
-
-
-    public Authentication authenticate(String userName, String password, String role) {
-        UserDetails userDetails=customerUserDetailsService.loadUserByUsername(userName);
-        User currUser = userRepository.findByUserName(userName);
-        if(userDetails==null){
-            throw new BadCredentialsException("Invalid Username or password");
-        }
-
-        String salt = currUser.getAuth().getSalt();
-        if(!Utils.verifyPassword(password,userDetails.getPassword(),salt)){
-            throw new BadCredentialsException("Invalid Username or password");
-        }
-        User user=userRepository.findByUserName(userDetails.getUsername());
-        if(!user.getRole().matches(role)){
-            throw new BadCredentialsException("Invalid Username or password");
-        }
-        return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
     }
 }
 
