@@ -85,6 +85,7 @@ public class AuthServiceImpl implements AuthService{
         SecureRandom random = new SecureRandom();
 
         for (int i = 0; i < 10; i++) {
+
             int randomIndex = random.nextInt(characters.length());
             char randomChar = characters.charAt(randomIndex);
             randomString.append(randomChar);

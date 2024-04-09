@@ -15,6 +15,7 @@ public interface AuthService {
     void saveUserAndDoctor(User newUser, Doctor newDoctor);
 
     void saveUserAndReceptionist(User newUser, Receptionist newReceptionist);
+    
     void saveUserAndNurse(User newUser, Nurse newNurse);
 
     void sendEmailWithAccountDetails(String email, String username, String password, String name);

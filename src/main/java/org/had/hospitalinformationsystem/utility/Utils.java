@@ -6,6 +6,10 @@ import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -213,6 +217,26 @@ public class Utils {
         newDoctor.setWorkStart(registrationDto.getWorkStart());
         newDoctor.setWorkEnd(registrationDto.getWorkEnd());
         return newDoctor;
+    }
+
+
+
+    public Authentication authenticate(String userName, String password, String role) {
+        UserDetails userDetails=customerUserDetailsService.loadUserByUsername(userName);
+        User currUser = userRepository.findByUserName(userName);
+        if(userDetails==null){
+            throw new BadCredentialsException("Invalid Username or password");
+        }
+
+        String salt = currUser.getAuth().getSalt();
+        if(!Utils.verifyPassword(password,userDetails.getPassword(),salt)){
+            throw new BadCredentialsException("Invalid Username or password");
+        }
+        User user=userRepository.findByUserName(userDetails.getUsername());
+        if(!user.getRole().matches(role)){
+            throw new BadCredentialsException("Invalid Username or password");
+        }
+        return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
     }
 }
 

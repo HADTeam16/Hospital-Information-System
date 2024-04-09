@@ -12,6 +12,7 @@ import org.had.hospitalinformationsystem.otpVerification.ForgetPasswordEmailResp
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
+import org.had.hospitalinformationsystem.utility.CustomerUserDetailsServiceImplementation;
 import org.had.hospitalinformationsystem.utility.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -102,6 +103,9 @@ public class AuthController {
                 return ResponseEntity.ok(new AuthResponse("", "User added Successfully, But failed to send mail", newUser));
             }
 
+        }
+        catch(DataIntegrityViolationException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,e.getMessage(),null));
         }
         catch(DataIntegrityViolationException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,e.getMessage(),null));
