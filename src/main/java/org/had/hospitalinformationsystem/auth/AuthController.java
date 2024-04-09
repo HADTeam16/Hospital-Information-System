@@ -106,9 +106,6 @@ public class AuthController {
         catch(DataIntegrityViolationException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,e.getMessage(),null));
         }
-        catch(DataIntegrityViolationException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,e.getMessage(),null));
-        }
         catch(BadCredentialsException e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Operation Failed due to Bad Credential",null));
         }
