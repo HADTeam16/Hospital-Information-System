@@ -2,7 +2,6 @@ package org.had.hospitalinformationsystem.otpVerification;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.had.hospitalinformationsystem.dto.AuthResponse;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,7 +39,7 @@ public class EmailOtpController {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if(role.equals("receptionist")) {
-                return ResponseEntity.ok(emailOtpService.sendEmail(emailOtpRequest));
+                return ResponseEntity.ok(emailOtpService.sendEmailForConsent(emailOtpRequest));
             }
             else{
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new EmailOtpResponse(OtpStatus.ACCESSDENIED,"Access Denied"));

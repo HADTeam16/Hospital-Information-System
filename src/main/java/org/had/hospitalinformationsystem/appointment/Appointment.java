@@ -32,5 +32,5 @@ public class Appointment {
     private String weight;
     private String height;
     private Boolean needWard;
-
+    private Boolean completed;
 }

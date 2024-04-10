@@ -17,6 +17,7 @@ import org.had.hospitalinformationsystem.utility.Utils;
 import org.had.hospitalinformationsystem.ward.WardController;
 import org.had.hospitalinformationsystem.ward.WardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -54,29 +55,37 @@ public class ReceptionistController {
     ReceptionistRepository receptionistRepository;
     // Add Patient
     @PostMapping("/signup/patient")
-    public ResponseEntity<?> signupPatient(@RequestHeader("Authorization") String jwt, @RequestBody RegistrationDto registrationDto) {
+    public ResponseEntity<Object> signupPatient(@RequestHeader("Authorization") String jwt, @RequestBody RegistrationDto registrationDto) {
         try {
-            User newUser = utils.getUser(registrationDto);
-            User savedUser;
             String role = JwtProvider.getRoleFromJwtToken(jwt);
-            if (!role.equals("receptionist") || !registrationDto.getRole().equals("patient")) {
-                throw new Exception("Access Denied!!");
+            if(role.equals("receptionist")){
+                Object result = utils.getUser(registrationDto);
+                if(result instanceof String){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,(String) result,null));
+                }
+                else{
+                    User newUser = (User) result;
+                    newUser.setDisable(true);
+                    newUser.getAuth().setPassword("");
+                    Patient newPatient = new Patient();
+                    newPatient.setUser(newUser);
+                    newPatient.setTemperature(registrationDto.getTemperature());
+                    newPatient.setBloodPressure(registrationDto.getBloodPressure());
+                    newPatient.setHeight(registrationDto.getHeight());
+                    newPatient.setWeight(registrationDto.getWeight());
+                    newPatient.setRegistrationDateAndTime(LocalDateTime.now());
+                    Consent currPatientConsent = new Consent();
+                    currPatientConsent.setPatient(newPatient);
+                    currPatientConsent.setConcent(true);
+                    userRepository.save(newUser);
+                    patientRepository.save(newPatient);
+                    consentRepository.save(currPatientConsent);
+                    return ResponseEntity.ok(new AuthResponse("", "Register Success", newUser));
+                }
             }
-            newUser.getAuth().setPassword("");
-            savedUser = userRepository.save(newUser);
-            Patient newPatient = new Patient();
-            newPatient.setUser(savedUser);
-            newPatient.setTemperature(registrationDto.getTemperature());
-            newPatient.setBloodPressure(registrationDto.getBloodPressure());
-            newPatient.setHeight(registrationDto.getHeight());
-            newPatient.setWeight(registrationDto.getWeight());
-            newPatient.setRegistrationDateAndTime(LocalDateTime.now());
-            patientRepository.save(newPatient);
-            Consent currPatientConsent = new Consent();
-            currPatientConsent.setPatient(newPatient);
-            currPatientConsent.setConcent(true);
-            consentRepository.save(currPatientConsent);
-            return ResponseEntity.ok(new AuthResponse("", "Register Success", savedUser));
+            else{
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null,"Access denied",null));
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error during patient registration: " + e.getMessage());
         }

@@ -1,6 +1,5 @@
 package org.had.hospitalinformationsystem.doctor;
 
-
 import org.had.hospitalinformationsystem.appointment.Appointment;
 import org.had.hospitalinformationsystem.appointment.AppointmentRepository;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
@@ -14,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -48,28 +49,21 @@ public class DoctorController {
             return ResponseEntity.badRequest().body("Failed to retrieve doctors: " + e.getMessage());
         }
     }
+
     @GetMapping("/recommend/ward/{appointmentId}")
-    public ResponseEntity<?> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable long appointmentId){
-        String role=JwtProvider.getRoleFromJwtToken(jwt);
-        if(role.equals("doctor")){
-            Appointment appointment=appointmentRepository.findByAppointmentId(appointmentId);
-            if(appointment==null){
-                return ResponseEntity.badRequest().body("Appointment id not found");
-            }
-            //Patient patient=appointment.getPatient();
-            NeedWard needWard=new NeedWard();
-
-            needWard.setAppointment(appointment);
-            needWard.setRequestTime(LocalDateTime.now());
-            //patient.setLastAppointmentId(appointmentId);
-            //patientRepository.save(patient);
-            needWardRepository.save(needWard);
-            return ResponseEntity.ok().body("WardDetails will be shortly assigned to patient.");
-
-        }
-        else{
-            return ResponseEntity.badRequest().body("wrong details have been put");
-        }
+    public ResponseEntity<Map<String, String>> assignWard(@RequestHeader("Authorization") String jwt,
+            @PathVariable long appointmentId) {
+        Appointment appointment = appointmentRepository.findByAppointmentId(appointmentId);
+        // Patient patient=appointment.getPatient();
+        NeedWard needWard = new NeedWard();
+        needWard.setAppointment(appointment);
+        needWard.setRequestTime(LocalDateTime.now());
+        // patient.setLastAppointmentId(appointmentId);
+        // patientRepository.save(patient);
+        needWardRepository.save(needWard);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "success");
+        return ResponseEntity.ok(response);
 
     }
 }

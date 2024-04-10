@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/records")
@@ -21,35 +23,39 @@ public class RecordsController {
     AppointmentRepository appointmentRepository;
 
     @PostMapping("/add/records/{appointmentId}")
-    public ResponseEntity<String>uploadRecords(@RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId, @RequestBody List<String> arr){
-        try{
+    public ResponseEntity<Map<String, String>> uploadRecords(@RequestHeader("Authorization") String jwt,
+            @PathVariable Long appointmentId, @RequestBody List<String> arr) {
+        Map<String, String> response = new HashMap<>();
+        try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
-            if(role.equals("doctor")){
+            if (role.equals("doctor")) {
                 Appointment currAppointment = appointmentRepository.findByAppointmentId(appointmentId);
-                if(currAppointment != null){
-                    for(String recordImage : arr) {
+                if (currAppointment != null) {
+                    for (String recordImage : arr) {
                         Records newRecord = new Records();
                         newRecord.setRecordImage(recordImage);
                         newRecord.setAppointment(currAppointment);
                         recordsRepository.save(newRecord);
                     }
-                    return ResponseEntity.ok("Success");
+                    response.put("message", "success");
+                    return ResponseEntity.ok(response);
+                } else {
+                    response.put("message", "unauthorized");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
                 }
-                else{
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed");
-                }
+            } else {
+                response.put("message", "unauthorized");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
-            else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed");
-            }
-        }
-        catch(Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed");
+        } catch (Exception e) {
+            response.put("message", "unauthorized");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 
     @GetMapping("/get/records/by/appointment/{appointmentId}")
-    public ResponseEntity<List<Records>> getAllRecordsByAppointmentId(@RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId) {
+    public ResponseEntity<List<Records>> getAllRecordsByAppointmentId(@RequestHeader("Authorization") String jwt,
+            @PathVariable Long appointmentId) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if (role.equals("doctor")) {
@@ -64,7 +70,8 @@ public class RecordsController {
     }
 
     @GetMapping("/get/records/by/patient/{patientId}")
-    public ResponseEntity<List<Records>>getAllRecordsByPatientId(@RequestHeader("Authorization") String jwt, @PathVariable Long patientId){
+    public ResponseEntity<List<Records>> getAllRecordsByPatientId(@RequestHeader("Authorization") String jwt,
+            @PathVariable Long patientId) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if (role.equals("doctor")) {
