@@ -90,6 +90,21 @@ public class NurseController {
         }
 
     }
+    @GetMapping("get/all/available/wardIds")
+    ResponseEntity<List<Long>> getAllAvailableWardIds(@RequestHeader("Authorization") String jwt){
+        String role=JwtProvider.getRoleFromJwtToken(jwt);
+        String userName=JwtProvider.getUserNameFromJwtToken(jwt);
+        User user=userRepository.findByUserName(userName);
+        Nurse nurse=nurseRepository.findByUser(user);
+        if(role.equals("nurse") && nurse.isHeadNurse()){
+            List<Long> wardIds=wardRepository.findAvailableWardIds();
+            return ResponseEntity.ok().body(wardIds);
+        }
+        else{
+            return ResponseEntity.badRequest().body(null);
+        }
+
+    }
 
     @GetMapping("/assign/ward/{wardId}/{needWardId}")
     ResponseEntity<?> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable Long wardId, @PathVariable Long needWardId) {

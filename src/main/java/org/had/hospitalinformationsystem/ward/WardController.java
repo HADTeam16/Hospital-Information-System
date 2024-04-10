@@ -12,10 +12,10 @@ public class WardController {
     @Autowired
     WardRepository wardRepository;
 
-    @GetMapping("/available/ward")
-    public List<Ward> availableWard(@RequestHeader("Authorization") String jwt){
-        return wardRepository.findAvailableWard();
-    }
+//    @GetMapping("/available/ward")
+//    public List<Ward> availableWard(@RequestHeader("Authorization") String jwt){
+//        return wardRepository.findAvailableWard();
+//    }
 
     @GetMapping("/booked/ward")
     public List<Ward> bookedWard(@RequestHeader("Authorization") String jwt){
