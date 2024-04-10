@@ -46,7 +46,6 @@ public class RegistrationDto {
         private LocalTime workEnd;
 
         //Patient-specific field
-        private LocalDateTime registrationDateAndTime;
         private String temperature;
         private String bloodPressure;
         private String weight;

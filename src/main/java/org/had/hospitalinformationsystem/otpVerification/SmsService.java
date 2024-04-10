@@ -55,13 +55,13 @@ public class SmsService {
         if (smsOtpInfo != null && smsOtpInfo.getOtp().equals(smsOtpValidationRequest.getOtpNumber())) {
             if (Instant.now().isBefore(smsOtpInfo.getExpirationTime())) {
                 otpMap.remove(username); // Remove OTP after successful validation
-                return "OTP is valid!";
+                return "OTP is valid";
             } else {
                 otpMap.remove(username); // Remove expired OTP entry from the map
                 return "OTP has expired";
             }
         } else {
-            return "OTP is invalid!";
+            return "OTP is invalid";
         }
     }
 
