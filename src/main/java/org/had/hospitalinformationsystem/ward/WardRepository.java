@@ -20,6 +20,10 @@ public interface WardRepository extends JpaRepository<Ward,Long> {
     @Query("SELECT wd FROM Ward wd WHERE wd.managingNurse.nurseId=:nurseId")
     List<Ward> allottedWard(Long nurseId);
 
+    @Query("SELECT wd.wardId FROM Ward wd WHERE wd.availableStatus = true")
+    List<Long>findAvailableWardIds();
+
+
 
 
 }
