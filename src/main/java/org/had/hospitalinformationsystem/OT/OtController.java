@@ -30,14 +30,14 @@ public class OtController {
 
 
     @GetMapping("/get/all/ots")
-    ResponseEntity<List<OT>> getAllOts(@RequestHeader("Authorization") String jwt){
+    ResponseEntity<?> getAllOts(@RequestHeader("Authorization") String jwt){
         String role= JwtProvider.getRoleFromJwtToken(jwt);
         if(role.equals("receptionist")){
             List<OT> ots=otRepository.findAll();
             return ResponseEntity.ok().body(ots);
         }
         else{
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body("Only receptionist can see all OTs");
         }
     }
     @GetMapping("/create/ots")
@@ -52,7 +52,7 @@ public class OtController {
         }
     }
     @GetMapping("/get/all/free/surgeons")
-    ResponseEntity<List<Doctor>> getAllSurgeons(@RequestHeader("Authorization") String jwt){
+    ResponseEntity<?> getAllSurgeons(@RequestHeader("Authorization") String jwt){
         String role= JwtProvider.getRoleFromJwtToken(jwt);
         if(role.equals("receptionist")){
             List<Doctor> surgeons=doctorService.getDoctorsWhoAreSurgeon(doctorRepository.findAll());
@@ -67,7 +67,7 @@ public class OtController {
             return ResponseEntity.ok().body(freeSurgeons);
         }
         else{
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body("Only receptionist can view all surgeons");
         }
     }
     @PutMapping("/book/ot/{otId}")
@@ -86,6 +86,7 @@ public class OtController {
             Set<Doctor> doctors=surgeonIds.stream().map(id->doctorRepository.findById(id))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
+                    .filter(doctor -> doctor.getSpecialization().contains("surgeon"))
                     .collect(Collectors.toSet());
             if(doctors.size()!=surgeonIds.size()){
                 return ResponseEntity.badRequest().body("One or more surgeon IDs are invalid");
@@ -117,6 +118,9 @@ public class OtController {
         OT ot = otOptional.get();
 
         // Update the OT status to available and clear any associated surgeons or patients
+        if(ot.isAvailableStatus()){
+            return ResponseEntity.badRequest().body("OT is already available");
+        }
         ot.setAvailableStatus(true);
         // Assuming there's a method to clear assigned doctors and patients
         ot.setDoctors(Collections.emptySet());

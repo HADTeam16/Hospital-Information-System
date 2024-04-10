@@ -1,5 +1,7 @@
 package org.had.hospitalinformationsystem.user;
 
+import org.had.hospitalinformationsystem.dto.HospitalLiveStatsDto;
+
 import java.util.List;
 
 public interface UserService {
@@ -12,4 +14,5 @@ public interface UserService {
     User findUserByJwt(String jwt);
 
     User updateUser(User user, Long userId);
+    HospitalLiveStatsDto getHospitalStats(String jwt);
 }

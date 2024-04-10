@@ -45,14 +45,14 @@ public class NurseController {
 
     // this api will help you find patients in needWard table
     @GetMapping("patients/who/needs/ward")
-    public ResponseEntity<List<NeedWard>> patientsNeedWard(@RequestHeader("Authorization") String jwt) {
-        String role = JwtProvider.getRoleFromJwtToken(jwt);
+    public ResponseEntity<?>  patientsNeedWard(@RequestHeader("Authorization") String jwt){
+        String role= JwtProvider.getRoleFromJwtToken(jwt);
 
-        String userName = JwtProvider.getUserNameFromJwtToken(jwt);
-        User user = userRepository.findByUserName(userName);
-        Optional<Nurse> nurse = nurseRepository.findById(user.getId());
-        if (!role.equals("nurse")) {
-            return ResponseEntity.badRequest().body(null);
+        String userName=JwtProvider.getUserNameFromJwtToken(jwt);
+        User user=userRepository.findByUserName(userName);
+        Optional<Nurse> nurse=nurseRepository.findById(user.getId());
+        if(!role.equals("nurse")){
+            return ResponseEntity.badRequest().body("Wrong user have been provided to see.");
 
         }
         if (nurse.get().isHeadNurse()) {
@@ -92,8 +92,7 @@ public class NurseController {
     }
 
     @GetMapping("/assign/ward/{wardId}/{needWardId}")
-    ResponseEntity<Ward> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable Long wardId,
-            @PathVariable Long needWardId) {
+    ResponseEntity<?> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable Long wardId, @PathVariable Long needWardId) {
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         String userName = JwtProvider.getUserNameFromJwtToken(jwt);
         User user = userRepository.findByUserName(userName);
@@ -108,7 +107,7 @@ public class NurseController {
                 NeedWard needWard = optionalNeedWard.get();
 
                 ward.setAppointment(needWard.getAppointment());
-                // ward.setManagingNurse(nurse);
+                ward.setManagingNurse(nurse);
                 ward.setPatient(needWard.getAppointment().getPatient());
                 ward.setAvailableStatus(false);
 
@@ -120,7 +119,7 @@ public class NurseController {
                 return ResponseEntity.notFound().build();
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only head nurse can assign ward to patient");
         }
     }
 
@@ -176,6 +175,10 @@ public class NurseController {
             response.put("message", "Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
+    }
+    @GetMapping("/allotted/ward/{nurseId}")
+    ResponseEntity<List<Ward>> getNurseAllottedWard(@RequestHeader("Authorization")String jwt,@PathVariable Long nurseId){
+        return ResponseEntity.ok().body(wardRepository.allottedWard(nurseId));
     }
 
 }

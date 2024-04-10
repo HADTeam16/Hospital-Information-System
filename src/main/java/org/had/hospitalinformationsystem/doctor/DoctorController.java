@@ -2,17 +2,16 @@ package org.had.hospitalinformationsystem.doctor;
 
 import org.had.hospitalinformationsystem.appointment.Appointment;
 import org.had.hospitalinformationsystem.appointment.AppointmentRepository;
+import org.had.hospitalinformationsystem.dto.PrescriptionsAndRecords;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.needWard.NeedWard;
 import org.had.hospitalinformationsystem.needWard.NeedWardRepository;
-import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.print.Doc;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +33,8 @@ public class DoctorController {
 
     @Autowired
     NeedWardRepository needWardRepository;
+    @Autowired
+    DoctorService doctorService;
 
     @GetMapping("/get/all/doctors")
     public ResponseEntity<?> getAllDoctor(@RequestHeader("Authorization") String jwt) {
@@ -54,17 +55,22 @@ public class DoctorController {
 
     @GetMapping("/recommend/ward/{appointmentId}")
     public ResponseEntity<Map<String, String>> assignWard(@RequestHeader("Authorization") String jwt,
-            @PathVariable long appointmentId) {
+                                                          @PathVariable long appointmentId) {
         Appointment appointment = appointmentRepository.findByAppointmentId(appointmentId);
-        // Patient patient=appointment.getPatient();
         NeedWard needWard = new NeedWard();
         needWard.setAppointment(appointment);
         needWard.setRequestTime(LocalDateTime.now());
-        // patient.setLastAppointmentId(appointmentId);
-        // patientRepository.save(patient);
+
         needWardRepository.save(needWard);
         Map<String, String> response = new HashMap<>();
         response.put("message", "success");
         return ResponseEntity.ok(response);
+    }
+    @PostMapping("/finish/appointment/{wardFlag}")
+    public ResponseEntity<?> finishAppointment(@RequestHeader("Authorization") String jwt,
+                                               @RequestBody PrescriptionsAndRecords prescriptionsAndRecords,
+                                               @PathVariable long wardFlag){
+        return doctorService.finishAppointment(jwt,prescriptionsAndRecords,wardFlag);
+
     }
 }

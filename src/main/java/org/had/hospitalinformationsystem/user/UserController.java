@@ -3,6 +3,7 @@ package org.had.hospitalinformationsystem.user;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.dto.AuthResponse;
+import org.had.hospitalinformationsystem.dto.HospitalLiveStatsDto;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.nurse.Nurse;
@@ -237,6 +238,11 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AuthResponse("",  e.getMessage() + "Error updating user", null));
         }
 
+    }
+
+    @GetMapping("/hospital/live/stats")
+    public ResponseEntity<HospitalLiveStatsDto> getHospitalStats(@RequestHeader("Authorization") String jwt){
+        return ResponseEntity.ok().body(userService.getHospitalStats(jwt));
     }
 
 }
