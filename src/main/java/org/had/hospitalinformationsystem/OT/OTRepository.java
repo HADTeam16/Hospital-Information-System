@@ -15,4 +15,6 @@ public interface OTRepository extends JpaRepository<OT,Long> {
 
     @Query("SELECT ot FROM OT ot WHERE ot.availableStatus = false")
     List<OT> findActiveOt();
+
+
 }

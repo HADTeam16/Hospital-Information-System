@@ -1,17 +1,15 @@
 package org.had.hospitalinformationsystem.appointment;
 
-import com.twilio.rest.microvisor.v1.App;
-import org.had.hospitalinformationsystem.appointment.Appointment;
-import org.had.hospitalinformationsystem.dto.AppointmentDataDto;
+import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
@@ -28,5 +26,21 @@ public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
 
     @Query("SELECT a.appointmentId, a.slot FROM Appointment a where a.patient.id= :patientId AND a.slot< :startDate ORDER BY a.slot DESC")
     List<Object[]> findAllPreviousAppointmentForPatient(Long patientId, LocalDateTime startDate);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.slot > :now")
+    Long getScheduledAppointmentCount(@Param("now") LocalDateTime now);
+
+    @Query("SELECT a from Appointment a where a.completed= :completed AND a.doctor.doctorId= :doctorId")
+    List<Appointment> getAttendedAppointments(@Param("completed") Integer completed,Long doctorId);
+
+    @Query("SELECT COUNT(DISTINCT a.patient.id) FROM Appointment a WHERE a.completed = :completed AND a.doctor.doctorId = :doctorId")
+    Integer getDistinctAttendedPatientsCount(@Param("completed") Integer completed,@Param("doctorId") Long doctorId);
+
+    @Query("SELECT a FROM Appointment a WHERE a.needWard=true AND a.doctor.doctorId = :doctorId")
+    List<Appointment> getWardAssignedTillDate(@Param("doctorId") Long doctorId);
+
+
+
+
 
 }

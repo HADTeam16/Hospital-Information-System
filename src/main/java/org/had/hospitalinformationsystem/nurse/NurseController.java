@@ -107,7 +107,7 @@ public class NurseController {
                 NeedWard needWard = optionalNeedWard.get();
 
                 ward.setAppointment(needWard.getAppointment());
-                // ward.setManagingNurse(nurse);
+                ward.setManagingNurse(nurse);
                 ward.setPatient(needWard.getAppointment().getPatient());
                 ward.setAvailableStatus(false);
 
@@ -172,6 +172,10 @@ public class NurseController {
         catch(Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+e.getMessage());
         }
+    }
+    @GetMapping("/allotted/ward/{nurseId}")
+    ResponseEntity<List<Ward>> getNurseAllottedWard(@RequestHeader("Authorization")String jwt,@PathVariable Long nurseId){
+        return ResponseEntity.ok().body(wardRepository.allottedWard(nurseId));
     }
 
 }
