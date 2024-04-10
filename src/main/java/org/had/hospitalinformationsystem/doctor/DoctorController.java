@@ -51,26 +51,18 @@ public class DoctorController {
     }
 
     @GetMapping("/recommend/ward/{appointmentId}")
-    public ResponseEntity<?> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable long appointmentId){
-        String role=JwtProvider.getRoleFromJwtToken(jwt);
-        if(role.equals("doctor")){
-            Appointment appointment=appointmentRepository.findByAppointmentId(appointmentId);
-            if(appointment==null){
-                return ResponseEntity.badRequest().body("Appointment id not found");
-            }
-            //Patient patient=appointment.getPatient();
-            NeedWard needWard=new NeedWard();
-
-            needWard.setAppointment(appointment);
-            needWard.setRequestTime(LocalDateTime.now());
-            //patient.setLastAppointmentId(appointmentId);
-            //patientRepository.save(patient);
-            needWardRepository.save(needWard);
-            return ResponseEntity.ok().body("WardDetails will be shortly assigned to patient.");
-
-        }
-        else{
-            return ResponseEntity.badRequest().body("wrong details have been put");
-        }
+    public ResponseEntity<Map<String, String>> assignWard(@RequestHeader("Authorization") String jwt,
+                                                          @PathVariable long appointmentId) {
+        Appointment appointment = appointmentRepository.findByAppointmentId(appointmentId);
+        // Patient patient=appointment.getPatient();
+        NeedWard needWard = new NeedWard();
+        needWard.setAppointment(appointment);
+        needWard.setRequestTime(LocalDateTime.now());
+        // patient.setLastAppointmentId(appointmentId);
+        // patientRepository.save(patient);
+        needWardRepository.save(needWard);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "success");
+        return ResponseEntity.ok(response);
     }
 }
