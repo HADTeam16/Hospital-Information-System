@@ -11,8 +11,8 @@ public class AppointmentDto {
     private Long doctorId;
     private Long patientId;
     private String purpose;
-    private String temperature;
-    private String bloodPressure;
-    private String weight;
-    private String height;
+    private float temperature;
+    private float bloodPressure;
+    private float weight;
+    private float height;
 }

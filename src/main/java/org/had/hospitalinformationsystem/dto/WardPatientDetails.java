@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class WardPatientDetails {
-    private String temperature;
-    private String bloodPressure;
-    private String weight;
+    private float temperature;
+    private float bloodPressure;
+    private float weight;
 }

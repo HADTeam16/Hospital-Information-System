@@ -100,7 +100,6 @@ public class NurseController {
             return ResponseEntity.badRequest().body(null);
         }
     }
-
     @GetMapping("/assign/ward/{wardId}/{needWardId}")
     ResponseEntity<?> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable Long wardId, @PathVariable Long needWardId) {
         String role = JwtProvider.getRoleFromJwtToken(jwt);

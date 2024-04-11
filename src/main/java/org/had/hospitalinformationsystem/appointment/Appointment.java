@@ -27,10 +27,10 @@ public class Appointment {
     @Column(columnDefinition="LONGTEXT")
     private String purpose;
     private LocalDateTime slot;
-    private String temperature;
-    private String bloodPressure;
-    private String weight;
-    private String height;
+    private float temperature;
+    private float bloodPressure;
+    private float weight;
+    private float height;
     private Boolean needWard;
     private Integer completed;
 }

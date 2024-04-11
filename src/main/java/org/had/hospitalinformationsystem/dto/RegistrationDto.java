@@ -46,10 +46,10 @@ public class RegistrationDto {
         private LocalTime workEnd;
 
         //Patient-specific field
-        private String temperature;//float
-        private String bloodPressure;
-        private String weight;
-        private String height;
+        private float temperature;//float
+        private float bloodPressure;
+        private float weight;
+        private float height;
         //Appointment field
 
         //Nurse-specific field
