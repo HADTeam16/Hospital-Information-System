@@ -75,130 +75,33 @@ public class AppointmentController {
 
     @GetMapping("/get/all/appointments")
     public ResponseEntity< List<Appointment>>getAllAppointment(@RequestHeader("Authorization") String jwt){
-        try {
-            String role = JwtProvider.getRoleFromJwtToken(jwt);
-            if(role.equals("receptionist")) {
-                return ResponseEntity.ok(appointmentRepository.findAll());
-            }
-            else{
-                return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-            }
-        }
-        catch(Exception e){
-            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+        return appointmentService.getAllAppointments(jwt);
     }
 
     @GetMapping("/get/all/appointments/by/date")
     public ResponseEntity<List<Appointment>>getAllAppointmentByDate(@RequestHeader("Authorization") String jwt,@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
-        try{
-            String role = JwtProvider.getRoleFromJwtToken(jwt);
-            String userName = JwtProvider.getUserNameFromJwtToken(jwt);
-            User user = userRepository.findByUserName(userName);
-
-            if(role.equals("doctor")){
-                LocalDateTime startDate = date.atStartOfDay();
-                LocalDateTime endDate = startDate.plusDays(1);
-                return ResponseEntity.ok(appointmentRepository.findByDoctorIdAndAppointmentDate(user.getId(),startDate,endDate));
-            }
-            else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-            }
-        }
-        catch(Exception e){
-           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        return appointmentService.getAllAppointmentsByDate(jwt,date);
     }
 
 //--------------------------------------------------------------check below api
     @GetMapping("/get/patient/details")
     public ResponseEntity<?> getDoctorsAppointment(@RequestHeader("Authorization") String jwt) {
-        try {
-            String userName = JwtProvider.getUserNameFromJwtToken(jwt);
-            User user = userRepository.findByUserName(userName);
-            if (user == null) {
-                return ResponseEntity.badRequest().body("User not found");
-            }
-            Doctor doctor = doctorRepository.findByUser(user);
-            if (doctor == null) {
-                return ResponseEntity.badRequest().body("Doctor not found for user: " + userName);
-            }
-            List<Patient> appointments = appointmentRepository.getDoctorsAppointment(doctor.getDoctorId());
-            return ResponseEntity.ok(appointments);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("An error occurred while fetching appointments: " + e.getMessage());
-        }
+        return appointmentService.getDoctorsAppointments(jwt);
     }
 
     @PostMapping("/book/appointment")
     public ResponseEntity<?> bookAppointment(@RequestHeader("Authorization") String jwt, @RequestBody AppointmentDto appointmentDto) {
-        String userName = JwtProvider.getUserNameFromJwtToken(jwt);
-        User user = userRepository.findByUserName(userName);
-        AppointmentResponseDto appointmentResponseDto = new AppointmentResponseDto();
-        if (!user.getRole().equals("receptionist")) {
-            appointmentResponseDto.setResponse("Only receptionist can book an appointment");
-            return ResponseEntity.badRequest().body(appointmentResponseDto);
-        }
-        Appointment appointment;
-        try {
-            appointment = appointmentService.createAppointment(appointmentDto);
-        } catch (Exception e) {
-            appointmentResponseDto.setResponse("Failed to create appointment: " + e.getMessage());
-            return ResponseEntity.badRequest().body(appointmentResponseDto);
-        }
-        try {
-            Doctor doctor = appointment.getDoctor();
-            messagingTemplate.convertAndSendToUser(doctor.getUser().getUserName(),"/topic/appointments", appointment);
-        } catch (Exception e) {
-            appointmentResponseDto.setResponse("Failed to send WebSocket update for appointment: " + e.getMessage());
-            return ResponseEntity.ok().body(appointmentResponseDto);
-        }
-
-        appointmentResponseDto.setResponse("Appointment created successfully for: " + appointment.getSlot().toString());
-        return ResponseEntity.ok().body(appointmentResponseDto);
+        return appointmentService.bookAppointment(jwt,appointmentDto);
     }
     @GetMapping("/get/all/previous/appointment/for/patient")
     public ResponseEntity<?>getAllPreviousAppointmentForPatient(@RequestHeader("Authorization") String jwt, @RequestParam("patientId") Long patientId, @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date){
-        try{
-            String role=JwtProvider.getRoleFromJwtToken(jwt);
-            if(role.equals("doctor")){
-                List<Object[]> appointments=appointmentRepository.findAllPreviousAppointmentForPatient(patientId,date);
-
-                List<AppointmentDataDto> appointmentDataDtos = new ArrayList<>();
-                for (Object[] appointment : appointments) {
-                    AppointmentDataDto dto = new AppointmentDataDto();
-                    dto.setAppointmentId((Long) appointment[0]); // Assuming appointmentId is at index 0
-                    dto.setDateTime((LocalDateTime) appointment[1]); // Assuming dateTime is at index 1
-                    appointmentDataDtos.add(dto);
-                }
-                return ResponseEntity.ok(appointmentDataDtos);
-            }
-            else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("null");
-            }
-        }
-        catch(HttpClientErrorException.BadRequest e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        }
-        catch(Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        }
+        return appointmentService.getAllPreviousAppointmentsForPatient(jwt, patientId, date);
     }
 
     @GetMapping("/get/appointment/prescription/records/{appointmentId}")
     public ResponseEntity<PrescriptionsAndRecords> getAppointmentPrescriptionAndRecords(
             @RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId) {
 
-        String role = JwtProvider.getRoleFromJwtToken(jwt);
-
-        if (role.equals("doctor")) {
-            List<String> records = recordsRepository.findRecordsImageByAppointmentId(appointmentId);
-            String prescription = prescriptionRepository.findPrescriptionImageByAppointmentID(appointmentId);
-            Appointment appointment = appointmentRepository.findByAppointmentId(appointmentId);
-            PrescriptionsAndRecords appointmentDetails = new PrescriptionsAndRecords(records, prescription,appointment);
-            return ResponseEntity.ok(appointmentDetails);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        return appointmentService.getAppointmentDetails(jwt,appointmentId);
     }
 }

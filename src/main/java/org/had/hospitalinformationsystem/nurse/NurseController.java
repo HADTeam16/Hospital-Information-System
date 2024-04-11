@@ -32,19 +32,15 @@ public class NurseController {
     PatientRepository patientRepository;
     @Autowired
     NurseRepository nurseRepository;
-
     @Autowired
     NurseService nurseService;
-
     @Autowired
     NeedWardRepository needWardRepository;
     @Autowired
     WardRepository wardRepository;
     @Autowired
     NeedWardService needWardService;
-
-    // this api will help you find patients in needWard table
-    @GetMapping("patients/who/needs/ward")
+    @GetMapping("/patients/who/needs/ward")
     public ResponseEntity<?>  patientsNeedWard(@RequestHeader("Authorization") String jwt){
         String role= JwtProvider.getRoleFromJwtToken(jwt);
 
@@ -103,7 +99,6 @@ public class NurseController {
         else{
             return ResponseEntity.badRequest().body(null);
         }
-
     }
 
     @GetMapping("/assign/ward/{wardId}/{needWardId}")
@@ -122,7 +117,9 @@ public class NurseController {
                 NeedWard needWard = optionalNeedWard.get();
 
                 ward.setAppointment(needWard.getAppointment());
-                ward.setManagingNurse(nurse);
+
+                ward.setManagingNurse(nurseRepository.findNurseWithLeastWardsAssigned());
+
                 ward.setPatient(needWard.getAppointment().getPatient());
                 ward.setAvailableStatus(false);
 
