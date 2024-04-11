@@ -46,6 +46,7 @@ public class AppointmentServiceImpl implements AppointmentService{
     RecordsRepository recordsRepository;
     @Autowired
     PrescriptionRepository prescriptionRepository;
+
     @Override
     public Appointment createAppointment(AppointmentDto appointmentDto) {
 

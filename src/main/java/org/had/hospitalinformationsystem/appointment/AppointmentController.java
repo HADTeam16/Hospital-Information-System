@@ -35,28 +35,10 @@ import java.util.List;
 public class AppointmentController {
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    AppointmentRepository  appointmentRepository;
-
-    @Autowired
-    DoctorRepository doctorRepository;
-
-    @Autowired
     AppointmentService appointmentService;
 
     @Autowired
     DoctorService doctorService;
-
-    @Autowired
-    PatientRepository patientRepository;
-
-    @Autowired
-    RecordsRepository recordsRepository;
-
-    @Autowired
-    PrescriptionRepository prescriptionRepository;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -65,10 +47,8 @@ public class AppointmentController {
     @SendTo("/topic/appointments")
     public void handleAppointmentBooking(Appointment appointment) {
         Doctor doctor = appointment.getDoctor();
-
         if (doctor != null) {
             String doctorTopic = "/topic/doctor/" + doctor.getDoctorId() + "/appointments";
-
             messagingTemplate.convertAndSend(doctorTopic, appointment);
         }
     }
@@ -83,7 +63,6 @@ public class AppointmentController {
         return appointmentService.getAllAppointmentsByDate(jwt,date);
     }
 
-//--------------------------------------------------------------check below api
     @GetMapping("/get/patient/details")
     public ResponseEntity<?> getDoctorsAppointment(@RequestHeader("Authorization") String jwt) {
         return appointmentService.getDoctorsAppointments(jwt);
@@ -99,9 +78,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/get/appointment/prescription/records/{appointmentId}")
-    public ResponseEntity<PrescriptionsAndRecords> getAppointmentPrescriptionAndRecords(
-            @RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId) {
-
+    public ResponseEntity<PrescriptionsAndRecords> getAppointmentPrescriptionAndRecords(@RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId) {
         return appointmentService.getAppointmentDetails(jwt,appointmentId);
     }
 }
