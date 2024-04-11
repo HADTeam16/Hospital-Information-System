@@ -2,7 +2,7 @@ package org.had.hospitalinformationsystem;
 
 import com.twilio.Twilio;
 import jakarta.annotation.PostConstruct;
-import org.had.hospitalinformationsystem.otpVerification.SmsTwilioConfig;
+import org.had.hospitalinformationsystem.dto.SmsTwilioConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.boot.SpringApplication;

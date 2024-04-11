@@ -3,9 +3,9 @@ package org.had.hospitalinformationsystem.auth;
 import jakarta.mail.internet.MimeMessage;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
+import org.had.hospitalinformationsystem.dto.*;
 import org.had.hospitalinformationsystem.nurse.Nurse;
 import org.had.hospitalinformationsystem.nurse.NurseRepository;
-import org.had.hospitalinformationsystem.otpVerification.*;
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
 import org.had.hospitalinformationsystem.receptionist.ReceptionistRepository;
 import org.had.hospitalinformationsystem.user.User;
@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AuthUtils {
+public class AuthUtils extends Utils{
     @Autowired
     private JavaMailSender sender;
     @Autowired
@@ -46,21 +46,6 @@ public class AuthUtils {
     Utils utils = new Utils();
 
     Map<String, OtpInfo> otpMap = new HashMap<>();
-
-    protected void sendEmail(String email, String username, String password, String name, String subject, String messageTemplate) {
-        try {
-            MimeMessage mimeMessage = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            helper.setTo(email);
-            helper.setSubject(subject);
-
-            String message = String.format(messageTemplate, name, username, password);
-
-            helper.setText(message, true);
-            sender.send(mimeMessage);
-        } catch (Exception ignored) {
-        }
-    }
 
     protected void handleException(Exception e) {
         if (e instanceof DataIntegrityViolationException) {
@@ -214,11 +199,11 @@ public class AuthUtils {
         return otpResponse;
     }
 
-    protected ForgetPasswordEmailResponse validateOtp(EmailOtpValidationRequest emailOtpValidationRequest, String email){
-        String username = emailOtpValidationRequest.getUsername();
+    protected ForgetPasswordEmailResponse validateOtp(OtpValidationRequest otpValidationRequest, String email){
+        String username = otpValidationRequest.getUsername();
         OtpInfo otpInfo = otpMap.get(username);
         ForgetPasswordEmailResponse response = new ForgetPasswordEmailResponse();
-        if (otpInfo != null && otpInfo.getOtp().equals(emailOtpValidationRequest.getEmailOtpNumber())) {
+        if (otpInfo != null && otpInfo.getOtp().equals(otpValidationRequest.getOtpNumber())) {
             if (Instant.now().isBefore(otpInfo.getExpirationTime())) {
                 otpMap.remove(username);
 

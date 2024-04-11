@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.otpVerification;
+package org.had.hospitalinformationsystem.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

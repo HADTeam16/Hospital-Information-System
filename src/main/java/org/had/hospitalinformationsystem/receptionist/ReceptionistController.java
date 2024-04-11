@@ -59,6 +59,7 @@ public class ReceptionistController {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if(role.equals("receptionist")){
+                registrationDto.setPassword("");
                 Object result = utils.getUser(registrationDto);
                 if(result instanceof String){
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,(String) result,null));

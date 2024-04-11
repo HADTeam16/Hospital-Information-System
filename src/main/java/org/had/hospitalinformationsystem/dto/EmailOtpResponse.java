@@ -1,8 +1,9 @@
-package org.had.hospitalinformationsystem.otpVerification;
+package org.had.hospitalinformationsystem.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.had.hospitalinformationsystem.dto.OtpStatus;
 
 
 @Data

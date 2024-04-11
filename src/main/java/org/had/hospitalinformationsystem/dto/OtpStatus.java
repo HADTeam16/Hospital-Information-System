@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.otpVerification;
+package org.had.hospitalinformationsystem.dto;
 
 public enum OtpStatus {
 

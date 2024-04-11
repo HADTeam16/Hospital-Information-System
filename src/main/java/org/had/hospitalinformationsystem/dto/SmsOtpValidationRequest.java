@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.otpVerification;
+package org.had.hospitalinformationsystem.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmailOtpRequest {
+public class SmsOtpValidationRequest {
     private String username;
-    private String email;
-
+    private String otpNumber;
 }

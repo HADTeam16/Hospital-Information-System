@@ -1,4 +1,4 @@
-package org.had.hospitalinformationsystem.otpVerification;
+package org.had.hospitalinformationsystem.dto;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
