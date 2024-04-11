@@ -1,11 +1,18 @@
 package org.had.hospitalinformationsystem.utility;
 
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
+import jakarta.mail.internet.MimeMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.had.hospitalinformationsystem.auth.Auth;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
+import org.had.hospitalinformationsystem.dto.SmsTwilioConfig;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,18 +29,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 public class Utils {
     @Autowired
     UserRepository userRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    private JavaMailSender sender;
+    @Autowired
+    private SmsTwilioConfig smsTwilioConfig;
 
-    public static String generateOTP() {
+    protected static String generateOTP() {
         return new DecimalFormat("000000")
                 .format(new Random().nextInt(999999));
     }
 
-    public static String generateRandomString(int length) {
+    protected static String generateRandomString(int length) {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder randomString = new StringBuilder(length);
         SecureRandom random = new SecureRandom();
@@ -47,6 +59,27 @@ public class Utils {
     }
 
 
+    protected void sendEmail(String email, String username, String password, String name, String subject, String messageTemplate) {
+        try {
+            MimeMessage mimeMessage = sender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(email);
+            helper.setSubject(subject);
+            String message = String.format(messageTemplate, name, username, password);
+            helper.setText(message, true);
+            sender.send(mimeMessage);
+        } catch (Exception ignored) {
+        }
+    }
+
+    protected void sendSms(PhoneNumber to, String otpMessage){
+        try{
+            PhoneNumber from = new PhoneNumber(smsTwilioConfig.getTrialNumber());
+            Message.creator(to, from, otpMessage).create();
+        }
+        catch(Exception ignored){
+        }
+    }
 
 
 
@@ -54,6 +87,8 @@ public class Utils {
 
 
 
+
+//----------------------------------------------------------------------------------------------------------------------------------------
 
 
     private static final int ITERATIONS = 10000;
@@ -68,6 +103,9 @@ public class Utils {
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
+
+
+
 
     public static boolean verifyPassword(String providedPassword, String storedPasswordHash, String salt) {
         String newHash = hashPassword(providedPassword, salt);
