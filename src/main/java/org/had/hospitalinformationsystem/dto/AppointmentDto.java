@@ -12,7 +12,7 @@ public class AppointmentDto {
     private Long patientId;
     private String purpose;
     private float temperature;
-    private float bloodPressure;
+    private String bloodPressure;
     private float weight;
     private float height;
 }

@@ -23,7 +23,7 @@ public class Patient {
     private User user;
     private LocalDateTime registrationDateAndTime;
     private float temperature;
-    private float bloodPressure;
+    private String bloodPressure;
     private float weight;
     private float height;
 }

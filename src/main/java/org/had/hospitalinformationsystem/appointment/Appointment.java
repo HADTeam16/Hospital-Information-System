@@ -28,7 +28,7 @@ public class Appointment {
     private String purpose;
     private LocalDateTime slot;
     private float temperature;
-    private float bloodPressure;
+    private String bloodPressure;
     private float weight;
     private float height;
     private Boolean needWard;

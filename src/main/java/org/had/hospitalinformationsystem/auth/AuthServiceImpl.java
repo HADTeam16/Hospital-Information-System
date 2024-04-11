@@ -2,13 +2,9 @@ package org.had.hospitalinformationsystem.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.had.hospitalinformationsystem.doctor.Doctor;
-import org.had.hospitalinformationsystem.dto.AuthResponse;
-import org.had.hospitalinformationsystem.dto.ChangePasswordRequest;
-import org.had.hospitalinformationsystem.dto.LoginRequest;
-import org.had.hospitalinformationsystem.dto.RegistrationDto;
+import org.had.hospitalinformationsystem.dto.*;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.nurse.Nurse;
-import org.had.hospitalinformationsystem.otpVerification.*;
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.utility.Utils;
@@ -200,10 +196,10 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
     public ResponseEntity<?> validateOtpForForgetPasswordByUser(String emailId, String otp){
         try{
             User user = userRepository.findUserByEmail(emailId);
-            EmailOtpValidationRequest emailOtpValidationRequest = new EmailOtpValidationRequest();
-            emailOtpValidationRequest.setUsername(user.getUserName());
-            emailOtpValidationRequest.setEmailOtpNumber(otp);
-            ForgetPasswordEmailResponse response = validateOtp(emailOtpValidationRequest,emailId);
+            OtpValidationRequest otpValidationRequest = new OtpValidationRequest();
+            otpValidationRequest.setUsername(user.getUserName());
+            otpValidationRequest.setOtpNumber(otp);
+            ForgetPasswordEmailResponse response = validateOtp(otpValidationRequest,emailId);
             if(response.getIsSent()==1){
                 return ResponseEntity.ok(response.getStatus());
             }
