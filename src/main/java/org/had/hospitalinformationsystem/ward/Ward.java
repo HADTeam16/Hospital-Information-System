@@ -19,15 +19,15 @@ public class Ward {
     private String wardNumber;
     private boolean availableStatus;
     @Enumerated(EnumType.STRING)
-    private VipDeluxeStatus vipDeluxeStatus;
+    //private VipDeluxeStatus vipDeluxeStatus;
     @OneToOne
     @JoinColumn(name = "appointment_id", referencedColumnName = "appointmentId")
     private Appointment appointment;
-    public enum VipDeluxeStatus {
-        STANDARD,
-        VIP,
-        DELUXE
-    }
+//    public enum VipDeluxeStatus {
+//        STANDARD,
+//        VIP,
+//        DELUXE
+//    }
     @ManyToOne
     @JoinColumn(name = "nurse_id")
     private Nurse managingNurse;

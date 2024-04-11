@@ -16,7 +16,7 @@ public class WardService {
                 ward.setFloor(floor);
                 ward.setWardNumber(String.valueOf(((floor-1)*8)+wardNumber));
                 ward.setAvailableStatus(true);
-                ward.setVipDeluxeStatus(Ward.VipDeluxeStatus.values()[new Random().nextInt(Ward.VipDeluxeStatus.values().length)]);
+                //ward.setVipDeluxeStatus(Ward.VipDeluxeStatus.values()[new Random().nextInt(Ward.VipDeluxeStatus.values().length)]);
                 wardRepository.save(ward);
             }
         }
