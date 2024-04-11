@@ -47,7 +47,7 @@ public class RegistrationDto {
 
         //Patient-specific field
         private float temperature;//float
-        private float bloodPressure;
+        private String bloodPressure;
         private float weight;
         private float height;
         //Appointment field
