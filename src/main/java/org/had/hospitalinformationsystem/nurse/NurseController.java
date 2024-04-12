@@ -134,13 +134,13 @@ public class NurseController {
         }
     }
 
-    @PutMapping("/update/assigned/ward/patient/details/{wardId}")
+    @PutMapping("/update/assigned/ward/patient/details/{patientId}")
     ResponseEntity<String> updateAssignedWardPatientDetails(@RequestHeader("Authorization") String jwt,
-            @PathVariable Long wardId, @RequestBody WardPatientDetails wardPatientDetails) {
+            @PathVariable Long patientId, @RequestBody WardPatientDetails wardPatientDetails) {
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         if (role.equals("nurse")) {
-            Optional<Patient> patientO = patientRepository
-                    .findById(wardRepository.findById(wardId).get().getPatient().getId());
+
+            Optional<Patient> patientO = patientRepository.findById(patientId);
             if (patientO.isPresent()) {
                 Patient patient = patientO.get();
                 patient.setTemperature(wardPatientDetails.getTemperature());
