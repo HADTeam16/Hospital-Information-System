@@ -192,4 +192,9 @@ public class NurseController {
         return ResponseEntity.ok().body(wardRepository.allottedWard(nurseId));
     }
 
+    @GetMapping("/assigned/patients")
+    ResponseEntity<?> getAssignedPatients(@RequestHeader("Authorization")String jwt){
+        return ResponseEntity.ok().body(nurseService.getPatientsFromWard(jwt));
+    }
+
 }
