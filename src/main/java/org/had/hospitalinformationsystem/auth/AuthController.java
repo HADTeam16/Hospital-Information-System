@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -30,9 +32,9 @@ public class AuthController {
         return authService.signIn(loginRequest);
     }
 
-    @PutMapping("/admin/change/password")
-    public ResponseEntity< String> changePasswordByAdmin(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
-        return authService.changePasswordByAdmin(jwt,changePasswordRequest);
+    @PutMapping("/admin/change/password/{id}")
+    public ResponseEntity<Map<String,String>> changePasswordByAdmin(@RequestHeader("Authorization") String jwt, @PathVariable Long id) {
+        return authService.changePasswordByAdmin(jwt,id);
     }
 
     @PutMapping("/user/change/password")
