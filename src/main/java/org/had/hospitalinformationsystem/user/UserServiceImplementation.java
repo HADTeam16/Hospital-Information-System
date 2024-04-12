@@ -22,6 +22,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class UserServiceImplementation implements UserService {
@@ -122,5 +124,27 @@ public class UserServiceImplementation implements UserService {
 
         return statsDto;
 
+    }
+
+    @Override
+    public String generateUsername(String firstName) {
+        String prefix = firstName.toLowerCase(); // Normalize the prefix
+        List<String> existingUsernames = userRepository.findUsernamesByPrefix(prefix);
+
+        // Find the highest number suffix
+        int maxNumber = 0;
+        Pattern pattern = Pattern.compile("^" + prefix + "(\\d+)$");
+        for (String username : existingUsernames) {
+            Matcher matcher = pattern.matcher(username);
+            if (matcher.matches()) {
+                int number = Integer.parseInt(matcher.group(1));
+                if (number > maxNumber) {
+                    maxNumber = number;
+                }
+            }
+        }
+
+        // Generate the next username
+        return prefix + (maxNumber + 1);
     }
 }
