@@ -8,10 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface DoctorService {
-//    List<Doctor> getAvailableDoctorsBySpecializationAndSlot(String specialization, LocalDateTime slot);
-    boolean isDoctorAvailable(Long doctorId, LocalDateTime desiredSlot);
 
-    LocalDateTime findNextAvailableSlot(Long doctorId);
     List<Doctor> getDoctorsWhoAreSurgeon(List<Doctor> doctors);
 
     ResponseEntity<?> finishAppointment(String jwt, PrescriptionsAndRecords prescriptionsAndRecords,Long wardFlag);

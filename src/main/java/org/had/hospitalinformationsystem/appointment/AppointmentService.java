@@ -9,16 +9,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AppointmentService {
-    Appointment createAppointment(AppointmentDto appointmentDto);
 
-    public ResponseEntity<List<Appointment>> getAllAppointments(String jwt);
-    public ResponseEntity<List<Appointment>> getAllAppointmentsByDate(String jwt, LocalDate date);
+    ResponseEntity<List<Appointment>> getAllAppointments(String jwt);
 
-    public ResponseEntity<?> getDoctorsAppointments(String jwt);
-    public ResponseEntity<?> bookAppointment(String jwt, AppointmentDto appointmentDto);
+    ResponseEntity<List<Appointment>> getAllAppointmentsByDate(String jwt, LocalDate date);
 
+    ResponseEntity<?> getDoctorsAppointments(String jwt);
 
-    void notifyDoctor(Appointment appointment);
-    public ResponseEntity<?> getAllPreviousAppointmentsForPatient(String jwt, Long patientId, LocalDateTime date);
-    public ResponseEntity<PrescriptionsAndRecords> getAppointmentDetails(String jwt,Long appointmentId);
+    ResponseEntity<?> bookAppointment(String jwt, AppointmentDto appointmentDto);
+
+    ResponseEntity<?> getAllPreviousAppointmentsForPatient(String jwt, Long patientId, LocalDateTime date);
+
+    ResponseEntity<PrescriptionsAndRecords> getAppointmentDetails(String jwt,Long appointmentId);
 }
