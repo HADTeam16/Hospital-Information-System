@@ -2,7 +2,7 @@ package org.had.hospitalinformationsystem.doctor;
 
 import org.had.hospitalinformationsystem.appointment.Appointment;
 import org.had.hospitalinformationsystem.appointment.AppointmentRepository;
-import org.had.hospitalinformationsystem.dto.PrescriptionsAndRecords;
+import org.had.hospitalinformationsystem.dto.AppointmentFinishDTO;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.needWard.NeedWard;
 import org.had.hospitalinformationsystem.needWard.NeedWardRepository;
@@ -55,7 +55,7 @@ public class DoctorController {
 
     @GetMapping("/recommend/ward/{appointmentId}")
     public ResponseEntity<Map<String, String>> assignWard(@RequestHeader("Authorization") String jwt,
-                                                          @PathVariable long appointmentId) {
+            @PathVariable long appointmentId) {
         Appointment appointment = appointmentRepository.findByAppointmentId(appointmentId);
         NeedWard needWard = new NeedWard();
         needWard.setAppointment(appointment);
@@ -66,11 +66,10 @@ public class DoctorController {
         response.put("message", "success");
         return ResponseEntity.ok(response);
     }
-    @PostMapping("/finish/appointment/{wardFlag}")
-    public ResponseEntity<?> finishAppointment(@RequestHeader("Authorization") String jwt,
-                                               @RequestBody PrescriptionsAndRecords prescriptionsAndRecords,
-                                               @PathVariable long wardFlag){
-        return doctorService.finishAppointment(jwt,prescriptionsAndRecords,wardFlag);
 
+    @PostMapping("/finish/appointment")
+    public ResponseEntity<Map<String, String>> finishAppointment(@RequestHeader("Authorization") String jwt,
+            @RequestBody AppointmentFinishDTO prescriptionsAndRecords) {
+        return doctorService.finishAppointment(jwt, prescriptionsAndRecords);
     }
 }
