@@ -5,6 +5,7 @@ import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.dto.*;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.nurse.Nurse;
+import org.had.hospitalinformationsystem.otpVerification.OtpVerificationUtils;
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.utility.Utils;
@@ -124,27 +125,30 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
     }
 
     @Override
-    public ResponseEntity< String> changePasswordByAdmin(String jwt, ChangePasswordRequest changePasswordRequest) {
+    public ResponseEntity< Map<String,String>> changePasswordByAdmin(String jwt,Long id) {
+        Map<String,String> response = new HashMap<>();;
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if (role.equals("admin")) {
-                User user = userRepository.findByUserName(changePasswordRequest.getUserName());
-                String encodedNewPassword = Utils.hashPassword(changePasswordRequest.getNewPassword(),user.getAuth().getSalt());
-                user.getAuth().setPassword(encodedNewPassword);
-                userRepository.save(user);
-                try {
-                    sendEmailWithNewPasswordDetails(user.getEmail(), user.getUserName(), changePasswordRequest.getNewPassword(), user.getFirstName());
-                    return ResponseEntity.ok("Password updated successfully");
+                Optional<User> optionalUser = userRepository.findById(id);
+                User user;
+                if(optionalUser.isPresent()) {
+                    user = optionalUser.get();
+                    return generateAndSentNewPasswordToUser(user);
+
                 }
-                catch(Exception e){
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unable to send the mail to the user, Kindly do it manually ");
+                else{
+                    response.put("message","User doesnLdvf3Br1xD't exist");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
                 }
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Permission Denied");
+                response.put("message","Permission Denied");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
         }
         catch(Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error: "+e.getMessage());
+            response.put("message","Error: "+e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 
@@ -179,36 +183,39 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
 
     @Override
     public ResponseEntity<?> sendOtpForForgetPasswordByUser(String emailId){
+        Map<String,String> response = new HashMap<>();
         try{
             User currUser = userRepository.findUserByEmail(emailId);
+
             if(currUser != null){
-                return ResponseEntity.ok(sendEmailForForgetPassword(currUser.getEmail(), currUser.getUserName(), currUser.getFirstName()));
+                EmailOtpResponse emailOtpResponse =sendEmailForForgetPassword(currUser.getEmail(), currUser.getUserName(), currUser.getFirstName());
+                response.put("message",emailOtpResponse.getMessage());
+                if(emailOtpResponse.getStatus()==OtpStatus.DELIVERED){
+                    return ResponseEntity.ok(response);
+                }
+                else{
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                }
             }
             else{
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Please Enter the Registered email");
+                response.put("message","Please Enter the Registered email");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
             }
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            response.put("message",e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
     @Override
-    public ResponseEntity<?> validateOtpForForgetPasswordByUser(String emailId, String otp){
+    public ResponseEntity<Map<String,String>> validateOtpForForgetPasswordByUser(String emailId, String otp){
+        Map<String, String> response = new HashMap<>();
         try{
-            User user = userRepository.findUserByEmail(emailId);
-            OtpValidationRequest otpValidationRequest = new OtpValidationRequest();
-            otpValidationRequest.setUsername(user.getUserName());
-            otpValidationRequest.setOtpNumber(otp);
-            ForgetPasswordEmailResponse response = validateOtp(otpValidationRequest,emailId);
-            if(response.getIsSent()==1){
-                return ResponseEntity.ok(response.getStatus());
-            }
-            else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response.getStatus());
-            }
+            return validateOtp(emailId,otp);
         }
         catch(Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error");
+            response.put("message",e.getMessage());
+            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
