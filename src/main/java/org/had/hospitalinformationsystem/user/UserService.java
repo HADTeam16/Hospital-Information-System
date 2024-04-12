@@ -15,4 +15,6 @@ public interface UserService {
 
     User updateUser(User user, Long userId);
     HospitalLiveStatsDto getHospitalStats(String jwt);
+
+    public String generateUsername(String firstName);
 }

@@ -1,17 +1,12 @@
 package org.had.hospitalinformationsystem.appointment;
 
 import org.had.hospitalinformationsystem.doctor.Doctor;
-import org.had.hospitalinformationsystem.doctor.DoctorRepository;
-import org.had.hospitalinformationsystem.doctor.DoctorService;
-
 import org.had.hospitalinformationsystem.dto.AppointmentDataDto;
 import org.had.hospitalinformationsystem.dto.AppointmentDto;
-
 import org.had.hospitalinformationsystem.dto.AppointmentResponseDto;
 import org.had.hospitalinformationsystem.dto.PrescriptionsAndRecords;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.patient.Patient;
-import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.prescription.PrescriptionRepository;
 import org.had.hospitalinformationsystem.records.RecordsRepository;
 import org.had.hospitalinformationsystem.user.User;
@@ -19,7 +14,6 @@ import org.had.hospitalinformationsystem.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,48 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class AppointmentServiceImpl implements AppointmentService{
+public class AppointmentServiceImpl extends AppointmentUtils implements AppointmentService{
 
     @Autowired
-    DoctorRepository doctorRepository;
-    @Autowired
-    PatientRepository patientRepository;
-    @Autowired
-    AppointmentRepository appointmentRepository;
-    @Autowired
-    DoctorService doctorService;
-    @Autowired
     UserRepository userRepository;
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
     @Autowired
     RecordsRepository recordsRepository;
     @Autowired
     PrescriptionRepository prescriptionRepository;
-    @Override
-    public Appointment createAppointment(AppointmentDto appointmentDto) {
-
-        Appointment appointment=new Appointment();
-        Doctor doctor=doctorRepository.findById(appointmentDto.getDoctorId()).orElseThrow();
-
-        LocalDateTime nextAvailableSlot=doctorService.findNextAvailableSlot(appointmentDto.getDoctorId());
-
-        if(nextAvailableSlot==null){
-            throw new IllegalStateException("No available slots for today");
-        }
-        Patient patient=patientRepository.findById(appointmentDto.getPatientId()).orElseThrow();
-        appointment.setDoctor(doctor);
-        appointment.setPatient(patient);
-        appointment.setPurpose(appointmentDto.getPurpose());
-        appointment.setSlot(nextAvailableSlot);
-        appointment.setNeedWard(false);
-        appointment.setCompleted(0);
-        appointment.setTemperature(appointmentDto.getTemperature());
-        appointment.setBloodPressure(appointmentDto.getBloodPressure());
-        appointment.setWeight(appointmentDto.getWeight());
-        appointment.setHeight(appointmentDto.getHeight());
-        return appointmentRepository.save(appointment);
-    }
 
     @Override
     public ResponseEntity<List<Appointment>> getAllAppointments(String jwt) {
@@ -82,7 +42,6 @@ public class AppointmentServiceImpl implements AppointmentService{
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         } catch (Exception e) {
-            // Log the exception for debugging purposes
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -104,6 +63,7 @@ public class AppointmentServiceImpl implements AppointmentService{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
+
     @Override
     public ResponseEntity<?> getDoctorsAppointments(String jwt) {
         try {
@@ -146,11 +106,6 @@ public class AppointmentServiceImpl implements AppointmentService{
             return ResponseEntity.badRequest().body(appointmentResponseDto);
         }
     }
-    @Override
-    public void notifyDoctor(Appointment appointment) {
-        Doctor doctor = appointment.getDoctor();
-        messagingTemplate.convertAndSendToUser(doctor.getUser().getUserName(),"/topic/appointments", appointment);
-    }
 
     @Override
     public ResponseEntity<?> getAllPreviousAppointmentsForPatient(String jwt, Long patientId, LocalDateTime date) {
@@ -188,6 +143,5 @@ public class AppointmentServiceImpl implements AppointmentService{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
-
 
 }

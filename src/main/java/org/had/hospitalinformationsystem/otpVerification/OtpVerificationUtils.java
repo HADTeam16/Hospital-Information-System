@@ -1,9 +1,7 @@
 package org.had.hospitalinformationsystem.otpVerification;
 
 import com.twilio.type.PhoneNumber;
-import org.had.hospitalinformationsystem.dto.OtpValidationRequest;
-import org.had.hospitalinformationsystem.dto.OtpInfo;
-import org.had.hospitalinformationsystem.dto.SmsTwilioConfig;
+import org.had.hospitalinformationsystem.dto.*;
 import org.had.hospitalinformationsystem.utility.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;

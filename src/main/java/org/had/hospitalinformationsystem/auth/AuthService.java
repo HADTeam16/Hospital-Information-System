@@ -6,6 +6,8 @@ import org.had.hospitalinformationsystem.dto.LoginRequest;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Map;
+
 public interface AuthService {
 
     ResponseEntity<AuthResponse> createAdmin();
@@ -14,7 +16,7 @@ public interface AuthService {
 
     ResponseEntity< AuthResponse>signIn(LoginRequest loginRequest);
 
-    ResponseEntity< String> changePasswordByAdmin(String jwt, ChangePasswordRequest changePasswordRequest);
+    ResponseEntity<Map<String,String>> changePasswordByAdmin(String jwt, Long id);
 
     ResponseEntity< String> changePasswordByUser(String jwt, ChangePasswordRequest changePasswordRequest);
 

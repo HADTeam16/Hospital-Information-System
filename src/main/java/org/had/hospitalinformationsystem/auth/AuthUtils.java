@@ -1,6 +1,7 @@
 package org.had.hospitalinformationsystem.auth;
 
 import jakarta.mail.internet.MimeMessage;
+import org.apache.coyote.Response;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.dto.*;
@@ -14,6 +15,7 @@ import org.had.hospitalinformationsystem.utility.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -53,32 +55,6 @@ public class AuthUtils extends Utils{
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error: " + e.getMessage(), e);
         }
-    }
-
-    protected EmailOtpResponse sendEmailWithNewPassword(String username, String password, String email){
-        EmailOtpResponse otpResponse;
-        try {
-            MimeMessage mimeMessage = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            helper.setTo(email);
-            String subject = "Recover your account";
-            helper.setSubject(subject);
-            String message = "Dear "+ username+",<br/>" +
-                    "We request you to kindly login with your new credentials and change your Password. <br/>" +
-                    "Steps to follow: Login -> Go to your Profile -> Click on Change Password <br/>" +
-                    "<strong> Username: " + username + "</strong> <br/>" +
-                    "<strong> Password: " + password + "</strong> <br/>" +
-                    "Best regards,<br/>" +
-                    "Pure Zen Wellness Hospital";
-
-            helper.setText(message,true);
-            sender.send(mimeMessage);
-            otpResponse = new EmailOtpResponse(OtpStatus.DELIVERED,message);
-        }
-        catch(Exception e){
-            otpResponse = new EmailOtpResponse(OtpStatus.FAILED,e.getMessage());
-        }
-        return otpResponse;
     }
 
     protected User createUserWithAdminDetails() {
@@ -155,8 +131,8 @@ public class AuthUtils extends Utils{
         String subject = "New Log in Credentials";
         String messageTemplate = "Hello Mr/Mrs "+name+",<br/><br/>" +
                 "As per your request, your password has been changed successfully.<br/> <br/>" +
-                "<strong> Username: %s </strong> <br/>" +
-                "<strong> Password: %s </strong> <br/><br/>" +
+                "<strong> Username:  </strong> " + username + "<br/>" +
+                "<strong> Password: </strong> " + password + "<br/>" +
                 "We request you to kindly login with your new credentials and change your Password. <br/>" +
                 "Steps to follow: Login -> Go to your Profile -> Click on Change Password <br/>" +
                 "Best regards,<br/>" +
@@ -178,6 +154,7 @@ public class AuthUtils extends Utils{
 
     protected EmailOtpResponse sendEmailForForgetPassword(String email, String username, String name) {
         EmailOtpResponse otpResponse;
+
         try {
             String subject = "OTP for changing password";
             String otp = Utils.generateOTP();
@@ -186,51 +163,55 @@ public class AuthUtils extends Utils{
                     ". Valid for the next 10 minutes only.<br/>" +
                     "Best regards,<br/>" +
                     "Pure Zen Wellness Hospital";
-
             sendEmail(email, username, "", name, subject, message);
-
             Instant expirationTime = Instant.now().plusSeconds(600);
-            otpMap.put(username, new OtpInfo(otp, expirationTime));
-
-            otpResponse = new EmailOtpResponse(OtpStatus.DELIVERED, message);
+            otpMap.put(email, new OtpInfo(otp, expirationTime));
+            otpResponse = new EmailOtpResponse(OtpStatus.DELIVERED, "Success");
         } catch (Exception e) {
             otpResponse = new EmailOtpResponse(OtpStatus.FAILED, e.getMessage());
         }
         return otpResponse;
     }
 
-    protected ForgetPasswordEmailResponse validateOtp(OtpValidationRequest otpValidationRequest, String email){
-        String username = otpValidationRequest.getUsername();
-        OtpInfo otpInfo = otpMap.get(username);
-        ForgetPasswordEmailResponse response = new ForgetPasswordEmailResponse();
-        if (otpInfo != null && otpInfo.getOtp().equals(otpValidationRequest.getOtpNumber())) {
+    protected ResponseEntity<Map<String,String>> validateOtp(String emailId,String otpNumber){
+        OtpInfo otpInfo = otpMap.get(emailId);
+        Map<String,String> response = new HashMap<>();
+        if (otpInfo != null && otpInfo.getOtp().equals(otpNumber)) {
             if (Instant.now().isBefore(otpInfo.getExpirationTime())) {
-                otpMap.remove(username);
-
-                String password = Utils.generateRandomString(10);
-                EmailOtpResponse emailResponse = sendEmailWithNewPassword(username,password,email);
-
-                if(emailResponse.getStatus().equals(OtpStatus.DELIVERED)){
-                    response.setStatus("Email has been sent successfully with new credentials");
-                    response.setPassword(password);
-                }
-                else{
-                    response.setStatus("Failed to send email... Try Again....");
-                    response.setPassword(null);
-                    response.setIsSent(1);
-                }
+                otpMap.remove(emailId);
+                User user = userRepository.findUserByEmail(emailId);
+                return generateAndSentNewPasswordToUser(user);
             } else {
-                otpMap.remove(username);
-                response.setStatus("OTP expired");
-                response.setPassword(null);
-                response.setIsSent(0);
+                response.put("message","OTP has been expired");
+                otpMap.remove(emailId);
+                return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(response);
             }
         } else {
-            response.setStatus("Invalid OTP");
-            response.setPassword(null);
-            response.setIsSent(0);
+            response.put("message","Invalid OTP");
+            return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(response);
         }
-        return response;
+    }
+
+    protected ResponseEntity<Map<String,String>> generateAndSentNewPasswordToUser(User user){
+        Map<String,String> response = new HashMap<>();
+        try {
+            String newPassword = generateRandomString(10);
+            String encodedNewPassword = Utils.hashPassword(newPassword, user.getAuth().getSalt());
+            user.getAuth().setPassword(encodedNewPassword);
+            try {
+                sendEmailWithNewPasswordDetails(user.getEmail(), user.getUserName(), newPassword, user.getFirstName());
+                response.put("message", "Password updated successfully");
+                userRepository.save(user);
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
+                response.put("message", "Failed to update password, Try again");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+        }
+        catch (Exception e){
+            response.put("message","Error!!!!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
 
     protected Authentication authenticate(String userName, String password, String role) {
