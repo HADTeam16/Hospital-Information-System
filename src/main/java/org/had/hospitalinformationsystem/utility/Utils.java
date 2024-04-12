@@ -10,6 +10,7 @@ import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.dto.SmsTwilioConfig;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
+import org.had.hospitalinformationsystem.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -39,6 +40,8 @@ public class Utils {
     private JavaMailSender sender;
     @Autowired
     private SmsTwilioConfig smsTwilioConfig;
+    @Autowired
+    UserService userService;
 
     protected static String generateOTP() {
         return new DecimalFormat("000000")
@@ -192,7 +195,8 @@ public class Utils {
 
         User newUser = new User();
         Auth auth = new Auth();
-        newUser.setUserName(registrationDto.getUserName());
+        newUser.setUserName(userService.generateUsername(registrationDto.getFirstName()));
+        //newUser.setUserName(registrationDto.getUserName());
         String salt = generateRandomString(27);
         auth.setSalt(salt);
         auth.setPassword(hashPassword(registrationDto.getPassword(), salt));

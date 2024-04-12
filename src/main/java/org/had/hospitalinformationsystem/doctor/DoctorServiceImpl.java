@@ -69,8 +69,7 @@ public class DoctorServiceImpl implements DoctorService{
 
             Prescription prescription = new Prescription();
             prescription.setPrescription(prescriptionsAndRecords.getPrescription());
-            prescription.setAppointment(appointment);
-            prescriptionRepository.save(prescription);
+
 
             for (String recordImage : prescriptionsAndRecords.getRecords()) {
                 Records newRecord = new Records();
@@ -79,6 +78,9 @@ public class DoctorServiceImpl implements DoctorService{
                 recordsRepository.save(newRecord);
             }
             appointment.setCompleted(1);
+            prescription.setAppointment(appointment);
+            prescriptionRepository.save(prescription);
+            System.out.println(appointment.getCompleted());
             appointmentRepository.save(appointment);
 
             return ResponseEntity.ok("Appointment finished successfully");

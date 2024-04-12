@@ -24,4 +24,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> searchUser(@Param("query") String query);
 
     User findUserByEmail(String email);
+
+    @Query("SELECT u.userName FROM User u WHERE u.userName LIKE :prefix%")
+    List<String> findUsernamesByPrefix(@Param("prefix") String prefix);
+
 }
