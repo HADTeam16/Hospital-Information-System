@@ -66,4 +66,8 @@ public class AppointmentController {
     public ResponseEntity<PrescriptionsAndRecords> getAppointmentPrescriptionAndRecords(@RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId) {
         return appointmentService.getAppointmentDetails(jwt,appointmentId);
     }
+    @GetMapping("/cancel/appointment/{appointmentId}")
+    public ResponseEntity<String> cancelAppointment(@RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId){
+        return appointmentService.cancelAppointment(jwt,appointmentId);
+    }
 }

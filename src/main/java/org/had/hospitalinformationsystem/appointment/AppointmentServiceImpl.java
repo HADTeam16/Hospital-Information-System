@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AppointmentServiceImpl extends AppointmentUtils implements AppointmentService{
@@ -141,6 +142,29 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
             return ResponseEntity.ok(appointmentDetails);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
+    @Override
+    public ResponseEntity<String> cancelAppointment(String jwt, Long appointmentId) {
+        String role=JwtProvider.getRoleFromJwtToken(jwt);
+        if(!role.equals("doctor")){
+            return ResponseEntity.badRequest().body("Only doctor can cancel the appointment");
+        }
+        String userName=JwtProvider.getUserNameFromJwtToken(jwt);
+        User user=userRepository.findByUserName(userName);
+        Optional<Doctor> doctor=doctorRepository.findById(user.getId());
+        if(doctor.isPresent()){
+            Appointment appointment=appointmentRepository.findByAppointmentId(appointmentId);
+            if(appointment.getDoctor().getDoctorId()!=doctor.get().getDoctorId()){
+                return ResponseEntity.badRequest().body("Only appointed doctor can cancel their appointment");
+            }
+            appointment.setCompleted(-1);
+            appointmentRepository.save(appointment);
+            return ResponseEntity.ok().body("Appointment cancelled successfully");
+        }
+        else{
+            return ResponseEntity.badRequest().body("No doctor found");
         }
     }
 
