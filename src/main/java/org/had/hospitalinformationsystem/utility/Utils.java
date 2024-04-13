@@ -234,7 +234,6 @@ public class Utils {
                 registrationDto.getBoardCertification(),
                 registrationDto.getCv(),
                 registrationDto.getDrugScreeningResult(),
-                registrationDto.getExperience(),
                 registrationDto.getMedicalDegree(),
                 registrationDto.getMedicalLicenseNumber(),
                 registrationDto.getSpecialization()
@@ -243,7 +242,6 @@ public class Utils {
                 "Board Certification",
                 "CV",
                 "Drug Screening Result",
-                "Experience",
                 "Medical Degree",
                 "Medical License Number",
                 "Specialization",
@@ -273,7 +271,6 @@ public class Utils {
         newDoctor.setBoardCertification(registrationDto.getBoardCertification());
         newDoctor.setCv(registrationDto.getCv());
         newDoctor.setDrugScreeningResult(registrationDto.getDrugScreeningResult());
-        newDoctor.setExperience(registrationDto.getExperience());
         newDoctor.setMedicalDegree(registrationDto.getMedicalDegree());
         newDoctor.setMedicalLicenseNumber(registrationDto.getMedicalLicenseNumber());
         newDoctor.setSpecialization(registrationDto.getSpecialization());

@@ -31,8 +31,6 @@ public class Doctor {
     @Lob
     @Column(columnDefinition="LONGTEXT", nullable = false)
     private String boardCertification; // Doc
-    @Column(nullable = false)
-    private String experience;
     @Lob
     @Column(columnDefinition="LONGTEXT", nullable = false)
     private String medicalDegree; //Doc
