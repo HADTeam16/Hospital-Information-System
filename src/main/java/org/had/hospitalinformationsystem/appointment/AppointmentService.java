@@ -21,4 +21,6 @@ public interface AppointmentService {
     ResponseEntity<?> getAllPreviousAppointmentsForPatient(String jwt, Long patientId, LocalDateTime date);
 
     ResponseEntity<PrescriptionsAndRecords> getAppointmentDetails(String jwt,Long appointmentId);
+
+    ResponseEntity<String> cancelAppointment(String jwt,Long appointmentId);
 }
