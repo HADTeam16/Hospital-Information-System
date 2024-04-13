@@ -43,6 +43,19 @@ public class Utils {
     @Autowired
     UserService userService;
 
+    private static final int ITERATIONS = 10000;
+    private static final int KEY_LENGTH = 256;
+    private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
+
+    private static boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+
+
+
     protected static String generateOTP() {
         return new DecimalFormat("000000")
                 .format(new Random().nextInt(999999));
@@ -94,28 +107,21 @@ public class Utils {
 //----------------------------------------------------------------------------------------------------------------------------------------
 
 
-    private static final int ITERATIONS = 10000;
-    private static final int KEY_LENGTH = 256;
-    private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
-
-
-
-    private static boolean isValidEmail(String email) {
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-        Pattern pattern = Pattern.compile(emailRegex);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
-    }
 
 
 
 
-    public static boolean verifyPassword(String providedPassword, String storedPasswordHash, String salt) {
+
+
+
+
+
+    protected static boolean verifyPassword(String providedPassword, String storedPasswordHash, String salt) {
         String newHash = hashPassword(providedPassword, salt);
         return newHash.equals(storedPasswordHash);
     }
 
-    public static String hashPassword(String password, String salt) {
+    protected static String hashPassword(String password, String salt) {
         char[] passwordChars = password.toCharArray();
         byte[] saltBytes = Base64.getDecoder().decode(salt);
 
@@ -132,7 +138,7 @@ public class Utils {
         }
     }
 
-    public Object getUser(RegistrationDto registrationDto) {
+    protected Object getUser(RegistrationDto registrationDto) {
         if (registrationDto == null) {
             return "Registration data is missing";
         }

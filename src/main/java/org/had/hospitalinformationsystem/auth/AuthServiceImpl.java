@@ -47,7 +47,7 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Access denied", null));
             }
 
-            Object result = utils.getUser(registrationDto);
+            Object result = getUser(registrationDto);
             if (result instanceof String) {
                 return ResponseEntity.badRequest().body(new AuthResponse(null, (String) result, null));
             }

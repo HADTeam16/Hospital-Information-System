@@ -29,7 +29,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/receptionist")
-public class ReceptionistController {
+public class ReceptionistController extends Utils {
     @Autowired
     PasswordEncoder passwordEncoder;
 
@@ -60,7 +60,7 @@ public class ReceptionistController {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if(role.equals("receptionist")){
                 registrationDto.setPassword("");
-                Object result = utils.getUser(registrationDto);
+                Object result = getUser(registrationDto);
                 if(result instanceof String){
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(null,(String) result,null));
                 }
@@ -91,7 +91,7 @@ public class ReceptionistController {
             return ResponseEntity.badRequest().body("Error during patient registration: " + e.getMessage());
         }
     }
-    
+
     @GetMapping("/find/doctor/by/specialization/{specialization}")
     public ResponseEntity<?> findDoctorBySpecialization(@RequestHeader("Authorization") String jwt, @PathVariable String specialization) {
         try {
