@@ -38,7 +38,6 @@ public class RegistrationDto {
         private String medicalLicenseNumber;
         private String specialization;
         private String boardCertification; // Doc
-        private String experience;
         private String medicalDegree; //Doc
         private String cv; //Doc
         private String drugScreeningResult; // Doc

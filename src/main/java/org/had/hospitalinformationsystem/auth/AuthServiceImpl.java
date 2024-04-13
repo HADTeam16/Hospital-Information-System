@@ -47,6 +47,7 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(null, "Access denied", null));
             }
 
+            registrationDto.setPassword(generateRandomString(10));
             Object result = getUser(registrationDto);
             if (result instanceof String) {
                 return ResponseEntity.badRequest().body(new AuthResponse(null, (String) result, null));
@@ -138,7 +139,7 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
 
                 }
                 else{
-                    response.put("message","User doesnLdvf3Br1xD't exist");
+                    response.put("message","User doesn't exist");
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
                 }
             } else {

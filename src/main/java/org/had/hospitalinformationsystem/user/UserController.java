@@ -209,7 +209,6 @@ public class UserController {
                                 doctor.setWorkStart(registrationDto.getWorkStart());
                                 doctor.setWorkEnd(registrationDto.getWorkEnd());
                                 doctor.setMedicalLicenseNumber(registrationDto.getMedicalLicenseNumber());
-                                doctor.setExperience(registrationDto.getExperience());
                                 doctorRepository.save(doctor);
                             }
                         }
