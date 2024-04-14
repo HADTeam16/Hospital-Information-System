@@ -118,8 +118,8 @@ public class AuthUtils extends Utils{
         String subject = "Your account has been created successfully";
         String messageTemplate = "Hello Mr/Mrs "+name+",<br/><br/>" +
                 "Your account has been created successfully. Happy to have you on board. Your LogIn Credentials are as below <br/>" +
-                "<strong> Username: %s </strong> <br/>" +
-                "<strong> Password: %s </strong> <br/>" +
+                "<strong> Username:  </strong> " + username + "<br/>" +
+                "<strong> Password: </strong> " + password + "<br/>" +
                 "We request you to kindly login and change your Password. <br/>" +
                 "Steps to follow: Login -> Go to your Profile -> Click on Change Password <br/>" +
                 "Best regards,<br/>" +
