@@ -82,7 +82,7 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
             }
             newUser.setAuth(null);
             try {
-                sendEmailWithAccountDetails(registrationDto.getEmail(), registrationDto.getUserName(), registrationDto.getPassword(), registrationDto.getFirstName());
+                sendEmailWithAccountDetails(registrationDto.getEmail(), newUser.getUserName(), registrationDto.getPassword(), registrationDto.getFirstName());
                 return ResponseEntity.ok(new AuthResponse("", "Registration Success", newUser));
             }
             catch(Exception e){
