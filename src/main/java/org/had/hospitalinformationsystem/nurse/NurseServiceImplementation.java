@@ -30,10 +30,10 @@ public class NurseServiceImplementation implements NurseService{
     }
 
     @Override
-    public ResponseEntity<?> getPatientsFromWard(String jwt) {
+    public ResponseEntity<List<Patient>> getPatientsFromWard(String jwt) {
         String role= JwtProvider.getRoleFromJwtToken(jwt);
         if(!role.equals("nurse")){
-            return ResponseEntity.badRequest().body("Only nurse can see their patients");
+            return ResponseEntity.badRequest().body(null);
         }
         String userName=JwtProvider.getUserNameFromJwtToken(jwt);
         Long nurseId=userRepository.findByUserName(userName).getId();
