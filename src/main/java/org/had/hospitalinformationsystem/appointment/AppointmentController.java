@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/appointment")
@@ -67,7 +68,7 @@ public class AppointmentController {
         return appointmentService.getAppointmentDetails(jwt,appointmentId);
     }
     @GetMapping("/cancel/appointment/{appointmentId}")
-    public ResponseEntity<String> cancelAppointment(@RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId){
+    public ResponseEntity<Map<String, String>> cancelAppointment(@RequestHeader("Authorization") String jwt, @PathVariable Long appointmentId){
         return appointmentService.cancelAppointment(jwt,appointmentId);
     }
 }

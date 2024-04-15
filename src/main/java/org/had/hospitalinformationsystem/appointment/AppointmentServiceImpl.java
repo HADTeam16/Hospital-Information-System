@@ -19,11 +19,13 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class AppointmentServiceImpl extends AppointmentUtils implements AppointmentService{
+public class AppointmentServiceImpl extends AppointmentUtils implements AppointmentService {
 
     @Autowired
     UserRepository userRepository;
@@ -56,7 +58,8 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
             if (role.equals("doctor")) {
                 LocalDateTime startDate = date.atStartOfDay();
                 LocalDateTime endDate = startDate.plusDays(1);
-                return ResponseEntity.ok(appointmentRepository.findByDoctorIdAndAppointmentDate(user.getId(), startDate, endDate));
+                return ResponseEntity
+                        .ok(appointmentRepository.findByDoctorIdAndAppointmentDate(user.getId(), startDate, endDate));
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
             }
@@ -82,7 +85,8 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
             return ResponseEntity.ok(appointments);
         } catch (Exception e) {
 
-            return ResponseEntity.internalServerError().body("An error occurred while fetching appointments: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body("An error occurred while fetching appointments: " + e.getMessage());
         }
     }
 
@@ -98,9 +102,11 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
         }
 
         try {
-            Appointment appointment = createAppointment(appointmentDto); // Assume this method exists and correctly creates an appointment
+            Appointment appointment = createAppointment(appointmentDto); // Assume this method exists and correctly
+                                                                         // creates an appointment
             notifyDoctor(appointment); // Send WebSocket notification to the doctor
-            appointmentResponseDto.setResponse("Appointment created successfully for: " + appointment.getSlot().toString());
+            appointmentResponseDto
+                    .setResponse("Appointment created successfully for: " + appointment.getSlot().toString());
             return ResponseEntity.ok().body(appointmentResponseDto);
         } catch (Exception e) {
             appointmentResponseDto.setResponse("Failed to create appointment: " + e.getMessage());
@@ -131,14 +137,15 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
     }
 
     @Override
-    public ResponseEntity<PrescriptionsAndRecords> getAppointmentDetails(String jwt,Long appointmentId) {
+    public ResponseEntity<PrescriptionsAndRecords> getAppointmentDetails(String jwt, Long appointmentId) {
         String role = JwtProvider.getRoleFromJwtToken(jwt);
 
         if (role.equals("doctor")) {
             List<String> records = recordsRepository.findRecordsImageByAppointmentId(appointmentId);
             String prescription = prescriptionRepository.findPrescriptionImageByAppointmentID(appointmentId);
             Appointment appointment = appointmentRepository.findByAppointmentId(appointmentId);
-            PrescriptionsAndRecords appointmentDetails = new PrescriptionsAndRecords(records, prescription,appointment);
+            PrescriptionsAndRecords appointmentDetails = new PrescriptionsAndRecords(records, prescription,
+                    appointment);
             return ResponseEntity.ok(appointmentDetails);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
@@ -146,25 +153,29 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
     }
 
     @Override
-    public ResponseEntity<String> cancelAppointment(String jwt, Long appointmentId) {
-        String role=JwtProvider.getRoleFromJwtToken(jwt);
-        if(!role.equals("doctor")){
-            return ResponseEntity.badRequest().body("Only doctor can cancel the appointment");
+    public ResponseEntity<Map<String, String>> cancelAppointment(String jwt, Long appointmentId) {
+        Map<String, String> response = new HashMap<>();
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+        if (!role.equals("doctor")) {
+            response.put("message", "Only doctor can cancel the appointment");
+            return ResponseEntity.badRequest().body(response);
         }
-        String userName=JwtProvider.getUserNameFromJwtToken(jwt);
-        User user=userRepository.findByUserName(userName);
-        Optional<Doctor> doctor=doctorRepository.findById(user.getId());
-        if(doctor.isPresent()){
-            Appointment appointment=appointmentRepository.findByAppointmentId(appointmentId);
-            if(appointment.getDoctor().getDoctorId()!=doctor.get().getDoctorId()){
-                return ResponseEntity.badRequest().body("Only appointed doctor can cancel their appointment");
+        String userName = JwtProvider.getUserNameFromJwtToken(jwt);
+        User user = userRepository.findByUserName(userName);
+        Optional<Doctor> doctor = doctorRepository.findById(user.getId());
+        if (doctor.isPresent()) {
+            Appointment appointment = appointmentRepository.findByAppointmentId(appointmentId);
+            if (appointment.getDoctor().getDoctorId() != doctor.get().getDoctorId()) {
+                response.put("message", "Only appointed doctor can cancel their appointment");
+                return ResponseEntity.badRequest().body(response);
             }
             appointment.setCompleted(-1);
             appointmentRepository.save(appointment);
-            return ResponseEntity.ok().body("Appointment cancelled successfully");
-        }
-        else{
-            return ResponseEntity.badRequest().body("No doctor found");
+            response.put("message", "Appointment cancelled successfully");
+            return ResponseEntity.ok().body(response);
+        } else {
+            response.put("message", "No doctor found");
+            return ResponseEntity.badRequest().body(response);
         }
     }
 

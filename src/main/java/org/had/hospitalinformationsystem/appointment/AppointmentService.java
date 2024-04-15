@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface AppointmentService {
 
@@ -22,5 +23,5 @@ public interface AppointmentService {
 
     ResponseEntity<PrescriptionsAndRecords> getAppointmentDetails(String jwt,Long appointmentId);
 
-    ResponseEntity<String> cancelAppointment(String jwt,Long appointmentId);
+    ResponseEntity<Map<String, String>> cancelAppointment(String jwt,Long appointmentId);
 }
