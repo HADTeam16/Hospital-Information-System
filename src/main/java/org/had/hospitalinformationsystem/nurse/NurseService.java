@@ -11,5 +11,5 @@ import java.util.List;
 public interface NurseService {
     List<Patient> getPatientsFromNeedWard(List<NeedWard> needWards);
 
-    ResponseEntity<?> getPatientsFromWard(String jwt);
+    ResponseEntity<List<Patient>> getPatientsFromWard(String jwt);
 }

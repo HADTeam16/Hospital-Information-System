@@ -135,8 +135,9 @@ public class NurseController {
     }
 
     @PutMapping("/update/assigned/ward/patient/details/{patientId}")
-    ResponseEntity<String> updateAssignedWardPatientDetails(@RequestHeader("Authorization") String jwt,
+    ResponseEntity<Map<String,String>> updateAssignedWardPatientDetails(@RequestHeader("Authorization") String jwt,
             @PathVariable Long patientId, @RequestBody WardPatientDetails wardPatientDetails) {
+        Map<String,String>response = new HashMap<>();
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         if (role.equals("nurse")) {
 
@@ -147,12 +148,15 @@ public class NurseController {
                 patient.setBloodPressure(wardPatientDetails.getBloodPressure());
                 patient.setWeight(wardPatientDetails.getWeight());
                 patientRepository.save(patient);
-                return ResponseEntity.ok("Updated");
+                response.put("message","Updated");
+                return ResponseEntity.ok(response);
             } else {
-                return ResponseEntity.ok("Failed");
+                response.put("message","Failed");
+                return ResponseEntity.ok(response);
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Denied");
+            response.put("message","Access Denied");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 
@@ -193,8 +197,8 @@ public class NurseController {
     }
 
     @GetMapping("/assigned/patients")
-    ResponseEntity<?> getAssignedPatients(@RequestHeader("Authorization")String jwt){
-        return ResponseEntity.ok().body(nurseService.getPatientsFromWard(jwt));
+    ResponseEntity<List<Patient>> getAssignedPatients(@RequestHeader("Authorization")String jwt){
+        return nurseService.getPatientsFromWard(jwt);
     }
 
 }
