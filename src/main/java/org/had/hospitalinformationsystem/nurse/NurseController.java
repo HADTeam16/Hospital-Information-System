@@ -12,10 +12,12 @@ import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.ward.Ward;
 import org.had.hospitalinformationsystem.ward.WardRepository;
+import org.had.hospitalinformationsystem.ward.WardService;
 import org.hibernate.sql.ast.tree.AbstractUpdateOrDeleteStatement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -40,6 +42,8 @@ public class NurseController {
     WardRepository wardRepository;
     @Autowired
     NeedWardService needWardService;
+    @Autowired
+    WardService wardService;
     @GetMapping("/patients/who/needs/ward")
     public ResponseEntity<?>  patientsNeedWard(@RequestHeader("Authorization") String jwt){
         String role= JwtProvider.getRoleFromJwtToken(jwt);
@@ -130,7 +134,9 @@ public class NurseController {
                 return ResponseEntity.notFound().build();
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only head nurse can assign ward to patient");
+            Map<String,String> response=new HashMap<>();
+            response.put("message","Only head nurse can assign ward to patient");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 
@@ -200,5 +206,10 @@ public class NurseController {
     ResponseEntity<List<Patient>> getAssignedPatients(@RequestHeader("Authorization")String jwt){
         return nurseService.getPatientsFromWard(jwt);
     }
+    @GetMapping("/call/emergency/{wardId}")
+        ResponseEntity<?>callEmergency(@RequestHeader("Authorization")String jwt, @PathVariable Long wardId){
+        return wardService.callEmergency(jwt,wardId);
+    }
+
 
 }
