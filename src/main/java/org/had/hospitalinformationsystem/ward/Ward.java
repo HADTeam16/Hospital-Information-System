@@ -33,5 +33,6 @@ public class Ward {
     private Nurse managingNurse;
     @OneToOne
     private Patient patient;
+    private boolean emergency;
 
 }
