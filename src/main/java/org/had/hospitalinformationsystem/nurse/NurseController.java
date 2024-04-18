@@ -13,6 +13,9 @@ import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.ward.Ward;
 import org.had.hospitalinformationsystem.ward.WardRepository;
 import org.had.hospitalinformationsystem.ward.WardService;
+import org.had.hospitalinformationsystem.wardHistory.WardHistory;
+import org.had.hospitalinformationsystem.wardHistory.WardHistoryRepository;
+import org.had.hospitalinformationsystem.wardHistory.WardHistoryService;
 import org.hibernate.sql.ast.tree.AbstractUpdateOrDeleteStatement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +48,11 @@ public class NurseController {
     NeedWardService needWardService;
     @Autowired
     WardService wardService;
+    @Autowired
+    WardHistoryRepository wardHistoryRepository;
+    @Autowired
+    WardHistoryService wardHistoryService;
+
     @GetMapping("/patients/who/needs/ward")
     public ResponseEntity<?>  patientsNeedWard(@RequestHeader("Authorization") String jwt){
         String role= JwtProvider.getRoleFromJwtToken(jwt);
@@ -116,19 +125,24 @@ public class NurseController {
             Optional<NeedWard> optionalNeedWard = needWardRepository.findById(needWardId);
 
             if (optionalWard.isPresent() && optionalNeedWard.isPresent()) {
+                WardHistory wardHistory=new WardHistory();
                 Ward ward = optionalWard.get();
                 NeedWard needWard = optionalNeedWard.get();
-
                 ward.setAppointment(needWard.getAppointment());
-
                 ward.setManagingNurse(nurseRepository.findNurseWithLeastWardsAssigned());
-
                 ward.setPatient(needWard.getAppointment().getPatient());
                 ward.setAvailableStatus(false);
 
                 Ward updatedWard = wardRepository.save(ward);
                 needWardRepository.deleteById(needWardId);
+                wardHistory.setBloodPressure(ward.getAppointment().getBloodPressure());
+                wardHistory.setHeight(ward.getAppointment().getHeight());
+                wardHistory.setWeight(ward.getAppointment().getWeight());
+                wardHistory.setTemperature(ward.getAppointment().getTemperature());
+                wardHistory.setAppointment(ward.getAppointment());
+                wardHistory.setLog(LocalDateTime.now());
 
+                wardHistoryRepository.save(wardHistory);
                 return ResponseEntity.ok().body(updatedWard);
             } else {
                 return ResponseEntity.notFound().build();
@@ -146,7 +160,6 @@ public class NurseController {
         Map<String,String>response = new HashMap<>();
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         if (role.equals("nurse")) {
-
             Optional<Patient> patientO = patientRepository.findById(patientId);
             if (patientO.isPresent()) {
                 Patient patient = patientO.get();
@@ -155,6 +168,14 @@ public class NurseController {
                 patient.setWeight(wardPatientDetails.getWeight());
                 patientRepository.save(patient);
                 response.put("message","Updated");
+                Ward ward=wardRepository.findByPatient(patientId);
+                WardHistory wardHistory=new WardHistory();
+                wardHistory.setTemperature(wardPatientDetails.getTemperature());
+                wardHistory.setBloodPressure(wardPatientDetails.getBloodPressure());
+                wardHistory.setWeight(wardPatientDetails.getWeight());
+                wardHistory.setLog(LocalDateTime.now());
+                wardHistory.setAppointment(ward.getAppointment());
+                wardHistoryRepository.save(wardHistory);
                 return ResponseEntity.ok(response);
             } else {
                 response.put("message","Failed");
@@ -210,6 +231,10 @@ public class NurseController {
         ResponseEntity<?>callEmergency(@RequestHeader("Authorization")String jwt, @PathVariable Long wardId){
         return wardService.callEmergency(jwt,wardId);
     }
+    @GetMapping("/ward/history/{wardId}")
+        ResponseEntity<?> wardHistory(@RequestHeader("Authorization") String jwt,@PathVariable Long wardId){
+            return wardHistoryService.getWardHistory(jwt,wardId);
+        }
 
 
 }
