@@ -90,7 +90,7 @@ public class OtController {
             Set<Doctor> doctors = surgeonIds.stream().map(id -> doctorRepository.findById(id))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .filter(doctor -> doctor.getSpecialization().contains("surgeon"))
+                    .filter(doctor -> doctor.getSpecialization().toLowerCase().contains("surgeon"))
                     .collect(Collectors.toSet());
             if (doctors.size() != surgeonIds.size()) {
                 response.put("message", "One or more surgeon IDs are invalid!");

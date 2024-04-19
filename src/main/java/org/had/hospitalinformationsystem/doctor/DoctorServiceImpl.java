@@ -40,7 +40,7 @@ public class DoctorServiceImpl implements DoctorService {
     public List<Doctor> getDoctorsWhoAreSurgeon(List<Doctor> doctors) {
         List<Doctor> surgeons = new ArrayList<>();
         for (Doctor doctor : doctors) {
-            if (doctor.getSpecialization().contains("surgeon")) {
+            if (doctor.getSpecialization().toLowerCase().contains("surgeon")) {
                 surgeons.add(doctor);
             }
         }
