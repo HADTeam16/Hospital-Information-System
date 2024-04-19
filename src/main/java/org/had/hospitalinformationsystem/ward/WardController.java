@@ -10,15 +10,10 @@ import java.util.List;
 public class WardController {
 
     @Autowired
-    WardRepository wardRepository;
-
-//    @GetMapping("/available/ward")
-//    public List<Ward> availableWard(@RequestHeader("Authorization") String jwt){
-//        return wardRepository.findAvailableWard();
-//    }
+    WardService wardService;
 
     @GetMapping("/booked/ward")
     public List<Ward> bookedWard(@RequestHeader("Authorization") String jwt){
-        return wardRepository.findBookedWard();
+        return wardService.bookedWard(jwt);
     }
 }

@@ -23,53 +23,20 @@ import java.util.Map;
 public class DoctorController {
 
     @Autowired
-    DoctorRepository doctorRepository;
-
-    @Autowired
-    PatientRepository patientRepository;
-
-    @Autowired
-    AppointmentRepository appointmentRepository;
-
-    @Autowired
-    NeedWardRepository needWardRepository;
-    @Autowired
     DoctorService doctorService;
 
     @GetMapping("/get/all/doctors")
     public ResponseEntity<?> getAllDoctor(@RequestHeader("Authorization") String jwt) {
-        try {
-            String role = JwtProvider.getRoleFromJwtToken(jwt);
-            if (!role.equals("admin") && !role.equals("receptionist")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: Unauthorized role");
-            }
-            List<Doctor> allDoctor = doctorRepository.findAll();
-            if (allDoctor.isEmpty()) {
-                return ResponseEntity.ok(Collections.emptyList());
-            }
-            return ResponseEntity.ok(allDoctor);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to retrieve doctors: " + e.getMessage());
-        }
+        return doctorService.getAllDoctor(jwt);
     }
 
     @GetMapping("/recommend/ward/{appointmentId}")
-    public ResponseEntity<Map<String, String>> assignWard(@RequestHeader("Authorization") String jwt,
-            @PathVariable long appointmentId) {
-        Appointment appointment = appointmentRepository.findByAppointmentId(appointmentId);
-        NeedWard needWard = new NeedWard();
-        needWard.setAppointment(appointment);
-        needWard.setRequestTime(LocalDateTime.now());
-
-        needWardRepository.save(needWard);
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "success");
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Map<String, String>> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable long appointmentId) {
+        return doctorService.assignWard(jwt, appointmentId);
     }
 
     @PostMapping("/finish/appointment")
-    public ResponseEntity<Map<String, String>> finishAppointment(@RequestHeader("Authorization") String jwt,
-            @RequestBody AppointmentFinishDTO prescriptionsAndRecords) {
+    public ResponseEntity<Map<String, String>> finishAppointment(@RequestHeader("Authorization") String jwt, @RequestBody AppointmentFinishDTO prescriptionsAndRecords) {
         return doctorService.finishAppointment(jwt, prescriptionsAndRecords);
     }
 }

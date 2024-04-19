@@ -1,19 +1,21 @@
 package org.had.hospitalinformationsystem.OT;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
 
-@Service
-public class OtService {
-    @Autowired
-    OTRepository otRepository;
+import java.util.Map;
+import java.util.Set;
 
-    public void createOts(){
-        for(int i=1;i<=10;i++){
-            OT ot=new OT();
-            ot.setAvailableStatus(true);
-            otRepository.save(ot);
-        }
-    }
 
+public interface OtService {
+
+
+    ResponseEntity<?> getAllOts(String jwt);
+
+    ResponseEntity<String> createOts(String jwt);
+
+    ResponseEntity<?> getAllSurgeons(String jwt);
+
+    ResponseEntity<Map<String, String>> bookOt(String jwt, Long otId, Set<Long> surgeonIds);
+
+    ResponseEntity<?> freeOt(String jwt, Long otId);
 }

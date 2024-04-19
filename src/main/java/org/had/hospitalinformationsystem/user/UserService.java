@@ -1,15 +1,28 @@
 package org.had.hospitalinformationsystem.user;
 
+import org.had.hospitalinformationsystem.dto.AuthResponse;
 import org.had.hospitalinformationsystem.dto.HospitalLiveStatsDto;
+import org.had.hospitalinformationsystem.dto.RegistrationDto;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface UserService {
 
 
-    List<User> findUserByRole(String role) throws Exception;
+    ResponseEntity<List<User>> getAllUsers(String jwt);
 
-    User findUserById(Long userId) throws Exception;
+    ResponseEntity<User> findUserById(String jwt,Long id);
+
+    ResponseEntity<List<User>> findUserByRole(String jwt, String role);
+
+    boolean userPresentOrNot(String jwt, String userName);
+
+    ResponseEntity<User> updateUser(String jwt, User user);
+
+    ResponseEntity<?>getUser(String jwt, Long userId);
+
+    ResponseEntity<AuthResponse> updateUser(String jwt, Long userId, RegistrationDto registrationDto);
 
     User findUserByJwt(String jwt);
 
