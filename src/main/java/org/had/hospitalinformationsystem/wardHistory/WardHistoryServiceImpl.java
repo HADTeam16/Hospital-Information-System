@@ -17,12 +17,14 @@ import java.util.Optional;
 
 @Service
 public class WardHistoryServiceImpl implements WardHistoryService {
+
     @Autowired
     WardRepository wardRepository;
     @Autowired
     WardHistoryRepository wardHistoryRepository;
     @Autowired
     UserRepository userRepository;
+
     @Override
     public ResponseEntity<?> getWardHistory(String jwt,Long wardId) {
         String userName= JwtProvider.getUserNameFromJwtToken(jwt);
@@ -39,7 +41,6 @@ public class WardHistoryServiceImpl implements WardHistoryService {
             return ResponseEntity.badRequest().body(response);
 
         }
-
         response.put("message","Ward not found");
         return ResponseEntity.badRequest().body(response);
     }

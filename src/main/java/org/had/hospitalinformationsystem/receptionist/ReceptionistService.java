@@ -1,18 +1,20 @@
 package org.had.hospitalinformationsystem.receptionist;
 
 import org.had.hospitalinformationsystem.appointment.Appointment;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Service;
+import org.had.hospitalinformationsystem.dto.RegistrationDto;
+import org.springframework.http.ResponseEntity;
 
-@Service
-public class ReceptionistService {
-    private final SimpMessagingTemplate messagingTemplate;
+import java.util.List;
 
-    public ReceptionistService(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
-    }
+public interface ReceptionistService {
 
-    public void sendAppointmentUpdate(Appointment appointment) {
-        messagingTemplate.convertAndSend("/topic/appointments", appointment);
-    }
+    void sendAppointmentUpdate(Appointment appointment);
+
+    ResponseEntity<Object> signupPatient(String jwt, RegistrationDto registrationDto);
+
+    ResponseEntity<?> findDoctorBySpecialization(String jwt, String specialization);
+
+    ResponseEntity<String> createWard(String jwt);
+
+    ResponseEntity<List<Receptionist>> getAllReceptionist(String jwt);
 }

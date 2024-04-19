@@ -20,9 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM User u WHERE u.role = 'admin'")
     Boolean findAdminByRole();
 
-    @Query("select u from User u where u.firstName LIKE %:query% OR u.lastName LIKE %:query% OR u.userName LIKE %:query%")
-    List<User> searchUser(@Param("query") String query);
-
     User findUserByEmail(String email);
 
     @Query("SELECT u.userName FROM User u WHERE u.userName LIKE :prefix%")
