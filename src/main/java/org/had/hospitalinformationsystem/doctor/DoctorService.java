@@ -2,11 +2,16 @@ package org.had.hospitalinformationsystem.doctor;
 
 import org.had.hospitalinformationsystem.dto.AppointmentFinishDTO;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.List;
 import java.util.Map;
 
 public interface DoctorService {
+
+    ResponseEntity<?> getAllDoctor(String jwt);
+
+    ResponseEntity<Map<String, String>> assignWard(String jwt, long appointmentId);
 
     List<Doctor> getDoctorsWhoAreSurgeon(List<Doctor> doctors);
 
