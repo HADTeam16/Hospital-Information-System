@@ -61,7 +61,7 @@ public class NurseController {
     }
 
     @GetMapping("/assign/ward/{wardId}/{needWardId}")
-    ResponseEntity<?> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable Long wardId, @PathVariable Long needWardId) {
+    ResponseEntity<Map<String,String>> assignWard(@RequestHeader("Authorization") String jwt, @PathVariable Long wardId, @PathVariable Long needWardId) {
         return nurseService.assignWard(jwt, wardId, needWardId);
     }
 

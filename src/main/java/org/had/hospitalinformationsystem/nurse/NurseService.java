@@ -21,7 +21,7 @@ public interface NurseService {
 
     ResponseEntity<List<Long>> getAllAvailableWardIds(String jwt);
 
-    ResponseEntity<?> assignWard(String jwt, Long wardId, Long needWardId);
+    ResponseEntity<Map<String,String>> assignWard(String jwt, Long wardId, Long needWardId);
 
     ResponseEntity<Map<String,String>> updateAssignedWardPatientDetails(String jwt, Long patientId, @RequestBody WardPatientDetails wardPatientDetails);
 

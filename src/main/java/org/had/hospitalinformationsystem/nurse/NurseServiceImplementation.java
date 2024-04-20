@@ -27,7 +27,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
-public class NurseServiceImplementation implements NurseService{
+public class NurseServiceImplementation implements NurseService {
 
     @Autowired
     UserRepository userRepository;//
@@ -45,17 +45,16 @@ public class NurseServiceImplementation implements NurseService{
     @Autowired
     WardHistoryService wardHistoryService;//
 
-
     @Override
-    public ResponseEntity<?>  patientsNeedWard(String jwt){
-        Map<String,String>response = new HashMap<>();
-        String role= JwtProvider.getRoleFromJwtToken(jwt);
+    public ResponseEntity<?> patientsNeedWard(String jwt) {
+        Map<String, String> response = new HashMap<>();
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
 
-        String userName=JwtProvider.getUserNameFromJwtToken(jwt);
-        User user=userRepository.findByUserName(userName);
-        Optional<Nurse> nurse=nurseRepository.findById(user.getId());
-        if(!role.equals("nurse")){
-            response.put("message","Wrong user have been provided to see.");
+        String userName = JwtProvider.getUserNameFromJwtToken(jwt);
+        User user = userRepository.findByUserName(userName);
+        Optional<Nurse> nurse = nurseRepository.findById(user.getId());
+        if (!role.equals("nurse")) {
+            response.put("message", "Wrong user have been provided to see.");
             return ResponseEntity.badRequest().body(response);
         }
         if (nurse.get().isHeadNurse()) {
@@ -95,22 +94,22 @@ public class NurseServiceImplementation implements NurseService{
     }
 
     @Override
-    public ResponseEntity<List<Long>> getAllAvailableWardIds(String jwt){
-        String role=JwtProvider.getRoleFromJwtToken(jwt);
-        String userName=JwtProvider.getUserNameFromJwtToken(jwt);
-        User user=userRepository.findByUserName(userName);
-        Nurse nurse=nurseRepository.findByUser(user);
-        if(role.equals("nurse") && nurse.isHeadNurse()){
-            List<Long> wardIds=wardRepository.findAvailableWardIds();
+    public ResponseEntity<List<Long>> getAllAvailableWardIds(String jwt) {
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+        String userName = JwtProvider.getUserNameFromJwtToken(jwt);
+        User user = userRepository.findByUserName(userName);
+        Nurse nurse = nurseRepository.findByUser(user);
+        if (role.equals("nurse") && nurse.isHeadNurse()) {
+            List<Long> wardIds = wardRepository.findAvailableWardIds();
             return ResponseEntity.ok().body(wardIds);
-        }
-        else{
+        } else {
             return ResponseEntity.badRequest().body(null);
         }
     }
 
     @Override
-    public ResponseEntity<?> assignWard(String jwt, Long wardId, Long needWardId) {
+    public ResponseEntity<Map<String, String>> assignWard(String jwt, Long wardId, Long needWardId) {
+        Map<String, String> response = new HashMap<>();
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         String userName = JwtProvider.getUserNameFromJwtToken(jwt);
         User user = userRepository.findByUserName(userName);
@@ -121,7 +120,7 @@ public class NurseServiceImplementation implements NurseService{
             Optional<NeedWard> optionalNeedWard = needWardRepository.findById(needWardId);
 
             if (optionalWard.isPresent() && optionalNeedWard.isPresent()) {
-                WardHistory wardHistory=new WardHistory();
+                WardHistory wardHistory = new WardHistory();
                 Ward ward = optionalWard.get();
                 NeedWard needWard = optionalNeedWard.get();
                 ward.setAppointment(needWard.getAppointment());
@@ -139,20 +138,21 @@ public class NurseServiceImplementation implements NurseService{
                 wardHistory.setLog(LocalDateTime.now());
 
                 wardHistoryRepository.save(wardHistory);
-                return ResponseEntity.ok().body(updatedWard);
+                response.put("message", "assign ward success");
+                return ResponseEntity.ok().body(response);
             } else {
                 return ResponseEntity.notFound().build();
             }
         } else {
-            Map<String,String> response=new HashMap<>();
-            response.put("message","Only head nurse can assign ward to patient");
+            response.put("message", "Only head nurse can assign ward to patient");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 
     @Override
-    public ResponseEntity<Map<String,String>> updateAssignedWardPatientDetails(String jwt, Long patientId, @RequestBody WardPatientDetails wardPatientDetails) {
-        Map<String,String>response = new HashMap<>();
+    public ResponseEntity<Map<String, String>> updateAssignedWardPatientDetails(String jwt, Long patientId,
+            @RequestBody WardPatientDetails wardPatientDetails) {
+        Map<String, String> response = new HashMap<>();
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         if (role.equals("nurse")) {
             Optional<Patient> patientO = patientRepository.findById(patientId);
@@ -162,9 +162,9 @@ public class NurseServiceImplementation implements NurseService{
                 patient.setBloodPressure(wardPatientDetails.getBloodPressure());
                 patient.setWeight(wardPatientDetails.getWeight());
                 patientRepository.save(patient);
-                response.put("message","Updated");
-                Ward ward=wardRepository.findByPatient(patientId);
-                WardHistory wardHistory=new WardHistory();
+                response.put("message", "Updated");
+                Ward ward = wardRepository.findByPatient(patientId);
+                WardHistory wardHistory = new WardHistory();
                 wardHistory.setTemperature(wardPatientDetails.getTemperature());
                 wardHistory.setBloodPressure(wardPatientDetails.getBloodPressure());
                 wardHistory.setWeight(wardPatientDetails.getWeight());
@@ -173,17 +173,17 @@ public class NurseServiceImplementation implements NurseService{
                 wardHistoryRepository.save(wardHistory);
                 return ResponseEntity.ok(response);
             } else {
-                response.put("message","Failed");
+                response.put("message", "Failed");
                 return ResponseEntity.ok(response);
             }
         } else {
-            response.put("message","Access Denied");
+            response.put("message", "Access Denied");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 
     @Override
-    public ResponseEntity<Map<String, String>> isNurseIsAHeadNurse(String jwt,Long nurseId) {
+    public ResponseEntity<Map<String, String>> isNurseIsAHeadNurse(String jwt, Long nurseId) {
         Map<String, String> response = new HashMap<>();
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
@@ -214,15 +214,15 @@ public class NurseServiceImplementation implements NurseService{
     }
 
     @Override
-    public ResponseEntity<List<Ward>> getNurseAllottedWard(String jwt,Long nurseId){
+    public ResponseEntity<List<Ward>> getNurseAllottedWard(String jwt, Long nurseId) {
         return ResponseEntity.ok().body(wardRepository.allottedWard(nurseId));
     }
 
     @Override
     public List<Patient> getPatientsFromNeedWard(List<NeedWard> needWards) {
-        List<Patient> patients=new ArrayList<>();
-        
-        for(NeedWard needWard:needWards){
+        List<Patient> patients = new ArrayList<>();
+
+        for (NeedWard needWard : needWards) {
             patients.add(needWard.getAppointment().getPatient());
         }
         return patients;
@@ -230,12 +230,12 @@ public class NurseServiceImplementation implements NurseService{
 
     @Override
     public ResponseEntity<List<Patient>> getPatientsFromWard(String jwt) {
-        String role= JwtProvider.getRoleFromJwtToken(jwt);
-        if(!role.equals("nurse")){
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+        if (!role.equals("nurse")) {
             return ResponseEntity.badRequest().body(null);
         }
-        String userName=JwtProvider.getUserNameFromJwtToken(jwt);
-        Long nurseId=userRepository.findByUserName(userName).getId();
+        String userName = JwtProvider.getUserNameFromJwtToken(jwt);
+        Long nurseId = userRepository.findByUserName(userName).getId();
         return ResponseEntity.ok().body(wardRepository.assignedPatientsUnderNurse(nurseId));
     }
 }
