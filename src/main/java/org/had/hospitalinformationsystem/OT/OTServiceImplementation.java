@@ -17,8 +17,6 @@ public class OTServiceImplementation implements OtService{
     @Autowired
     OTRepository otRepository;
     @Autowired
-    OtService otService;
-    @Autowired
     DoctorService doctorService;
     @Autowired
     DoctorRepository doctorRepository;
