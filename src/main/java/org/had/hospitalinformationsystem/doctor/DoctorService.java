@@ -1,6 +1,7 @@
 package org.had.hospitalinformationsystem.doctor;
 
 import org.had.hospitalinformationsystem.dto.AppointmentFinishDTO;
+import org.had.hospitalinformationsystem.ward.Ward;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 
@@ -20,5 +21,7 @@ public interface DoctorService {
     Map<String,Long> getSpecialityWiseDoctorsCount();
 
     public Map<String, Long> getCurrentlyAvailableSpecialityWiseDoctorsCount();
+
+    ResponseEntity<List<Ward>> getAllWards(String jwt);
 
 }

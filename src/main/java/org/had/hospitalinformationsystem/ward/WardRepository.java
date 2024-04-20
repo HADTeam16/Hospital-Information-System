@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface WardRepository extends JpaRepository<Ward,Long> {
 
-    @Query("SELECT wd FROM Ward wd WHERE wd.availableStatus = true")
+    @Query("SELECT wd FROM Ward wd")
     List<Ward>findAvailableWard();
 
     @Query("SELECT wd FROM Ward wd WHERE wd.availableStatus = false")

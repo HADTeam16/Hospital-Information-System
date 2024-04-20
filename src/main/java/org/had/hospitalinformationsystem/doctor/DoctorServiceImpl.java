@@ -10,6 +10,8 @@ import org.had.hospitalinformationsystem.prescription.Prescription;
 import org.had.hospitalinformationsystem.prescription.PrescriptionRepository;
 import org.had.hospitalinformationsystem.records.Records;
 import org.had.hospitalinformationsystem.records.RecordsRepository;
+import org.had.hospitalinformationsystem.ward.Ward;
+import org.had.hospitalinformationsystem.ward.WardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +32,8 @@ public class DoctorServiceImpl implements DoctorService {
     PrescriptionRepository prescriptionRepository;
     @Autowired
     RecordsRepository recordsRepository;
-
+    @Autowired
+    WardRepository wardRepository;//
 
     @Override
     public ResponseEntity<?> getAllDoctor(String jwt) {
@@ -159,6 +162,18 @@ public class DoctorServiceImpl implements DoctorService {
             specialityWiseAvailableDoctors.put(specialization, count);
         }
         return specialityWiseAvailableDoctors;
+    }
+
+    @Override
+    public ResponseEntity<List<Ward>> getAllWards(String jwt) {
+        String role = JwtProvider.getRoleFromJwtToken(jwt);
+        if (role.equals("doctor")) {
+            List<Ward> wards = wardRepository.findAll();
+            return ResponseEntity.ok().body(wards);
+        } else {
+            return ResponseEntity.badRequest().body(null);
+        }
+
     }
 
 }
