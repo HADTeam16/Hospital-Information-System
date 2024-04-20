@@ -1,20 +1,11 @@
 package org.had.hospitalinformationsystem.doctor;
 
-import org.had.hospitalinformationsystem.appointment.Appointment;
-import org.had.hospitalinformationsystem.appointment.AppointmentRepository;
 import org.had.hospitalinformationsystem.dto.AppointmentFinishDTO;
-import org.had.hospitalinformationsystem.jwt.JwtProvider;
-import org.had.hospitalinformationsystem.needWard.NeedWard;
-import org.had.hospitalinformationsystem.needWard.NeedWardRepository;
-import org.had.hospitalinformationsystem.patient.PatientRepository;
+import org.had.hospitalinformationsystem.ward.Ward;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,5 +29,10 @@ public class DoctorController {
     @PostMapping("/finish/appointment")
     public ResponseEntity<Map<String, String>> finishAppointment(@RequestHeader("Authorization") String jwt, @RequestBody AppointmentFinishDTO prescriptionsAndRecords) {
         return doctorService.finishAppointment(jwt, prescriptionsAndRecords);
+    }
+
+    @GetMapping("get/all/wards")
+    ResponseEntity<List<Ward>> getAllWards(@RequestHeader("Authorization") String jwt) {
+        return doctorService.getAllWards(jwt);
     }
 }

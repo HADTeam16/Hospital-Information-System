@@ -17,8 +17,6 @@ public interface NurseService {
 
     ResponseEntity<List<Nurse>> getAllNurse(String jwt);
 
-    ResponseEntity<List<Ward>> getAllAvailableWards(String jwt);
-
     ResponseEntity<List<Long>> getAllAvailableWardIds(String jwt);
 
     ResponseEntity<Map<String,String>> assignWard(String jwt, Long wardId, Long needWardId);

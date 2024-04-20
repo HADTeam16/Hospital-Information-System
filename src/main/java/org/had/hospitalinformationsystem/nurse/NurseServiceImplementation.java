@@ -4,14 +4,12 @@ import org.had.hospitalinformationsystem.dto.WardPatientDetails;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.needWard.NeedWard;
 import org.had.hospitalinformationsystem.needWard.NeedWardRepository;
-import org.had.hospitalinformationsystem.needWard.NeedWardService;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.ward.Ward;
 import org.had.hospitalinformationsystem.ward.WardRepository;
-import org.had.hospitalinformationsystem.ward.WardService;
 import org.had.hospitalinformationsystem.wardHistory.WardHistory;
 import org.had.hospitalinformationsystem.wardHistory.WardHistoryRepository;
 import org.had.hospitalinformationsystem.wardHistory.WardHistoryService;
@@ -19,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -59,7 +54,6 @@ public class NurseServiceImplementation implements NurseService {
         }
         if (nurse.get().isHeadNurse()) {
             List<NeedWard> needWards = needWardRepository.returnNeedWards();
-            List<Patient> patients = getPatientsFromNeedWard(needWards);
             return ResponseEntity.ok(needWards);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
@@ -76,21 +70,6 @@ public class NurseServiceImplementation implements NurseService {
         } else {
             return ResponseEntity.badRequest().body(null);
         }
-    }
-
-    @Override
-    public ResponseEntity<List<Ward>> getAllAvailableWards(String jwt) {
-        String role = JwtProvider.getRoleFromJwtToken(jwt);
-        String userName = JwtProvider.getUserNameFromJwtToken(jwt);
-        User user = userRepository.findByUserName(userName);
-        Nurse nurse = nurseRepository.findByUser(user);
-        if (role.equals("nurse") && nurse.isHeadNurse()) {
-            List<Ward> wards = wardRepository.findAvailableWard();
-            return ResponseEntity.ok().body(wards);
-        } else {
-            return ResponseEntity.badRequest().body(null);
-        }
-
     }
 
     @Override
@@ -127,8 +106,8 @@ public class NurseServiceImplementation implements NurseService {
                 ward.setManagingNurse(nurseRepository.findNurseWithLeastWardsAssigned());
                 ward.setPatient(needWard.getAppointment().getPatient());
                 ward.setAvailableStatus(false);
+                wardRepository.save(ward);
 
-                Ward updatedWard = wardRepository.save(ward);
                 needWardRepository.deleteById(needWardId);
                 wardHistory.setBloodPressure(ward.getAppointment().getBloodPressure());
                 wardHistory.setHeight(ward.getAppointment().getHeight());
