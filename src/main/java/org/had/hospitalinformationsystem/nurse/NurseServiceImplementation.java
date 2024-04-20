@@ -30,25 +30,20 @@ import java.util.*;
 public class NurseServiceImplementation implements NurseService{
 
     @Autowired
-    UserRepository userRepository;
+    UserRepository userRepository;//
     @Autowired
-    PatientRepository patientRepository;
+    PatientRepository patientRepository;//
     @Autowired
-    NurseRepository nurseRepository;
+    NurseRepository nurseRepository;//
     @Autowired
-    NurseService nurseService;
+    NeedWardRepository needWardRepository;//
     @Autowired
-    NeedWardRepository needWardRepository;
+    WardRepository wardRepository;//
+
     @Autowired
-    WardRepository wardRepository;
+    WardHistoryRepository wardHistoryRepository;//
     @Autowired
-    NeedWardService needWardService;
-    @Autowired
-    WardService wardService;
-    @Autowired
-    WardHistoryRepository wardHistoryRepository;
-    @Autowired
-    WardHistoryService wardHistoryService;
+    WardHistoryService wardHistoryService;//
 
 
     @Override
@@ -65,7 +60,7 @@ public class NurseServiceImplementation implements NurseService{
         }
         if (nurse.get().isHeadNurse()) {
             List<NeedWard> needWards = needWardRepository.returnNeedWards();
-            List<Patient> patients = nurseService.getPatientsFromNeedWard(needWards);
+            List<Patient> patients = getPatientsFromNeedWard(needWards);
             return ResponseEntity.ok(needWards);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
