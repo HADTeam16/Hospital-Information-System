@@ -9,4 +9,5 @@ public class WardPatientDetails {
     private float temperature;
     private String bloodPressure;
     private float weight;
+    private float height;
 }

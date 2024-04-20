@@ -129,31 +129,39 @@ public class NurseServiceImplementation implements NurseService {
     }
 
     @Override
-    public ResponseEntity<Map<String, String>> updateAssignedWardPatientDetails(String jwt, Long patientId,
-            @RequestBody WardPatientDetails wardPatientDetails) {
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Map<String,String>> updateAssignedWardPatientDetails(String jwt, Long wardId, @RequestBody WardPatientDetails wardPatientDetails) {
+        Map<String,String>response = new HashMap<>();
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         if (role.equals("nurse")) {
-            Optional<Patient> patientO = patientRepository.findById(patientId);
-            if (patientO.isPresent()) {
-                Patient patient = patientO.get();
-                patient.setTemperature(wardPatientDetails.getTemperature());
-                patient.setBloodPressure(wardPatientDetails.getBloodPressure());
-                patient.setWeight(wardPatientDetails.getWeight());
-                patientRepository.save(patient);
-                response.put("message", "Updated");
-                Ward ward = wardRepository.findByPatient(patientId);
-                WardHistory wardHistory = new WardHistory();
-                wardHistory.setTemperature(wardPatientDetails.getTemperature());
-                wardHistory.setBloodPressure(wardPatientDetails.getBloodPressure());
-                wardHistory.setWeight(wardPatientDetails.getWeight());
-                wardHistory.setLog(LocalDateTime.now());
-                wardHistory.setAppointment(ward.getAppointment());
-                wardHistoryRepository.save(wardHistory);
-                return ResponseEntity.ok(response);
-            } else {
-                response.put("message", "Failed");
-                return ResponseEntity.ok(response);
+            Optional<Ward> ward=wardRepository.findById(wardId);
+            if(ward.isPresent()){
+                Optional<Patient> patient=patientRepository.findById(ward.get().getPatient().getId());
+                if(patient.isPresent()){
+                    patient.get().setWeight(wardPatientDetails.getWeight());
+                    patient.get().setHeight(wardPatientDetails.getHeight());
+                    patient.get().setBloodPressure(wardPatientDetails.getBloodPressure());
+                    patient.get().setTemperature(wardPatientDetails.getTemperature());
+                    WardHistory wardHistory=new WardHistory();
+                    wardHistory.setAppointment(ward.get().getAppointment());
+                    wardHistory.setHeight(wardPatientDetails.getHeight());
+                    wardHistory.setWeight(wardPatientDetails.getWeight());
+                    wardHistory.setBloodPressure(wardPatientDetails.getBloodPressure());
+                    wardHistory.setTemperature(wardPatientDetails.getTemperature());
+                    wardHistory.setLog(LocalDateTime.now());
+                    patientRepository.save(patient.get());
+                    wardHistoryRepository.save(wardHistory);
+                    response.put("message","Patient details has been updated");
+                    return ResponseEntity.ok().body(response);
+
+                }
+                else{
+                    response.put("message","Patient not found");
+                    return ResponseEntity.badRequest().body(response);
+                }
+            }
+            else{
+                response.put("message","ward not found");
+                return ResponseEntity.badRequest().body(response);
             }
         } else {
             response.put("message", "Access Denied");
