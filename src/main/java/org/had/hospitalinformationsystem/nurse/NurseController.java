@@ -50,12 +50,12 @@ public class NurseController {
         return nurseService.getAllNurse(jwt);
     }
 
-    @GetMapping("get/all/available/wards")
+    @GetMapping("/get/all/available/wards")
     ResponseEntity<List<Ward>> getAllAvailableWards(@RequestHeader("Authorization") String jwt) {
         return nurseService.getAllAvailableWards(jwt);
     }
 
-    @GetMapping("get/all/available/wardIds")
+    @GetMapping("/get/all/available/wardIds")
     ResponseEntity<List<Long>> getAllAvailableWardIds(@RequestHeader("Authorization") String jwt){
         return nurseService.getAllAvailableWardIds(jwt);
     }
@@ -65,9 +65,9 @@ public class NurseController {
         return nurseService.assignWard(jwt, wardId, needWardId);
     }
 
-    @PutMapping("/update/assigned/ward/patient/details/{patientId}")
-    ResponseEntity<Map<String,String>> updateAssignedWardPatientDetails(@RequestHeader("Authorization") String jwt, @PathVariable Long patientId, @RequestBody WardPatientDetails wardPatientDetails) {
-        return nurseService.updateAssignedWardPatientDetails(jwt, patientId, wardPatientDetails);
+    @PutMapping("/update/assigned/ward/patient/details/{wardId}")
+    ResponseEntity<Map<String,String>> updateAssignedWardPatientDetails(@RequestHeader("Authorization") String jwt, @PathVariable Long wardId, @RequestBody WardPatientDetails wardPatientDetails) {
+        return nurseService.updateAssignedWardPatientDetails(jwt, wardId, wardPatientDetails);
     }
 
     @GetMapping("/is/head/nurse/{nurseId}")
