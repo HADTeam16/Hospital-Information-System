@@ -23,7 +23,7 @@ public interface NurseService {
 
     ResponseEntity<Map<String,String>> assignWard(String jwt, Long wardId, Long needWardId);
 
-    ResponseEntity<Map<String,String>> updateAssignedWardPatientDetails(String jwt, Long patientId, @RequestBody WardPatientDetails wardPatientDetails);
+    ResponseEntity<Map<String,String>> updateAssignedWardPatientDetails(String jwt, Long wardId, @RequestBody WardPatientDetails wardPatientDetails);
 
     ResponseEntity<Map<String, String>> isNurseIsAHeadNurse(String jwt,Long nurseId);
 

@@ -22,7 +22,7 @@ public class WardHistory {
     private float temperature;
     private String bloodPressure;
     private float weight;
-    private float height;//need to remove
+    private float height;
 
     public void setAppointment(Appointment appointment) {
         this.appointment=appointment;
