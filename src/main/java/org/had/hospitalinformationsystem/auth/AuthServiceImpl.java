@@ -190,11 +190,13 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
 
             if(currUser != null){
                 EmailOtpResponse emailOtpResponse =sendEmailForForgetPassword(currUser.getEmail(), currUser.getUserName(), currUser.getFirstName());
-                response.put("message",emailOtpResponse.getMessage());
+
                 if(emailOtpResponse.getStatus()==OtpStatus.DELIVERED){
+                    response.put("message","Email Sent Successfully");
                     return ResponseEntity.ok(response);
                 }
                 else{
+                    response.put("message","Try Again!!");
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
                 }
             }
