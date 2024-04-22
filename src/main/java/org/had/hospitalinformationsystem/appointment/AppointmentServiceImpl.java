@@ -171,6 +171,7 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
             }
             appointment.setCompleted(-1);
             appointmentRepository.save(appointment);
+            sendEmailForAckOfAppointmentCancel(appointment.getPatient().getUser().getEmail(),appointment.getPatient().getUser().getUserName(),appointment.getPatient().getUser().getFirstName(),appointment.getSlot());
             response.put("message", "Appointment cancelled successfully");
             return ResponseEntity.ok().body(response);
         } else {
