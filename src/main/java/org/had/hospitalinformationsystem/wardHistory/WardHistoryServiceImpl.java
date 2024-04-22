@@ -35,6 +35,9 @@ public class WardHistoryServiceImpl implements WardHistoryService {
         if(ward.isPresent()){
             if(role.equals("doctor") || role.equals("nurse")){
                 List<WardHistory> wardHistories=wardHistoryRepository.getWardHistoriesByAppointment(ward.get().getAppointment().getAppointmentId());
+                for(WardHistory wardhist :wardHistories ){
+                    wardhist.setAppointment(null);
+                }
                 return ResponseEntity.ok().body(wardHistories);
             }
             response.put("message","Only doctor and nurse can see ward history");

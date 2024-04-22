@@ -75,7 +75,7 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
                     newPatient.setUser(newUser);
                     newPatient.setTemperature(registrationDto.getTemperature());
                     newPatient.setBloodPressure(registrationDto.getBloodPressure());
-                    newPatient.setHeight(registrationDto.getHeight());
+                    newPatient.setHeartRate(registrationDto.getHeartRate());
                     newPatient.setWeight(registrationDto.getWeight());
                     newPatient.setRegistrationDateAndTime(LocalDateTime.now());
                     Consent currPatientConsent = new Consent();

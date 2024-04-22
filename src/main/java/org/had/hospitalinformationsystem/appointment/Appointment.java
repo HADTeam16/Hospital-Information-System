@@ -50,9 +50,9 @@ public class Appointment {
     @Column(nullable = false)
     private float weight;
 
-    @Min(value = 0, message = "Height cannot be negative")
+    @Min(value = 0, message = "HeartRate cannot be negative")
     @Column(nullable = false)
-    private float height;
+    private float heartRate;
 
     @NotNull
     @Column(nullable = false)

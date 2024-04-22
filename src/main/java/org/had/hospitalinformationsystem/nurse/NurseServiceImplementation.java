@@ -110,7 +110,7 @@ public class NurseServiceImplementation implements NurseService {
 
                 needWardRepository.deleteById(needWardId);
                 wardHistory.setBloodPressure(ward.getAppointment().getBloodPressure());
-                wardHistory.setHeight(ward.getAppointment().getHeight());
+                wardHistory.setHeartRate(ward.getAppointment().getHeartRate());
                 wardHistory.setWeight(ward.getAppointment().getWeight());
                 wardHistory.setTemperature(ward.getAppointment().getTemperature());
                 wardHistory.setAppointment(ward.getAppointment());
@@ -138,12 +138,12 @@ public class NurseServiceImplementation implements NurseService {
                 Optional<Patient> patient=patientRepository.findById(ward.get().getPatient().getId());
                 if(patient.isPresent()){
                     patient.get().setWeight(wardPatientDetails.getWeight());
-                    patient.get().setHeight(wardPatientDetails.getHeight());
+                    patient.get().setHeartRate(wardPatientDetails.getHeartRate());
                     patient.get().setBloodPressure(wardPatientDetails.getBloodPressure());
                     patient.get().setTemperature(wardPatientDetails.getTemperature());
                     WardHistory wardHistory=new WardHistory();
                     wardHistory.setAppointment(ward.get().getAppointment());
-                    wardHistory.setHeight(wardPatientDetails.getHeight());
+                    wardHistory.setHeartRate(wardPatientDetails.getHeartRate());
                     wardHistory.setWeight(wardPatientDetails.getWeight());
                     wardHistory.setBloodPressure(wardPatientDetails.getBloodPressure());
                     wardHistory.setTemperature(wardPatientDetails.getTemperature());
