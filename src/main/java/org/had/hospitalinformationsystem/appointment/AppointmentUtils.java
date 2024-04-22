@@ -123,4 +123,14 @@ public class AppointmentUtils extends Utils {
         return appointments.isEmpty();
     }
 
+    protected void sendEmailForAckOfAppointmentCancel(String email, String username, String name, LocalDateTime date) {
+        String subject = "Appointment Cancellation Notification";
+        String messageTemplate = "Hello Mr/Mrs " + name + ",<br/><br/>" +
+                "Your appointment scheduled for " + date + " has been canceled. We apologize for any inconvenience caused.<br/>" +
+                "To reschedule your appointment, please contact our receptionist and schedule a new appointment if needed " + ".<br/>" +
+                "Thank you for your understanding.<br/><br/>" +
+                "Best regards,<br/>" +
+                "Pure Zen Wellness Hospital";
+        sendEmail(email, username, "", name, subject, messageTemplate);
+    }
 }
