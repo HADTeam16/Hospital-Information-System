@@ -1,8 +1,7 @@
 package org.had.hospitalinformationsystem.receptionist;
 
 import org.had.hospitalinformationsystem.appointment.Appointment;
-import org.had.hospitalinformationsystem.consent.Consent;
-import org.had.hospitalinformationsystem.consent.ConsentRepository;
+
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.dto.AuthResponse;
@@ -37,8 +36,6 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
     @Autowired
     DoctorRepository doctorRepository;
 
-    @Autowired
-    ConsentRepository consentRepository;
 
     @Autowired
     WardService wardService;
@@ -78,12 +75,9 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
                     newPatient.setHeartRate(registrationDto.getHeartRate());
                     newPatient.setWeight(registrationDto.getWeight());
                     newPatient.setRegistrationDateAndTime(LocalDateTime.now());
-                    Consent currPatientConsent = new Consent();
-                    currPatientConsent.setPatient(newPatient);
-                    currPatientConsent.setConcent(true);
-                    userRepository.save(newUser);
-                    patientRepository.save(newPatient);
-                    consentRepository.save(currPatientConsent);
+                    newPatient.setConcent(true);
+                    newPatient.setHeight(registrationDto.getHeight());
+                    newPatient.setBloodGroup(registrationDto.getBloodGroup());
                     return ResponseEntity.ok(new AuthResponse("", "Register Success", newUser));
                 }
             }

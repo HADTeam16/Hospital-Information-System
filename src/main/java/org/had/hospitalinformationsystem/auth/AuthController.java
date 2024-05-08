@@ -17,7 +17,7 @@ public class AuthController {
     @Autowired
     AuthService authService;
 
-    @PostMapping("/signup/admin")
+    @GetMapping("/signup/admin")
     public ResponseEntity<AuthResponse> createAdmin() {
         return authService.createAdmin();
     }

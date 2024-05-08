@@ -197,7 +197,17 @@ public class Utils {
         if(!isValidEmail(registrationDto.getEmail())){
             return "Please, Enter Valid Email";
         }
-
+        if(registrationDto.getEmergencyContactName().equals(null)){
+            if(registrationDto.getEmergencyContactNumber().equals(null)){
+                return "Please, Enter Valid Emergency Contact Number";
+            }
+            else if(registrationDto.getEmergencyContactNumber().length()!=10){
+                return "Please Enter a valid Emergency Valid Contact Number";
+            }
+            else if(!registrationDto.getEmergencyContactNumber().matches("\\d+")){
+                return "Emergency Contact number must contain digits only";
+            }
+        }
 
         User newUser = new User();
         Auth auth = new Auth();
