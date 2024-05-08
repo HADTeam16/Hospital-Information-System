@@ -78,6 +78,8 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
                     newPatient.setConcent(true);
                     newPatient.setHeight(registrationDto.getHeight());
                     newPatient.setBloodGroup(registrationDto.getBloodGroup());
+                    userRepository.save(newUser);
+                    patientRepository.save(newPatient);
                     return ResponseEntity.ok(new AuthResponse("", "Register Success", newUser));
                 }
             }
