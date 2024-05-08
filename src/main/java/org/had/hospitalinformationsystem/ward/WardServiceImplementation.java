@@ -33,7 +33,7 @@ public class WardServiceImplementation implements WardService{
     @Override
     public void createInitialWards(){
         for(int floor=1;floor<=3;floor++){
-            for(int wardNumber=1;wardNumber<=8;wardNumber++){
+            for(int wardNumber=1;wardNumber<=10;wardNumber++){
                 Ward ward=new Ward();
                 ward.setFloor(floor);
                 ward.setWardNumber(String.valueOf(((floor-1)*8)+wardNumber));

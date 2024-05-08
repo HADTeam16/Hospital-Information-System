@@ -26,4 +26,7 @@ public class Patient {
     private String bloodPressure;
     private float weight;
     private float heartRate;
+    private String bloodGroup;
+    private String height;
+    private boolean concent;
 }

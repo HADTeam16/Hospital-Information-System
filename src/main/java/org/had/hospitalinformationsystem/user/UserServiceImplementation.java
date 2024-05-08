@@ -287,7 +287,7 @@ public class UserServiceImplementation implements UserService {
         statsDto.setSpecialityWiseDoctorsCount(doctorService.getSpecialityWiseDoctorsCount());
         statsDto.setOtsAvailable(otRepository.findAvailableOt().size());
         statsDto.setTotalOts(10);
-        statsDto.setTotalWards(24);
+        statsDto.setTotalWards(30);
         statsDto.setAvailableWards(wardRepository.findAvailableWard().size());
 
         String userName=JwtProvider.getUserNameFromJwtToken(jwt);

@@ -49,6 +49,9 @@ public class RegistrationDto {
         private String bloodPressure;
         private float weight;
         private float heartRate;
+        private boolean concent;
+        private String bloodGroup;
+        private String height;
         //Appointment field
 
         //Nurse-specific field
