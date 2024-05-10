@@ -38,7 +38,7 @@ public class AuthController {
     }
 
     @PutMapping("/user/change/password")
-    public ResponseEntity< String> changePasswordByUser(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
+    public ResponseEntity< Map<String,String>> changePasswordByUser(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
         return authService.changePasswordByUser(jwt,changePasswordRequest);
     }
 

@@ -154,7 +154,8 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
     }
 
     @Override
-    public ResponseEntity< String> changePasswordByUser(String jwt, ChangePasswordRequest changePasswordRequest) {
+    public ResponseEntity<Map<String,String>> changePasswordByUser(String jwt, ChangePasswordRequest changePasswordRequest) {
+        Map<String, String> response = new HashMap<>();
         try {
             String oldPassword = changePasswordRequest.getOldPassword();
             String newPassword = changePasswordRequest.getNewPassword();
@@ -167,18 +168,23 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
                 currUser.getAuth().setPassword(encodedNewPassword);
                 userRepository.save(currUser);
                 try {
-                    sendEmailWithAcknowledgementOfPasswordChange(currUser.getEmail(), currUser.getUserName(), changePasswordRequest.getNewPassword(), currUser.getFirstName());
-                    return ResponseEntity.ok("Password updated successfully");
+                    sendEmailWithAcknowledgementOfPasswordChange(currUser.getEmail(), currUser.getUserName(),
+                            changePasswordRequest.getNewPassword(), currUser.getFirstName());
+                    response.put("message", "Password updated successfully");
+                    return ResponseEntity.ok(response);
                 }
-                catch(Exception e){
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unable to send the mail to the user, Kindly do it manually ");
+                catch (Exception e) {
+                    response.put("message", "Unable to send the mail to the user, Kindly do it manually");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
                 }
             } else {
-                return ResponseEntity.ok("Check your current password");
+                response.put("message","Check your current password");
+                return ResponseEntity.ok(response);
             }
         }
         catch(Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error");
+            response.put("message","Error");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 
