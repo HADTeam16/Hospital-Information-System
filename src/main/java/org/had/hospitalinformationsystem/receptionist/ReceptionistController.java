@@ -33,4 +33,5 @@ public class ReceptionistController {
     public ResponseEntity<List<Receptionist>> getAllReceptionist(@RequestHeader("Authorization") String jwt) {
         return receptionistService.getAllReceptionist(jwt);
     }
+
 }

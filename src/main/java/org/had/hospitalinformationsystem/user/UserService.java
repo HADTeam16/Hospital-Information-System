@@ -6,6 +6,7 @@ import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService {
 
@@ -18,7 +19,7 @@ public interface UserService {
 
     boolean userPresentOrNot(String jwt, String userName);
 
-    ResponseEntity<User> updateUser(String jwt, User user);
+
 
     ResponseEntity<?>getUser(String jwt, Long userId);
 
@@ -30,4 +31,6 @@ public interface UserService {
     HospitalLiveStatsDto getHospitalStats(String jwt);
 
     public String generateUsername(String firstName);
+
+    public ResponseEntity<Map<String,String>> updateProfile(String jwt,String profilePic);
 }

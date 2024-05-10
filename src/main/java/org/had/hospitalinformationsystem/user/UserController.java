@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -37,10 +38,10 @@ public class UserController {
         return userService.userPresentOrNot(jwt, userName);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<User> updateUser(@RequestHeader("Authorization") String jwt, @RequestBody User user) {
-        return userService.updateUser(jwt, user);
-    }
+//    @PutMapping("/update")
+//    public ResponseEntity<User> updateUser(@RequestHeader("Authorization") String jwt, @RequestBody User user) {
+//        return userService.updateUser(jwt, user);
+//    }
 
     @GetMapping()
     public User getUserByJwt(@RequestHeader("Authorization") String jwt){
@@ -60,6 +61,11 @@ public class UserController {
     @GetMapping("/hospital/live/stats")
     public ResponseEntity<HospitalLiveStatsDto> getHospitalStats(@RequestHeader("Authorization") String jwt){
         return ResponseEntity.ok().body(userService.getHospitalStats(jwt));
+    }
+
+    @PutMapping("/update/profilepic")
+    public ResponseEntity<Map<String,String>> updateProfile(@RequestHeader("Authorization") String jwt,@RequestBody String profilePic){
+        return userService.updateProfile(jwt,profilePic);
     }
 
 }
