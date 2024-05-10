@@ -154,7 +154,7 @@ public class AuthServiceImpl extends AuthUtils implements AuthService {
     }
 
     @Override
-    public ResponseEntity<Map<String,String>> changePasswordByUser(String jwt, ChangePasswordRequest changePasswordRequest) {
+    public ResponseEntity<Map<String, String>> changePasswordByUser(String jwt, ChangePasswordRequest changePasswordRequest) {
         Map<String, String> response = new HashMap<>();
         try {
             String oldPassword = changePasswordRequest.getOldPassword();
