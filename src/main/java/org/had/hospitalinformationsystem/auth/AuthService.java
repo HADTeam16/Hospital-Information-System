@@ -18,7 +18,7 @@ public interface AuthService {
 
     ResponseEntity<Map<String,String>> changePasswordByAdmin(String jwt, Long id);
 
-    ResponseEntity< String> changePasswordByUser(String jwt, ChangePasswordRequest changePasswordRequest);
+    ResponseEntity<Map<String, String>> changePasswordByUser(String jwt, ChangePasswordRequest changePasswordRequest);
 
     ResponseEntity<?> sendOtpForForgetPasswordByUser(String emailId);
 

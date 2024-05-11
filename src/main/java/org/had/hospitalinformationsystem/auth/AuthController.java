@@ -23,37 +23,42 @@ public class AuthController {
     }
 
     @PostMapping("/signup/user")
-    public ResponseEntity<Object> createUser(@RequestHeader("Authorization") String jwt, @RequestBody RegistrationDto registrationDto) {
-        return authService.createUser(jwt,registrationDto);
+    public ResponseEntity<Object> createUser(@RequestHeader("Authorization") String jwt,
+            @RequestBody RegistrationDto registrationDto) {
+        return authService.createUser(jwt, registrationDto);
     }
 
     @PostMapping("/signin")
-    public ResponseEntity< AuthResponse>signIn(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthResponse> signIn(@RequestBody LoginRequest loginRequest) {
         return authService.signIn(loginRequest);
     }
 
     @PutMapping("/admin/change/password/{id}")
-    public ResponseEntity<Map<String,String>> changePasswordByAdmin(@RequestHeader("Authorization") String jwt, @PathVariable Long id) {
-        return authService.changePasswordByAdmin(jwt,id);
+    public ResponseEntity<Map<String, String>> changePasswordByAdmin(@RequestHeader("Authorization") String jwt,
+            @PathVariable Long id) {
+        return authService.changePasswordByAdmin(jwt, id);
     }
 
     @PutMapping("/user/change/password")
-    public ResponseEntity< String> changePasswordByUser(@RequestHeader("Authorization") String jwt,@RequestBody ChangePasswordRequest changePasswordRequest) {
-        return authService.changePasswordByUser(jwt,changePasswordRequest);
+    public ResponseEntity<Map<String, String>> changePasswordByUser(@RequestHeader("Authorization") String jwt,
+            @RequestBody ChangePasswordRequest changePasswordRequest) {
+        return authService.changePasswordByUser(jwt, changePasswordRequest);
     }
 
     @PostMapping("/user/forget/password/send/otp/{emailId}")
-    public ResponseEntity<?> sendOtpForForgetPasswordByUser(@PathVariable String emailId){
+    public ResponseEntity<?> sendOtpForForgetPasswordByUser(@PathVariable String emailId) {
         return authService.sendOtpForForgetPasswordByUser(emailId);
     }
 
     @PostMapping("/user/forget/password/validate/otp/{emailId}/{otp}")
-    public ResponseEntity<?> validateOtpForForgetPasswordByUser(@PathVariable String emailId, @PathVariable String otp){
-        return authService.validateOtpForForgetPasswordByUser(emailId,otp);
+    public ResponseEntity<?> validateOtpForForgetPasswordByUser(@PathVariable String emailId,
+            @PathVariable String otp) {
+        return authService.validateOtpForForgetPasswordByUser(emailId, otp);
     }
 
     @PutMapping("/toggle/user/status/{userId}")
-    public ResponseEntity<?> toggleUserLogInStatus(@RequestHeader("Authorization") String jwt, @PathVariable Long userId){
-        return authService.toggleUserLogInStatus(jwt,userId);
+    public ResponseEntity<?> toggleUserLogInStatus(@RequestHeader("Authorization") String jwt,
+            @PathVariable Long userId) {
+        return authService.toggleUserLogInStatus(jwt, userId);
     }
 }
