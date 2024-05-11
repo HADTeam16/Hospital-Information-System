@@ -12,7 +12,9 @@ import org.had.hospitalinformationsystem.records.Records;
 import org.had.hospitalinformationsystem.records.RecordsRepository;
 import org.had.hospitalinformationsystem.ward.Ward;
 import org.had.hospitalinformationsystem.ward.WardRepository;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,9 @@ public class DoctorServiceImpl implements DoctorService {
     RecordsRepository recordsRepository;
     @Autowired
     WardRepository wardRepository;//
+    @Qualifier("jasyptStringEncryptor")
+    @Autowired
+    private StringEncryptor stringEncryptor;
 
     @Override
     public ResponseEntity<?> getAllDoctor(String jwt) {
@@ -114,11 +119,11 @@ public class DoctorServiceImpl implements DoctorService {
             }
 
             Prescription prescription = new Prescription();
-            prescription.setPrescription(prescriptionsAndRecords.getPrescription());
+            prescription.setPrescription(stringEncryptor.encrypt(prescriptionsAndRecords.getPrescription()));
 
             for (String recordImage : prescriptionsAndRecords.getRecords()) {
                 Records newRecord = new Records();
-                newRecord.setRecordImage(recordImage);
+                newRecord.setRecordImage(stringEncryptor.encrypt(recordImage));
                 newRecord.setAppointment(appointment);
                 recordsRepository.save(newRecord);
             }
