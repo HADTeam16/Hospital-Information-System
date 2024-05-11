@@ -35,3 +35,5 @@ build/
 .vscode/
 
 src/main/java/org/had/hospitalinformationsystem/test.puml
+src/main/java/org/had/hospitalinformationsystem/jwt/JwtConstant.java
+src/main/java/org/had/hospitalinformationsystem/jwt/AppConfig.java

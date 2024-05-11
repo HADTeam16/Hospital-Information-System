@@ -123,7 +123,7 @@ public class OtpVerificationServiceImpl extends OtpVerificationUtils implements 
             if (role.equals("receptionist")) {
                 int val = validateOtp(otpValidationRequest);
                 if(val==1){
-                    Boolean result = receptionistServiceImplementation.removeConsentForPaatientId(jwt,otpValidationRequest.getUsername());
+                    Boolean result = receptionistServiceImplementation.removeConsentForPatientId(jwt,otpValidationRequest.getUsername());
                     if(result){
                         response.put("message","Consent Removed Successfully");
                     }

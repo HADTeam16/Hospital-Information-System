@@ -17,4 +17,5 @@ public interface ReceptionistService {
     ResponseEntity<String> createWard(String jwt);
 
     ResponseEntity<List<Receptionist>> getAllReceptionist(String jwt);
+    public  Boolean checkPatientByPatientId(String jwt,Long id);
 }
