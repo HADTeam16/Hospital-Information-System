@@ -13,7 +13,9 @@ import org.had.hospitalinformationsystem.ward.WardRepository;
 import org.had.hospitalinformationsystem.wardHistory.WardHistory;
 import org.had.hospitalinformationsystem.wardHistory.WardHistoryRepository;
 import org.had.hospitalinformationsystem.wardHistory.WardHistoryService;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,9 @@ public class NurseServiceImplementation implements NurseService {
     @Autowired
     WardHistoryService wardHistoryService;//
 
+    @Qualifier("jasyptStringEncryptor")
+    @Autowired
+    private StringEncryptor stringEncryptor;
     @Override
     public ResponseEntity<?> patientsNeedWard(String jwt) {
         Map<String, String> response = new HashMap<>();
@@ -107,7 +112,6 @@ public class NurseServiceImplementation implements NurseService {
                 ward.setPatient(needWard.getAppointment().getPatient());
                 ward.setAvailableStatus(false);
                 wardRepository.save(ward);
-
                 needWardRepository.deleteById(needWardId);
                 wardHistory.setBloodPressure(ward.getAppointment().getBloodPressure());
                 wardHistory.setHeartRate(ward.getAppointment().getHeartRate());
@@ -115,7 +119,6 @@ public class NurseServiceImplementation implements NurseService {
                 wardHistory.setTemperature(ward.getAppointment().getTemperature());
                 wardHistory.setAppointment(ward.getAppointment());
                 wardHistory.setLog(LocalDateTime.now());
-
                 wardHistoryRepository.save(wardHistory);
                 response.put("message", "assign ward success");
                 return ResponseEntity.ok().body(response);
@@ -139,13 +142,15 @@ public class NurseServiceImplementation implements NurseService {
                 if(patient.isPresent()){
                     patient.get().setWeight(wardPatientDetails.getWeight());
                     patient.get().setHeartRate(wardPatientDetails.getHeartRate());
-                    patient.get().setBloodPressure(wardPatientDetails.getBloodPressure());
+                    patient.get().setBloodPressure(stringEncryptor.encrypt(wardPatientDetails.getBloodPressure()));
+
                     patient.get().setTemperature(wardPatientDetails.getTemperature());
                     WardHistory wardHistory=new WardHistory();
                     wardHistory.setAppointment(ward.get().getAppointment());
                     wardHistory.setHeartRate(wardPatientDetails.getHeartRate());
                     wardHistory.setWeight(wardPatientDetails.getWeight());
-                    wardHistory.setBloodPressure(wardPatientDetails.getBloodPressure());
+                    wardHistory.setBloodPressure(stringEncryptor.encrypt(wardPatientDetails.getBloodPressure()));
+
                     wardHistory.setTemperature(wardPatientDetails.getTemperature());
                     wardHistory.setLog(LocalDateTime.now());
                     patientRepository.save(patient.get());
@@ -202,7 +207,14 @@ public class NurseServiceImplementation implements NurseService {
 
     @Override
     public ResponseEntity<List<Ward>> getNurseAllottedWard(String jwt, Long nurseId) {
-        return ResponseEntity.ok().body(wardRepository.allottedWard(nurseId));
+        List<Ward> wards=wardRepository.allottedWard(nurseId);
+        for(Ward w:wards){
+            w.getAppointment().setPurpose(stringEncryptor.decrypt(w.getAppointment().getPurpose()));
+            w.getAppointment().setBloodPressure(stringEncryptor.decrypt(w.getAppointment().getBloodPressure()));
+            w.getPatient().setHeight(stringEncryptor.decrypt((w.getPatient().getHeight())));
+            w.getPatient().setBloodGroup(stringEncryptor.decrypt(w.getPatient().getBloodGroup()));
+        }
+        return ResponseEntity.ok().body(wards);
     }
 
     @Override
@@ -223,6 +235,10 @@ public class NurseServiceImplementation implements NurseService {
         }
         String userName = JwtProvider.getUserNameFromJwtToken(jwt);
         Long nurseId = userRepository.findByUserName(userName).getId();
-        return ResponseEntity.ok().body(wardRepository.assignedPatientsUnderNurse(nurseId));
+        List<Patient> patients=wardRepository.assignedPatientsUnderNurse(nurseId);
+        for(Patient p:patients){
+
+        }
+        return ResponseEntity.ok().body(patients);
     }
 }

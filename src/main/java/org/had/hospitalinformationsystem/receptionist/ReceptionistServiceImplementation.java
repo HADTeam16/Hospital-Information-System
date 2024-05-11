@@ -2,6 +2,7 @@ package org.had.hospitalinformationsystem.receptionist;
 
 import org.had.hospitalinformationsystem.appointment.Appointment;
 
+import org.had.hospitalinformationsystem.appointment.AppointmentRepository;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.dto.AuthResponse;
@@ -9,19 +10,28 @@ import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
+import org.had.hospitalinformationsystem.prescription.Prescription;
+import org.had.hospitalinformationsystem.prescription.PrescriptionRepository;
+import org.had.hospitalinformationsystem.records.Records;
+import org.had.hospitalinformationsystem.records.RecordsRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
+import org.had.hospitalinformationsystem.user.UserService;
 import org.had.hospitalinformationsystem.utility.Utils;
+import org.had.hospitalinformationsystem.ward.Ward;
+import org.had.hospitalinformationsystem.ward.WardRepository;
 import org.had.hospitalinformationsystem.ward.WardService;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -36,12 +46,22 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
     @Autowired
     DoctorRepository doctorRepository;
 
-
+    @Autowired
+    WardRepository wardRepository;
     @Autowired
     WardService wardService;
-
+    @Autowired
+    PrescriptionRepository prescriptionRepository;
+    @Autowired
+    RecordsRepository recordsRepository;
     @Autowired
     ReceptionistRepository receptionistRepository;
+
+    @Autowired
+    AppointmentRepository appointmentRepository;
+    @Qualifier("jasyptStringEncryptor")
+    @Autowired
+    private StringEncryptor stringEncryptor;
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -68,18 +88,17 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
                     User newUser = (User) result;
                     newUser.setDisable(true);
                     newUser.getAuth().setPassword("");
-                    Patient newPatient = new Patient();
-                    newPatient.setUser(newUser);
-                    newPatient.setTemperature(registrationDto.getTemperature());
-                    newPatient.setBloodPressure(registrationDto.getBloodPressure());
-                    newPatient.setHeartRate(registrationDto.getHeartRate());
-                    newPatient.setWeight(registrationDto.getWeight());
-                    newPatient.setRegistrationDateAndTime(LocalDateTime.now());
-                    newPatient.setConcent(true);
-                    newPatient.setHeight(registrationDto.getHeight());
-                    newPatient.setBloodGroup(registrationDto.getBloodGroup());
-                    userRepository.save(newUser);
-                    patientRepository.save(newPatient);
+                    Object patientResult = Utils.getPatient(registrationDto,newUser);
+                    if (patientResult instanceof String) {
+                        return ResponseEntity.badRequest().body(new AuthResponse(null, (String) patientResult, null));
+                    } else {
+                        Patient newPatient = (Patient) patientResult;
+                        userRepository.save(newUser);
+                        newPatient.setBloodGroup(stringEncryptor.encrypt(((Patient) patientResult).getBloodGroup()));
+                        newPatient.setHeight(stringEncryptor.encrypt(((Patient) patientResult).getHeight()));
+                        newPatient.setBloodPressure(stringEncryptor.encrypt(((Patient) patientResult).getBloodPressure()));
+                        patientRepository.save(newPatient);
+                    }
                     return ResponseEntity.ok(new AuthResponse("", "Register Success", newUser));
                 }
             }
@@ -133,5 +152,85 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
         else{
             return ResponseEntity.badRequest().body(null);
         }
+    }
+
+    public Boolean removeConsentForPatientId(String jwt,String emailId){
+        try{
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (role.equals("receptionist")) {
+                Patient patient = patientRepository.findPatientByEmailId(emailId);
+                patient.setConsent(false);
+                patientRepository.save(patient);
+                return true;
+            }
+            else {
+                return false;
+            }
+        }catch(Exception e){
+            return false;
+        }
+    }
+
+    public Boolean giveConsentForPatientId(String jwt,String emailId){
+        try{
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (role.equals("receptionist")) {
+                Patient patient = patientRepository.findPatientByEmailId(emailId);
+                if(patient !=null) {
+                    patient.setConsent(true);
+                    patientRepository.save(patient);
+                }
+                return true;
+            }
+            else {
+                return false;
+            }
+        }catch(Exception e){
+            return false;
+        }
+    }
+
+    public  Boolean checkPatientByPatientId(String jwt,Long id){
+        try{
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if(role.equals("doctor") || role.equals("nurse") || role.equals("receptionist") ){
+                return patientRepository.findPatientById(id).isConsent();
+            }
+            else{
+                return  false;
+            }
+        }
+        catch(Exception e){
+            return  false;
+        }
+    }
+
+    @Override
+    public ResponseEntity<Map<String, String>> deletePatient(String jwt, Long id) {
+        String role=JwtProvider.getRoleFromJwtToken(jwt);
+        Map<String, String> response = new HashMap<>();
+        if(!role.equals("receptionist")){
+            response.put("Message","Only receptionist can delete a Patient");
+            return ResponseEntity.badRequest().body(response);
+        }
+        Ward ward=wardRepository.findByPatient(id);
+        if(ward!=null){
+            response.put("Message","Patient is in Ward so data cannot be deleted");
+            return ResponseEntity.badRequest().body(response);
+        }
+        List<Appointment> appointments=appointmentRepository.getAppointmentByPatientid(id);
+        for(Appointment a:appointments){
+            List<Records> records=recordsRepository.findRecordsByAppointmentId(a.getAppointmentId());
+            for(Records r:records){
+                recordsRepository.deleteById(r.getRecordsId());
+            }
+            Prescription prescription=prescriptionRepository.findPrescriptionByAppointmentID(a.getAppointmentId());
+            prescriptionRepository.deleteById(prescription.getPrescriptionId());
+            appointmentRepository.deleteById(a.getAppointmentId());
+        }
+        response.put("message","Patient data successfully deleted");
+        patientRepository.deleteById(id);
+        userRepository.deleteById(id);
+        return ResponseEntity.ok().body(response);
     }
 }

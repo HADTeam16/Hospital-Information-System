@@ -27,10 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -130,28 +127,6 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public ResponseEntity<User> updateUser(String jwt, User user) {
-        try {
-            String role = JwtProvider.getRoleFromJwtToken(jwt);
-
-            if ("admin".equals(role)) {
-                User reqUser = findUserByJwt(jwt);
-
-                if (reqUser != null) {
-                    User updatedUser = updateUser(user, reqUser.getId());
-                    return ResponseEntity.ok(updatedUser);
-                } else {
-                    return ResponseEntity.notFound().build();
-                }
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    @Override
     public ResponseEntity<?>getUser(String jwt, Long userId){
         try{
             String role = JwtProvider.getRoleFromJwtToken(jwt);
@@ -199,31 +174,34 @@ public class UserServiceImplementation implements UserService {
                 Optional<User> optionalUser = userRepository.findById(userId);
                 if (optionalUser.isPresent()) {
                     User user = optionalUser.get();
-                    user.setFirstName(registrationDto.getFirstName());
-                    user.setMiddleName(registrationDto.getMiddleName());
-                    user.setLastName(registrationDto.getLastName());
-                    user.setGender(registrationDto.getGender());
-                    user.setDateOfBirth(registrationDto.getDateOfBirth());
-                    user.setCountry(registrationDto.getCountry());
-                    user.setState(registrationDto.getState());
-                    user.setCity(registrationDto.getCity());
-                    user.setAddressLine1(registrationDto.getAddressLine1());
-                    user.setAddressLine2(registrationDto.getAddressLine2());
-                    user.setLandmark(registrationDto.getLandmark());
-                    user.setPinCode(registrationDto.getPinCode());
-                    user.setContact(registrationDto.getContact());
-                    user.setProfilePicture(registrationDto.getProfilePicture());
-                    user.setEmergencyContactName(registrationDto.getEmergencyContactName());
-                    user.setEmergencyContactNumber(registrationDto.getEmergencyContactNumber());
+                    if(!registrationDto.getFirstName().equals(null)) user.setFirstName(registrationDto.getFirstName());
+                    if(!registrationDto.getMiddleName().equals(null))user.setMiddleName(registrationDto.getMiddleName());
+                    if(!registrationDto.getLastName().equals(null)) user.setLastName(registrationDto.getLastName());
+                    if(!registrationDto.getGender().equals(null)) user.setGender(registrationDto.getGender());
+                    if(!registrationDto.getDateOfBirth().equals(null)) user.setDateOfBirth(registrationDto.getDateOfBirth());
+                    if(!registrationDto.getCountry().equals(null)) user.setCountry(registrationDto.getCountry());
+                    if(!registrationDto.getState().equals(null)) user.setState(registrationDto.getState());
+                    if(!registrationDto.getCity().equals(null)) user.setCity(registrationDto.getCity());
+                    if(!registrationDto.getAddressLine1().equals(null)) user.setAddressLine1(registrationDto.getAddressLine1());
+                    if(!registrationDto.getAddressLine2().equals(null)) user.setAddressLine2(registrationDto.getAddressLine2());
+                    if(!registrationDto.getLandmark().equals(null)) user.setLandmark(registrationDto.getLandmark());
+                    if(!registrationDto.getPinCode().equals(null)) user.setPinCode(registrationDto.getPinCode());
+                    if(!registrationDto.getContact().equals(null)) user.setContact(registrationDto.getContact());
+                    if(!registrationDto.getProfilePicture().equals(null)) user.setProfilePicture(registrationDto.getProfilePicture());
+                    if(!registrationDto.getEmergencyContactName().equals(null)) user.setEmergencyContactName(registrationDto.getEmergencyContactName());
+                    if(!registrationDto.getEmergencyContactName().equals(null)) user.setEmergencyContactNumber(registrationDto.getEmergencyContactNumber());
 
                     switch (user.getRole()) {
                         case "doctor" -> {
                             Doctor doctor = doctorRepository.findByUser(user);
                             if (doctor != null) {
-                                doctor.setSpecialization(registrationDto.getSpecialization());
-                                doctor.setWorkStart(registrationDto.getWorkStart());
-                                doctor.setWorkEnd(registrationDto.getWorkEnd());
-                                doctor.setMedicalLicenseNumber(registrationDto.getMedicalLicenseNumber());
+                                if(!registrationDto.getSpecialization().equals(null)) doctor.setSpecialization(registrationDto.getSpecialization());
+                                if(!registrationDto.getWorkStart().equals(null)) doctor.setWorkStart(registrationDto.getWorkStart());
+                                if(!registrationDto.getWorkEnd().equals(null)) doctor.setWorkEnd(registrationDto.getWorkEnd());
+                                if(!registrationDto.getMedicalLicenseNumber().equals(null)) doctor.setMedicalLicenseNumber(registrationDto.getMedicalLicenseNumber());
+                                if(!registrationDto.getBoardCertification().equals(null)) doctor.setBoardCertification(registrationDto.getBoardCertification());
+                                if(!registrationDto.getCv().equals(null)) doctor.setCv(registrationDto.getCv());
+                                if(!registrationDto.getDrugScreeningResult().equals(null)) doctor.setDrugScreeningResult(registrationDto.getDrugScreeningResult());
                                 doctorRepository.save(doctor);
                             }
                         }
@@ -233,13 +211,15 @@ public class UserServiceImplementation implements UserService {
                         case "nurse" -> {
                             Nurse nurse = nurseRepository.findByUser(user);
                             if (nurse != null) {
-                                nurse.setHeadNurse(registrationDto.isHeadNurse());
+                                if(registrationDto.isHeadNurse()) nurse.setHeadNurse(true);
+                                if(registrationDto.isHeadNurse()==false) nurse.setHeadNurse(false);
                                 nurseRepository.save(nurse);
                             }
                         }
                     }
                     // Save updated user
                     User savedUser = userRepository.save(user);
+                    savedUser.setAuth(null);
                     return ResponseEntity.ok(new AuthResponse("", "User updated successfully", savedUser));
                 } else {
                     return ResponseEntity.notFound().build();
@@ -251,7 +231,6 @@ public class UserServiceImplementation implements UserService {
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AuthResponse("",  e.getMessage() + "Error updating user", null));
         }
-
     }
 
     @Override
@@ -344,5 +323,17 @@ public class UserServiceImplementation implements UserService {
 
         // Generate the next username
         return prefix + (maxNumber + 1);
+    }
+
+    @Override
+    public ResponseEntity<Map<String, String>> updateProfile(String jwt,String profilePic) {
+        String userName=JwtProvider.getUserNameFromJwtToken(jwt);
+        User user=userRepository.findByUserName(userName);
+        user.setProfilePicture(profilePic);
+        userRepository.save(user);
+        System.out.println(profilePic);
+        Map<String, String> response = new HashMap<>();
+        response.put("message","Profile Pic Successfull Updated");
+        return ResponseEntity.ok().body(response);
     }
 }

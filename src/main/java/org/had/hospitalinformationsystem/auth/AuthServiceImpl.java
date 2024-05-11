@@ -9,6 +9,7 @@ import org.had.hospitalinformationsystem.otpVerification.OtpVerificationUtils;
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.utility.Utils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,6 @@ import java.util.*;
 @Service
 @Slf4j
 public class AuthServiceImpl extends AuthUtils implements AuthService {
-
     @Override
     public ResponseEntity<AuthResponse> createAdmin() {
         try {

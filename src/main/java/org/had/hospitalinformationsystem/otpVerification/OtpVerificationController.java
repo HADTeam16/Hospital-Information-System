@@ -28,9 +28,18 @@ public class OtpVerificationController {
 
     @PostMapping("/validate/otp")
     public ResponseEntity<Map<String, String>> validateOtp(@RequestHeader("Authorization") String jwt,@RequestBody OtpValidationRequest otpValidationRequest){
+        System.out.println(otpValidationRequest.getUsername());
         return otpVerificationService.validateOtp(jwt, otpValidationRequest);
     }
 
+    @PostMapping("/send/otp/via/email/for/consent/remove")
+    public ResponseEntity<Map<String,String>>sendOtpForConsentRemove(@RequestHeader("Authorization") String jwt, @RequestBody EmailOtpRequest emailOtpRequest){
+        return otpVerificationService.sendOtpForConsentRemove(jwt,emailOtpRequest);
+    }
 
+    @PostMapping("/validate/otp/for/consent/remove")
+    public ResponseEntity<Map<String, String>> validateOtpForConsentRemove(@RequestHeader("Authorization") String jwt,@RequestBody OtpValidationRequest otpValidationRequest){
+        return otpVerificationService.validateOtpForConsentRemove(jwt, otpValidationRequest);
+    }
 
 }

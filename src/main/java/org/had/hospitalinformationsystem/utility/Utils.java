@@ -8,10 +8,15 @@ import org.had.hospitalinformationsystem.auth.Auth;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.dto.SmsTwilioConfig;
+import org.had.hospitalinformationsystem.jwt.AppConfig;
+import org.had.hospitalinformationsystem.jwt.JwtProvider;
+import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.user.UserService;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Base64;
 import java.util.Random;
@@ -32,6 +38,8 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 public class Utils {
+
+
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -42,6 +50,9 @@ public class Utils {
     private SmsTwilioConfig smsTwilioConfig;
     @Autowired
     UserService userService;
+    @Qualifier("jasyptStringEncryptor")
+    @Autowired
+    private static StringEncryptor stringEncryptor;
 
     private static final int ITERATIONS = 10000;
     private static final int KEY_LENGTH = 256;
@@ -51,7 +62,17 @@ public class Utils {
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
         Pattern pattern = Pattern.compile(emailRegex);
         Matcher matcher = pattern.matcher(email);
+
         return matcher.matches();
+    }
+
+    private static boolean validBloodGroup(String str){
+        String bloodGroupPattern = "(A|B|AB|O)[+-]";
+        if(str.matches(bloodGroupPattern)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 
@@ -287,6 +308,44 @@ public class Utils {
         newDoctor.setWorkStart(registrationDto.getWorkStart());
         newDoctor.setWorkEnd(registrationDto.getWorkEnd());
         return newDoctor;
+    }
+
+    public static Object getPatient(RegistrationDto registrationDto, User newUser) {
+        String[] fields = {
+                String.valueOf(registrationDto.getTemperature()),
+                registrationDto.getBloodPressure(),
+                String.valueOf(registrationDto.getHeartRate()),
+                String.valueOf(registrationDto.getWeight()),
+                registrationDto.getHeight(),
+                registrationDto.getBloodGroup(),
+        };
+        String[] fieldNames = {
+                "Temperature",
+                "Blood Pressure",
+                "Heart Rate",
+                "Weight",
+                "Height",
+                "Blood Group",
+        };
+
+
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i] == null) {
+                return fieldNames[i] + " is missing";
+            }
+        }
+
+        Patient newPatient = new Patient();
+        newPatient.setUser(newUser);
+        newPatient.setTemperature(registrationDto.getTemperature());
+        newPatient.setBloodPressure(registrationDto.getBloodPressure());
+        newPatient.setHeartRate(registrationDto.getHeartRate());
+        newPatient.setWeight(registrationDto.getWeight());
+        newPatient.setRegistrationDateAndTime(LocalDateTime.now());
+        newPatient.setConsent(true);
+        newPatient.setHeight(registrationDto.getHeight());
+        newPatient.setBloodGroup(registrationDto.getBloodGroup());
+        return newPatient;
     }
 }
 

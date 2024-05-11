@@ -7,7 +7,9 @@ import org.had.hospitalinformationsystem.dto.AppointmentDto;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.utility.Utils;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.LocalDate;
@@ -27,6 +29,9 @@ public class AppointmentUtils extends Utils {
     AppointmentRepository appointmentRepository;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    @Qualifier("jasyptStringEncryptor")
+    @Autowired
+    private StringEncryptor stringEncryptor;
 
     protected Appointment createAppointment(AppointmentDto appointmentDto) {
         Doctor doctor = findDoctorById(appointmentDto.getDoctorId());
@@ -43,18 +48,20 @@ public class AppointmentUtils extends Utils {
         Appointment appointment = new Appointment();
         appointment.setDoctor(doctor);
         appointment.setPatient(patient);
-        appointment.setPurpose(appointmentDto.getPurpose());
+        appointment.setPurpose(stringEncryptor.encrypt(appointmentDto.getPurpose()));
         appointment.setSlot(nextAvailableSlot);
         appointment.setNeedWard(false); // Assuming default value
         appointment.setCompleted(0); // Assuming default value
         appointment.setTemperature(appointmentDto.getTemperature());
-        appointment.setBloodPressure(appointmentDto.getBloodPressure());
+        appointment.setBloodPressure(stringEncryptor.encrypt(appointmentDto.getBloodPressure()));
         appointment.setWeight(appointmentDto.getWeight());
         appointment.setHeartRate(appointmentDto.getHeartRate());
         patient.setTemperature(appointmentDto.getTemperature());
         patient.setWeight(appointmentDto.getWeight());
         patient.setHeartRate(appointmentDto.getHeartRate());
-        patient.setBloodPressure(appointmentDto.getBloodPressure());
+        patient.setBloodPressure(stringEncryptor.encrypt(appointmentDto.getBloodPressure()));
+        patient.setHeight(patient.getHeight());
+        patient.setBloodGroup(patient.getBloodGroup());
         patientRepository.save(patient);
         return appointment;
     }

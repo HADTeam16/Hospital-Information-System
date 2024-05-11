@@ -28,5 +28,5 @@ public class Patient {
     private float heartRate;
     private String bloodGroup;
     private String height;
-    private boolean concent;
+    private boolean consent;
 }
