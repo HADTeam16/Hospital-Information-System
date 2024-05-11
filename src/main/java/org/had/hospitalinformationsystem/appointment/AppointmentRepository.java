@@ -22,9 +22,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
 
     @Query("SELECT a FROM Appointment a WHERE a.doctor.doctorId = :doctorId " + "AND a.slot >= :startDate AND a.slot < :endDate ORDER BY a.slot")
     List<Appointment> findByDoctorIdAndAppointmentDate(Long doctorId, LocalDateTime startDate, LocalDateTime endDate);
-
-    @Query("SELECT a.appointmentId, a.slot FROM Appointment a where a.patient.id= :patientId AND a.slot< :startDate ORDER BY a.slot DESC")
+    @Query("SELECT a.appointmentId, a.slot FROM Appointment a where a.patient.consent=true")
+    List<Appointment> findAllAppointment();
+    @Query("SELECT a.appointmentId, a.slot FROM Appointment a where a.patient.id= :patientId AND a.patient.consent=true AND a.slot< :startDate ORDER BY a.slot DESC")
     List<Object[]> findAllPreviousAppointmentForPatient(Long patientId, LocalDateTime startDate);
+
 
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.slot > :now")
     Long getScheduledAppointmentCount(@Param("now") LocalDateTime now);
