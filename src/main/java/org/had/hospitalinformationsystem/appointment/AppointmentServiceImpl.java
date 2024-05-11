@@ -7,6 +7,7 @@ import org.had.hospitalinformationsystem.dto.AppointmentResponseDto;
 import org.had.hospitalinformationsystem.dto.PrescriptionsAndRecords;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.patient.Patient;
+import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.prescription.PrescriptionRepository;
 import org.had.hospitalinformationsystem.records.RecordsRepository;
 import org.had.hospitalinformationsystem.user.User;
@@ -33,13 +34,15 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
     RecordsRepository recordsRepository;
     @Autowired
     PrescriptionRepository prescriptionRepository;
+    @Autowired
+    PatientRepository patientRepository;
 
     @Override
     public ResponseEntity<List<Appointment>> getAllAppointments(String jwt) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if (role.equals("receptionist")) {
-                List<Appointment> appointments = appointmentRepository.findAll();
+                List<Appointment> appointments = appointmentRepository.findAllAppointment();
                 return ResponseEntity.ok(appointments);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -121,6 +124,7 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
             if (!role.equals("doctor")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
             }
+
             List<Object[]> appointments = appointmentRepository.findAllPreviousAppointmentForPatient(patientId, date);
             List<AppointmentDataDto> appointmentDataDtos = new ArrayList<>();
             for (Object[] appointment : appointments) {
