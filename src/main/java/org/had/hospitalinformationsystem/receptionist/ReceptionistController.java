@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/receptionist")
@@ -36,6 +37,10 @@ public class ReceptionistController {
     @GetMapping("/normal/{userid}")
     public Boolean haveConsent(@RequestHeader("Authorization") String jwt,@PathVariable Long userid){
         return receptionistService.checkPatientByPatientId(jwt,userid);
+    }
+    @GetMapping("/delete/patient/{id}")
+    public ResponseEntity<Map<String,String>>deletePatient(@RequestHeader("Authorization") String jwt,@PathVariable Long id){
+        return receptionistService.deletePatient(jwt,id);
     }
 
 }
