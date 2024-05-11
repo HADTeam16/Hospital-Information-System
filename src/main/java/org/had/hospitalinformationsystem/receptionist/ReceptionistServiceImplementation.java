@@ -19,10 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Service
@@ -69,18 +66,14 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
                     User newUser = (User) result;
                     newUser.setDisable(true);
                     newUser.getAuth().setPassword("");
-                    Patient newPatient = new Patient();
-                    newPatient.setUser(newUser);
-                    newPatient.setTemperature(registrationDto.getTemperature());
-                    newPatient.setBloodPressure(registrationDto.getBloodPressure());
-                    newPatient.setHeartRate(registrationDto.getHeartRate());
-                    newPatient.setWeight(registrationDto.getWeight());
-                    newPatient.setRegistrationDateAndTime(LocalDateTime.now());
-                    newPatient.setConsent(true);
-                    newPatient.setHeight(registrationDto.getHeight());
-                    newPatient.setBloodGroup(registrationDto.getBloodGroup());
-                    userRepository.save(newUser);
-                    patientRepository.save(newPatient);
+                    Object patientResult = Utils.getPatient(registrationDto,newUser);
+                    if (patientResult instanceof String) {
+                        return ResponseEntity.badRequest().body(new AuthResponse(null, (String) patientResult, null));
+                    } else {
+                        Patient newPatient = (Patient) patientResult;
+                        userRepository.save(newUser);
+                        patientRepository.save(newPatient);
+                    }
                     return ResponseEntity.ok(new AuthResponse("", "Register Success", newUser));
                 }
             }
