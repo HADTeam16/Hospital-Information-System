@@ -152,4 +152,19 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
             return false;
         }
     }
+
+    public  Boolean checkPatientByPatientId(String jwt,Long id){
+        try{
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if(role.equals("doctor") || role.equals("nurse") || role.equals("receptionist") ){
+                return patientRepository.findPatientById(id).isConsent();
+            }
+            else{
+                return  false;
+            }
+        }
+        catch(Exception e){
+            return  false;
+        }
+    }
 }
