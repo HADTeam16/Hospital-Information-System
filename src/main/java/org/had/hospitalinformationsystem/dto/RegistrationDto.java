@@ -49,7 +49,7 @@ public class RegistrationDto {
         private String bloodPressure;
         private float weight;
         private float heartRate;
-        private boolean concent;
+        private boolean consent;
         private String bloodGroup;
         private String height;
         //Appointment field

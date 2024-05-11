@@ -33,5 +33,9 @@ public class ReceptionistController {
     public ResponseEntity<List<Receptionist>> getAllReceptionist(@RequestHeader("Authorization") String jwt) {
         return receptionistService.getAllReceptionist(jwt);
     }
+    @GetMapping("/normal/{userid}")
+    public Boolean haveConsent(@RequestHeader("Authorization") String jwt,@PathVariable Long userid){
+        return receptionistService.checkPatientByPatientId(jwt,userid);
+    }
 
 }
