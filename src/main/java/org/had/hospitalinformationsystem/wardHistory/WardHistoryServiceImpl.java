@@ -6,7 +6,9 @@ import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.ward.Ward;
 import org.had.hospitalinformationsystem.ward.WardRepository;
 import org.had.hospitalinformationsystem.ward.WardService;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +26,9 @@ public class WardHistoryServiceImpl implements WardHistoryService {
     WardHistoryRepository wardHistoryRepository;
     @Autowired
     UserRepository userRepository;
-
+    @Qualifier("jasyptStringEncryptor")
+    @Autowired
+    private StringEncryptor stringEncryptor;
     @Override
     public ResponseEntity<?> getWardHistory(String jwt,Long wardId) {
         String userName= JwtProvider.getUserNameFromJwtToken(jwt);
@@ -37,6 +41,7 @@ public class WardHistoryServiceImpl implements WardHistoryService {
                 List<WardHistory> wardHistories=wardHistoryRepository.getWardHistoriesByAppointment(ward.get().getAppointment().getAppointmentId());
                 for(WardHistory wardhist :wardHistories ){
                     wardhist.setAppointment(null);
+                    wardhist.setBloodPressure(stringEncryptor.decrypt(wardhist.getBloodPressure()));
                 }
                 return ResponseEntity.ok().body(wardHistories);
             }

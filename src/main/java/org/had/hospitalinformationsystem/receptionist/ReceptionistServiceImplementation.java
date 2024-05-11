@@ -11,9 +11,12 @@ import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
+import org.had.hospitalinformationsystem.user.UserService;
 import org.had.hospitalinformationsystem.utility.Utils;
 import org.had.hospitalinformationsystem.ward.WardService;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -40,6 +43,11 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
 
     @Autowired
     ReceptionistRepository receptionistRepository;
+
+
+    @Qualifier("jasyptStringEncryptor")
+    @Autowired
+    private StringEncryptor stringEncryptor;
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -72,6 +80,9 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
                     } else {
                         Patient newPatient = (Patient) patientResult;
                         userRepository.save(newUser);
+                        newPatient.setBloodGroup(stringEncryptor.encrypt(((Patient) patientResult).getBloodGroup()));
+                        newPatient.setHeight(stringEncryptor.encrypt(((Patient) patientResult).getHeight()));
+                        newPatient.setBloodPressure(stringEncryptor.encrypt(((Patient) patientResult).getBloodPressure()));
                         patientRepository.save(newPatient);
                     }
                     return ResponseEntity.ok(new AuthResponse("", "Register Success", newUser));
@@ -129,7 +140,7 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
         }
     }
 
-    public Boolean removeConsentForPaatientId(String jwt,String emailId){
+    public Boolean removeConsentForPatientId(String jwt,String emailId){
         try{
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             if (role.equals("receptionist")) {

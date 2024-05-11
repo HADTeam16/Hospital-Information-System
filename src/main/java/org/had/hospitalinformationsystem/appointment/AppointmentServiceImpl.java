@@ -9,10 +9,13 @@ import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.prescription.PrescriptionRepository;
+import org.had.hospitalinformationsystem.records.Records;
 import org.had.hospitalinformationsystem.records.RecordsRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -36,18 +39,28 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
     PrescriptionRepository prescriptionRepository;
     @Autowired
     PatientRepository patientRepository;
+    @Qualifier("jasyptStringEncryptor")
+    @Autowired
+    private StringEncryptor stringEncryptor;
 
     @Override
     public ResponseEntity<List<Appointment>> getAllAppointments(String jwt) {
+
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
+            System.out.println(role);
             if (role.equals("receptionist")) {
                 List<Appointment> appointments = appointmentRepository.findAllAppointment();
+                for(Appointment a:appointments){
+                    a.setPurpose(stringEncryptor.decrypt(a.getPurpose()));
+                    a.setBloodPressure(stringEncryptor.decrypt(a.getBloodPressure()));
+                }
                 return ResponseEntity.ok(appointments);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -61,12 +74,20 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
             if (role.equals("doctor")) {
                 LocalDateTime startDate = date.atStartOfDay();
                 LocalDateTime endDate = startDate.plusDays(1);
-                return ResponseEntity
-                        .ok(appointmentRepository.findByDoctorIdAndAppointmentDate(user.getId(), startDate, endDate));
+                List<Appointment> appointments = appointmentRepository.findByDoctorIdAndAppointmentDate(user.getId(), startDate, endDate);
+                for(Appointment a:appointments){
+
+                    a.setPurpose(stringEncryptor.decrypt(a.getPurpose()));
+                    a.setBloodPressure(stringEncryptor.decrypt(a.getBloodPressure()));
+                }
+
+                return ResponseEntity.ok(appointments);
+
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
             }
         } catch (Exception e) {
+
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
@@ -85,6 +106,7 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
             }
 
             List<Patient> appointments = appointmentRepository.getDoctorsAppointment(doctor.getDoctorId());
+
             return ResponseEntity.ok(appointments);
         } catch (Exception e) {
 
@@ -146,9 +168,14 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
 
         if (role.equals("doctor")) {
             List<String> records = recordsRepository.findRecordsImageByAppointmentId(appointmentId);
-            String prescription = prescriptionRepository.findPrescriptionImageByAppointmentID(appointmentId);
+            List<String> Record=new ArrayList<>();
+            for(String r:records){
+                Record.add(stringEncryptor.decrypt(r));
+            }
+            String prescription = stringEncryptor.decrypt(prescriptionRepository.findPrescriptionImageByAppointmentID(appointmentId));
             Appointment appointment = appointmentRepository.findByAppointmentId(appointmentId);
-            PrescriptionsAndRecords appointmentDetails = new PrescriptionsAndRecords(records, prescription,
+            appointment.setBloodPressure(stringEncryptor.decrypt(appointment.getBloodPressure()));
+            PrescriptionsAndRecords appointmentDetails = new PrescriptionsAndRecords(Record, prescription,
                     appointment);
             return ResponseEntity.ok(appointmentDetails);
         } else {

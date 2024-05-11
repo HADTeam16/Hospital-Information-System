@@ -8,11 +8,15 @@ import org.had.hospitalinformationsystem.auth.Auth;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.dto.SmsTwilioConfig;
+import org.had.hospitalinformationsystem.jwt.AppConfig;
+import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.user.UserService;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +38,8 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 public class Utils {
+
+
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -44,6 +50,9 @@ public class Utils {
     private SmsTwilioConfig smsTwilioConfig;
     @Autowired
     UserService userService;
+    @Qualifier("jasyptStringEncryptor")
+    @Autowired
+    private static StringEncryptor stringEncryptor;
 
     private static final int ITERATIONS = 10000;
     private static final int KEY_LENGTH = 256;
@@ -53,6 +62,7 @@ public class Utils {
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
         Pattern pattern = Pattern.compile(emailRegex);
         Matcher matcher = pattern.matcher(email);
+
         return matcher.matches();
     }
 
