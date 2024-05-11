@@ -20,6 +20,7 @@ public class OtpVerificationServiceImpl extends OtpVerificationUtils implements 
     @Autowired
     ReceptionistServiceImplementation receptionistServiceImplementation;
 
+
     @Override
     public ResponseEntity<Map<String,String>> sendOtpViaMail(String jwt, EmailOtpRequest emailOtpRequest){
         Map<String, String> response = new HashMap<>();
@@ -94,6 +95,7 @@ public class OtpVerificationServiceImpl extends OtpVerificationUtils implements 
                 int val = validateOtp(otpValidationRequest);
                 if(val==1){
                     response.put("message","OTP is valid");
+                    receptionistServiceImplementation.giveConsentForPatientId(jwt,otpValidationRequest.getUsername());
                     return ResponseEntity.ok(response);
                 }
                 else if(val==2){

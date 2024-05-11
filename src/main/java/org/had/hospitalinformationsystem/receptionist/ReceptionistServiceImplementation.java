@@ -157,6 +157,25 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
         }
     }
 
+    public Boolean giveConsentForPatientId(String jwt,String emailId){
+        try{
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (role.equals("receptionist")) {
+                Patient patient = patientRepository.findPatientByEmailId(emailId);
+                if(patient !=null) {
+                    patient.setConsent(true);
+                    patientRepository.save(patient);
+                }
+                return true;
+            }
+            else {
+                return false;
+            }
+        }catch(Exception e){
+            return false;
+        }
+    }
+
     public  Boolean checkPatientByPatientId(String jwt,Long id){
         try{
             String role = JwtProvider.getRoleFromJwtToken(jwt);

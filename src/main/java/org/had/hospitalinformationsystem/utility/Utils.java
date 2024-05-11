@@ -335,7 +335,6 @@ public class Utils {
             }
         }
 
-
         Patient newPatient = new Patient();
         newPatient.setUser(newUser);
         newPatient.setTemperature(registrationDto.getTemperature());
