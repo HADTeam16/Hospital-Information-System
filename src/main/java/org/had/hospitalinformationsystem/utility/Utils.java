@@ -165,7 +165,6 @@ public class Utils {
                 registrationDto.getContact(),
                 registrationDto.getEmail(),
                 registrationDto.getProfilePicture(),
-                registrationDto.getBloodGroup(),
                 registrationDto.getRole()
         };
         String[] fieldNames = {
@@ -180,7 +179,6 @@ public class Utils {
                 "Contact",
                 "Email",
                 "Profile Picture",
-                "Blood Group",
                 "Role"
         };
 
@@ -220,9 +218,6 @@ public class Utils {
             else if(!registrationDto.getEmergencyContactNumber().matches("\\d+")){
                 return "Emergency Contact number must contain digits only";
             }
-        }
-        if(!validBloodGroup(registrationDto.getBloodGroup())){
-            return "Enter Valid Blood Group";
         }
 
         User newUser = new User();

@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OtpValidationRequest {
-    private String emailId;
+    private String username;
     private String otpNumber;
 }

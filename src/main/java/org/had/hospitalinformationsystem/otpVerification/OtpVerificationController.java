@@ -28,6 +28,7 @@ public class OtpVerificationController {
 
     @PostMapping("/validate/otp")
     public ResponseEntity<Map<String, String>> validateOtp(@RequestHeader("Authorization") String jwt,@RequestBody OtpValidationRequest otpValidationRequest){
+        System.out.println(otpValidationRequest.getUsername());
         return otpVerificationService.validateOtp(jwt, otpValidationRequest);
     }
 

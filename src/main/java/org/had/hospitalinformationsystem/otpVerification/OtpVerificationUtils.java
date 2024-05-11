@@ -61,13 +61,14 @@ public class OtpVerificationUtils extends Utils {
         PhoneNumber to = new PhoneNumber(phoneNumber);
         sendSms(to,otpMessage);
         Instant expirationTime = Instant.now().plusSeconds(600);
+        System.out.println(phoneNumber + " "+ otp);
         otpMap.put(phoneNumber, new OtpInfo(otp,expirationTime));
     }
 
     protected int validateOtp(OtpValidationRequest otpValidationRequest){
-        String username = otpValidationRequest.getEmailId();
+        String username = otpValidationRequest.getUsername();
         OtpInfo otpInfo = otpMap.get(username);
-
+        System.out.println(otpValidationRequest.getUsername() + " " + otpValidationRequest.getOtpNumber());
         if (otpInfo != null && otpInfo.getOtp().equals(otpValidationRequest.getOtpNumber())) {
             if (Instant.now().isBefore(otpInfo.getExpirationTime())) {
                 otpMap.remove(username);
