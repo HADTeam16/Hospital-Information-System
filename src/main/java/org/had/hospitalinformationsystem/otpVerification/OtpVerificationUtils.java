@@ -34,6 +34,22 @@ public class OtpVerificationUtils extends Utils {
         otpMap.put(email,new OtpInfo(otp,expirationTime));
     }
 
+    protected void sendEmailForConsentRemove(String email, String username, String name) {
+        String otp = generateOTP();
+        String subject = "Removing Consent";
+        String messageTemplate = "Dear User,<br/><br/>" +
+                //Write Email
+                "" + otp + "" +
+                "" +
+                "" +
+                "" +
+                "" +
+                "";
+        sendEmail(email, username, "", name, subject, messageTemplate);
+        Instant expirationTime = Instant.now().plusSeconds(600);
+        otpMap.put(email,new OtpInfo(otp,expirationTime));
+    }
+
     protected  void sendSmsForConsent(String phoneNumber,String name){
         String otp = generateOTP();
         String otpMessage = "Your One-Time Password (OTP) is " + otp + " This OTP ensures the security of your personal health data. This OTP is valid for 10 minutes.\n" +
@@ -49,7 +65,7 @@ public class OtpVerificationUtils extends Utils {
     }
 
     protected int validateOtp(OtpValidationRequest otpValidationRequest){
-        String username = otpValidationRequest.getUsername();
+        String username = otpValidationRequest.getEmailId();
         OtpInfo otpInfo = otpMap.get(username);
 
         if (otpInfo != null && otpInfo.getOtp().equals(otpValidationRequest.getOtpNumber())) {
