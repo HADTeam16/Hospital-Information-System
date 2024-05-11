@@ -8,6 +8,7 @@ import org.had.hospitalinformationsystem.auth.Auth;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.dto.SmsTwilioConfig;
+import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
 import org.had.hospitalinformationsystem.user.UserService;
@@ -23,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Base64;
 import java.util.Random;
@@ -52,6 +54,15 @@ public class Utils {
         Pattern pattern = Pattern.compile(emailRegex);
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
+    }
+
+    private static boolean validBloodGroup(String str){
+        String bloodGroupPattern = "(A|B|AB|O)[+-]";
+        if(str.matches(bloodGroupPattern)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 
@@ -154,6 +165,7 @@ public class Utils {
                 registrationDto.getContact(),
                 registrationDto.getEmail(),
                 registrationDto.getProfilePicture(),
+                registrationDto.getBloodGroup(),
                 registrationDto.getRole()
         };
         String[] fieldNames = {
@@ -168,6 +180,7 @@ public class Utils {
                 "Contact",
                 "Email",
                 "Profile Picture",
+                "Blood Group",
                 "Role"
         };
 
@@ -207,6 +220,9 @@ public class Utils {
             else if(!registrationDto.getEmergencyContactNumber().matches("\\d+")){
                 return "Emergency Contact number must contain digits only";
             }
+        }
+        if(!validBloodGroup(registrationDto.getBloodGroup())){
+            return "Enter Valid Blood Group";
         }
 
         User newUser = new User();
@@ -287,6 +303,45 @@ public class Utils {
         newDoctor.setWorkStart(registrationDto.getWorkStart());
         newDoctor.setWorkEnd(registrationDto.getWorkEnd());
         return newDoctor;
+    }
+
+    public static Object getPatient(RegistrationDto registrationDto, User newUser) {
+        String[] fields = {
+                String.valueOf(registrationDto.getTemperature()),
+                registrationDto.getBloodPressure(),
+                String.valueOf(registrationDto.getHeartRate()),
+                String.valueOf(registrationDto.getWeight()),
+                registrationDto.getHeight(),
+                registrationDto.getBloodGroup(),
+        };
+        String[] fieldNames = {
+                "Temperature",
+                "Blood Pressure",
+                "Heart Rate",
+                "Weight",
+                "Height",
+                "Blood Group",
+        };
+
+
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i] == null) {
+                return fieldNames[i] + " is missing";
+            }
+        }
+
+
+        Patient newPatient = new Patient();
+        newPatient.setUser(newUser);
+        newPatient.setTemperature(registrationDto.getTemperature());
+        newPatient.setBloodPressure(registrationDto.getBloodPressure());
+        newPatient.setHeartRate(registrationDto.getHeartRate());
+        newPatient.setWeight(registrationDto.getWeight());
+        newPatient.setRegistrationDateAndTime(LocalDateTime.now());
+        newPatient.setConsent(true);
+        newPatient.setHeight(registrationDto.getHeight());
+        newPatient.setBloodGroup(registrationDto.getBloodGroup());
+        return newPatient;
     }
 }
 
