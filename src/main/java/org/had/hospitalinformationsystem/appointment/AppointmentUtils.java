@@ -55,6 +55,8 @@ public class AppointmentUtils extends Utils {
         patient.setWeight(appointmentDto.getWeight());
         patient.setHeartRate(appointmentDto.getHeartRate());
         patient.setBloodPressure(appointmentDto.getBloodPressure());
+        patient.setHeight(patient.getHeight());
+        patient.setBloodGroup(patient.getBloodGroup());
         patientRepository.save(patient);
         return appointment;
     }

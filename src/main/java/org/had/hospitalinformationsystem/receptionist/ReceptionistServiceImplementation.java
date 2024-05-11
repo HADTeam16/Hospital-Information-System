@@ -17,11 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -75,7 +76,7 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
                     newPatient.setHeartRate(registrationDto.getHeartRate());
                     newPatient.setWeight(registrationDto.getWeight());
                     newPatient.setRegistrationDateAndTime(LocalDateTime.now());
-                    newPatient.setConcent(true);
+                    newPatient.setConsent(true);
                     newPatient.setHeight(registrationDto.getHeight());
                     newPatient.setBloodGroup(registrationDto.getBloodGroup());
                     userRepository.save(newUser);
@@ -132,6 +133,23 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
         }
         else{
             return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    public Boolean removeConsentForPaatientId(String jwt,String emailId){
+        try{
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (role.equals("receptionist")) {
+                Patient patient = patientRepository.findPatientByEmailId(emailId);
+                patient.setConsent(false);
+                patientRepository.save(patient);
+                return true;
+            }
+            else {
+                return false;
+            }
+        }catch(Exception e){
+            return false;
         }
     }
 }
