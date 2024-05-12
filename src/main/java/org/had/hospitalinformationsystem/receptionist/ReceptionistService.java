@@ -9,11 +9,9 @@ import java.util.Map;
 
 public interface ReceptionistService {
 
-    void sendAppointmentUpdate(Appointment appointment);
 
     ResponseEntity<Object> signupPatient(String jwt, RegistrationDto registrationDto);
 
-    ResponseEntity<?> findDoctorBySpecialization(String jwt, String specialization);
 
     ResponseEntity<String> createWard(String jwt);
 

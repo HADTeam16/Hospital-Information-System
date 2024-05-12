@@ -8,7 +8,6 @@ import org.had.hospitalinformationsystem.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +38,6 @@ public class WardServiceImplementation implements WardService{
                 ward.setWardNumber(String.valueOf(((floor-1)*8)+wardNumber));
                 ward.setAvailableStatus(true);
                 ward.setEmergency(false);
-                //ward.setVipDeluxeStatus(Ward.VipDeluxeStatus.values()[new Random().nextInt(Ward.VipDeluxeStatus.values().length)]);
                 wardRepository.save(ward);
             }
         }

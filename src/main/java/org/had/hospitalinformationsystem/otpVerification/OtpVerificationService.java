@@ -4,8 +4,6 @@ import org.had.hospitalinformationsystem.dto.EmailOtpRequest;
 import org.had.hospitalinformationsystem.dto.OtpValidationRequest;
 import org.had.hospitalinformationsystem.dto.SmsOtpRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.Map;
 

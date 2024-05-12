@@ -38,11 +38,6 @@ public class UserController {
         return userService.userPresentOrNot(jwt, userName);
     }
 
-//    @PutMapping("/update")
-//    public ResponseEntity<User> updateUser(@RequestHeader("Authorization") String jwt, @RequestBody User user) {
-//        return userService.updateUser(jwt, user);
-//    }
-
     @GetMapping()
     public User getUserByJwt(@RequestHeader("Authorization") String jwt){
         return userService.findUserByJwt(jwt);

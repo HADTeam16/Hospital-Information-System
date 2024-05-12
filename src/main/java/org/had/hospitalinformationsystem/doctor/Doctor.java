@@ -4,12 +4,9 @@ package org.had.hospitalinformationsystem.doctor;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.had.hospitalinformationsystem.OT.OT;
 import org.had.hospitalinformationsystem.user.User;
 
 import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Getter
