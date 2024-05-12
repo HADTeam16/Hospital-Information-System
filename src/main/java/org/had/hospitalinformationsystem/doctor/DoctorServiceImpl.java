@@ -174,6 +174,17 @@ public class DoctorServiceImpl implements DoctorService {
         String role = JwtProvider.getRoleFromJwtToken(jwt);
         if (role.equals("doctor")) {
             List<Ward> wards = wardRepository.findAll();
+            for(Ward w:wards){
+                if(w.getAppointment()!=null){
+                    w.getAppointment().setBloodPressure(stringEncryptor.decrypt(w.getAppointment().getBloodPressure()));
+                    w.getAppointment().setPurpose(stringEncryptor.decrypt(w.getAppointment().getPurpose()));
+                    w.getPatient().setBloodGroup(stringEncryptor.decrypt(w.getPatient().getBloodGroup()));
+                    w.getPatient().setHeight(stringEncryptor.decrypt(w.getPatient().getHeight()));
+                    w.getPatient().setBloodPressure(stringEncryptor.decrypt(w.getPatient().getBloodPressure()));
+
+                }
+
+            }
             return ResponseEntity.ok().body(wards);
         } else {
             return ResponseEntity.badRequest().body(null);
