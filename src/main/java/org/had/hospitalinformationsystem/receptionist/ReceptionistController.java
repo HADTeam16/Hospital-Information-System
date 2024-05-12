@@ -38,9 +38,14 @@ public class ReceptionistController {
     public Boolean haveConsent(@RequestHeader("Authorization") String jwt,@PathVariable Long userid){
         return receptionistService.checkPatientByPatientId(jwt,userid);
     }
-    @GetMapping("/delete/patient/{id}")
-    public ResponseEntity<Map<String,String>>deletePatient(@RequestHeader("Authorization") String jwt,@PathVariable Long id){
-        return receptionistService.deletePatient(jwt,id);
+    @GetMapping("/send/otp/for/delete/patient/data/request/{id}")
+    public ResponseEntity<Map<String,String>>deletePatientsendOtp(@RequestHeader("Authorization") String jwt,@PathVariable Long id){
+        return receptionistService.deletePatientsendOtp(jwt,id);
+    }
+
+    @GetMapping("/validate/otp/for/delete/patient/data/request/{id}/{email}/{otp}")
+    public ResponseEntity<Map<String,String>>deletePatientDataValidateOtp(@RequestHeader("Authorization") String jwt,@PathVariable Long id, @PathVariable String email, @PathVariable String otp){
+        return receptionistService.deletePatientDataValidateOtp(jwt,id,email,otp);
     }
 
 }

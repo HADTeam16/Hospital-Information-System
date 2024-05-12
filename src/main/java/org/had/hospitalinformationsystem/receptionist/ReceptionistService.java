@@ -19,5 +19,7 @@ public interface ReceptionistService {
 
     ResponseEntity<List<Receptionist>> getAllReceptionist(String jwt);
     public  Boolean checkPatientByPatientId(String jwt,Long id);
-    ResponseEntity<Map<String,String>> deletePatient(String jwt, Long id);
+    ResponseEntity<Map<String,String>> deletePatientsendOtp(String jwt, Long id);
+
+    ResponseEntity<Map<String, String>> deletePatientDataValidateOtp(String jwt,Long id, String email, String otp);
 }
