@@ -37,18 +37,18 @@ public class OtpVerificationUtils extends Utils {
     protected void sendEmailForConsentRemove(String email, String username, String name) {
         String otp = generateOTP();
         String subject = "Removing Consent";
-        String messageTemplate = "Dear User,<br/><br/>" +
-                //Write Email
-                "" + otp + "" +
-                "" +
-                "" +
-                "" +
-                "" +
-                "";
+        String messageTemplate = "Dear " + username + ",<br/><br/>" +
+                "We have received a request to remove your consent associated with the account under the name of " + name + ".<br/><br/>" +
+                "To proceed with the removal of consent, please use the following One Time Password (OTP): <strong>" + otp + "</strong><br/><br/>" +
+                "Please note that this OTP is valid for the next 10 minutes. After this time, you will need to generate a new OTP if you wish to proceed with the removal process.<br/><br/>" +
+                "If you did not initiate this request or have any concerns, please contact our support team immediately.<br/><br/>" +
+                "Best regards,<br/>" +
+                "[Your Organization's Name]";
         sendEmail(email, username, "", name, subject, messageTemplate);
         Instant expirationTime = Instant.now().plusSeconds(600);
         otpMap.put(email,new OtpInfo(otp,expirationTime));
     }
+
 
     protected  void sendSmsForConsent(String phoneNumber,String name){
         String otp = generateOTP();
@@ -81,8 +81,4 @@ public class OtpVerificationUtils extends Utils {
             return -1;
         }
     }
-
-
-
-
 }
