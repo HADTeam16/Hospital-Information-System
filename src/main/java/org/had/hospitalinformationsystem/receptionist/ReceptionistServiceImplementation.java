@@ -275,18 +275,18 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
     private void sendOtpEmailForPatientDataDelete(String email, String username, String name) {
         String otp = generateOTP();
         String subject = "Deleting Data";
-        String messageTemplate = "Dear User,<br/><br/>" +
-                //Write Email
-                "" + otp + "" +
-                "" +
-                "" +
-                "" +
-                "" +
-                "";
+        String messageTemplate = "Dear " + username + ",<br/><br/>" +
+                "We have received a request to delete your data associated with the account under the name of " + name + ".<br/><br/>" +
+                "To proceed with the deletion, please use the following One Time Password (OTP): <strong>" + otp + "</strong><br/><br/>" +
+                "Please note that this OTP is valid for the next 10 minutes. After this time, you will need to generate a new OTP if you wish to proceed with the data deletion process.<br/><br/>" +
+                "If you did not initiate this request or have any concerns, please contact our support team immediately.<br/><br/>" +
+                "Best regards,<br/>" +
+                "Pure Zen Wellness Hospital";
         sendEmail(email, username, "", name, subject, messageTemplate);
         Instant expirationTime = Instant.now().plusSeconds(600);
         otpMap.put(email,new OtpInfo(otp,expirationTime));
     }
+
 
     private int validateOtp(String email, String otp){
         String username = email;
