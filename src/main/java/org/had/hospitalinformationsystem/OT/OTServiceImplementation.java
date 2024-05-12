@@ -90,10 +90,10 @@ public class OTServiceImplementation implements OtService{
                     .map(Optional::get)
                     .filter(doctor -> doctor.getSpecialization().contains("surgeon"))
                     .collect(Collectors.toSet());
-            if (doctors.size() != surgeonIds.size()) {
-                response.put("message", "One or more surgeon IDs are invalid!");
-                return ResponseEntity.badRequest().body(response);
-            }
+//            if (doctors.size() != surgeonIds.size()) {
+//                response.put("message", "One or more surgeon IDs are invalid!");
+//                return ResponseEntity.badRequest().body(response);
+//            }
             ot.setDoctors(doctors);
             ot.setAvailableStatus(false);
             otRepository.save(ot);
