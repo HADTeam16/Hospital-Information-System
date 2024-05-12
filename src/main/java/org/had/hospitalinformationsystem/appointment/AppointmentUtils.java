@@ -10,7 +10,6 @@ import org.had.hospitalinformationsystem.utility.Utils;
 import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,8 +26,6 @@ public class AppointmentUtils extends Utils {
     PatientRepository patientRepository;
     @Autowired
     AppointmentRepository appointmentRepository;
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
     @Qualifier("jasyptStringEncryptor")
     @Autowired
     private StringEncryptor stringEncryptor;
@@ -50,8 +47,8 @@ public class AppointmentUtils extends Utils {
         appointment.setPatient(patient);
         appointment.setPurpose(stringEncryptor.encrypt(appointmentDto.getPurpose()));
         appointment.setSlot(nextAvailableSlot);
-        appointment.setNeedWard(false); // Assuming default value
-        appointment.setCompleted(0); // Assuming default value
+        appointment.setNeedWard(false);
+        appointment.setCompleted(0);
         appointment.setTemperature(appointmentDto.getTemperature());
         appointment.setBloodPressure(stringEncryptor.encrypt(appointmentDto.getBloodPressure()));
         appointment.setWeight(appointmentDto.getWeight());
@@ -108,11 +105,6 @@ public class AppointmentUtils extends Utils {
     protected Patient findPatientById(long patientId) {
         return patientRepository.findById(patientId)
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found with ID: " + patientId));
-    }
-
-    protected void notifyDoctor(Appointment appointment) {
-        Doctor doctor = appointment.getDoctor();
-        messagingTemplate.convertAndSendToUser(doctor.getUser().getUserName(),"/topic/appointments", appointment);
     }
 
     private boolean isDoctorAvailable(Long doctorId, LocalDateTime desiredSlot) {

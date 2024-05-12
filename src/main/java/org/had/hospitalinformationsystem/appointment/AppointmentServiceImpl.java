@@ -9,7 +9,6 @@ import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.prescription.PrescriptionRepository;
-import org.had.hospitalinformationsystem.records.Records;
 import org.had.hospitalinformationsystem.records.RecordsRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
@@ -127,9 +126,7 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
         }
 
         try {
-            Appointment appointment = createAppointment(appointmentDto); // Assume this method exists and correctly
-                                                                         // creates an appointment
-            notifyDoctor(appointment); // Send WebSocket notification to the doctor
+            Appointment appointment = createAppointment(appointmentDto);
             appointmentResponseDto
                     .setResponse("Appointment created successfully for: " + appointment.getSlot().toString());
             return ResponseEntity.ok().body(appointmentResponseDto);
@@ -151,8 +148,8 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
             List<AppointmentDataDto> appointmentDataDtos = new ArrayList<>();
             for (Object[] appointment : appointments) {
                 AppointmentDataDto dto = new AppointmentDataDto();
-                dto.setAppointmentId((Long) appointment[0]); // Assuming appointmentId is at index 0
-                dto.setDateTime((LocalDateTime) appointment[1]); // Assuming dateTime is at index 1
+                dto.setAppointmentId((Long) appointment[0]);
+                dto.setDateTime((LocalDateTime) appointment[1]);
                 appointmentDataDtos.add(dto);
             }
             return ResponseEntity.ok(appointmentDataDtos);

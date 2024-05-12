@@ -1,7 +1,5 @@
 package org.had.hospitalinformationsystem.auth;
 
-import jakarta.mail.internet.MimeMessage;
-import org.apache.coyote.Response;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.dto.*;
@@ -17,7 +15,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

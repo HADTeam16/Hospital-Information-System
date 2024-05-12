@@ -3,13 +3,9 @@ package org.had.hospitalinformationsystem.appointment;
 import org.had.hospitalinformationsystem.doctor.DoctorService;
 import org.had.hospitalinformationsystem.dto.AppointmentDto;
 import org.had.hospitalinformationsystem.dto.PrescriptionsAndRecords;
-import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -25,18 +21,6 @@ public class AppointmentController {
     AppointmentService appointmentService;
     @Autowired
     DoctorService doctorService;
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
-    @MessageMapping("/appointmentBooked")
-    @SendTo("/topic/appointments")
-    public void handleAppointmentBooking(Appointment appointment) {
-        Doctor doctor = appointment.getDoctor();
-        if (doctor != null) {
-            String doctorTopic = "/topic/doctor/" + doctor.getDoctorId() + "/appointments";
-            messagingTemplate.convertAndSend(doctorTopic, appointment);
-        }
-    }
 
     @GetMapping("/get/all/appointments")
     public ResponseEntity< List<Appointment>>getAllAppointment(@RequestHeader("Authorization") String jwt){

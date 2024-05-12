@@ -19,8 +19,6 @@ public interface UserService {
 
     boolean userPresentOrNot(String jwt, String userName);
 
-
-
     ResponseEntity<?>getUser(String jwt, Long userId);
 
     ResponseEntity<AuthResponse> updateUser(String jwt, Long userId, RegistrationDto registrationDto);

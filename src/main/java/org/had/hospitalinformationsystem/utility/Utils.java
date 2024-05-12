@@ -8,8 +8,6 @@ import org.had.hospitalinformationsystem.auth.Auth;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.dto.SmsTwilioConfig;
-import org.had.hospitalinformationsystem.jwt.AppConfig;
-import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
@@ -75,8 +73,6 @@ public class Utils {
         }
     }
 
-
-
     protected static String generateOTP() {
         return new DecimalFormat("000000")
                 .format(new Random().nextInt(999999));
@@ -117,25 +113,6 @@ public class Utils {
         catch(Exception ignored){
         }
     }
-
-
-
-
-
-
-
-
-//----------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
 
     protected static boolean verifyPassword(String providedPassword, String storedPasswordHash, String salt) {
         String newHash = hashPassword(providedPassword, salt);
@@ -348,4 +325,3 @@ public class Utils {
         return newPatient;
     }
 }
-

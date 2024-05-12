@@ -3,11 +3,9 @@ package org.had.hospitalinformationsystem.receptionist;
 import org.had.hospitalinformationsystem.appointment.Appointment;
 
 import org.had.hospitalinformationsystem.appointment.AppointmentRepository;
-import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.dto.AuthResponse;
 import org.had.hospitalinformationsystem.dto.OtpInfo;
-import org.had.hospitalinformationsystem.dto.OtpValidationRequest;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.patient.Patient;
@@ -18,7 +16,6 @@ import org.had.hospitalinformationsystem.records.Records;
 import org.had.hospitalinformationsystem.records.RecordsRepository;
 import org.had.hospitalinformationsystem.user.User;
 import org.had.hospitalinformationsystem.user.UserRepository;
-import org.had.hospitalinformationsystem.user.UserService;
 import org.had.hospitalinformationsystem.utility.Utils;
 import org.had.hospitalinformationsystem.ward.Ward;
 import org.had.hospitalinformationsystem.ward.WardRepository;
@@ -28,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -68,17 +64,6 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
     @Autowired
     private StringEncryptor stringEncryptor;
 
-    private final SimpMessagingTemplate messagingTemplate;
-
-    public ReceptionistServiceImplementation(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
-    }
-
-    @Override
-    public void sendAppointmentUpdate(Appointment appointment) {
-        messagingTemplate.convertAndSend("/topic/appointments", appointment);
-    }
-
     @Override
     public ResponseEntity<Object> signupPatient(String jwt, RegistrationDto registrationDto) {
         try {
@@ -112,25 +97,6 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error during patient registration: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public ResponseEntity<?> findDoctorBySpecialization(String jwt, String specialization) {
-        try {
-            String role = JwtProvider.getRoleFromJwtToken(jwt);
-            if (!role.equals("receptionist")) {
-                throw new Exception("Access Denied - Only receptionists can access this information.");
-            }
-
-            List<Doctor> doctors = doctorRepository.findDoctorBySpecialization(specialization);
-            if (doctors.isEmpty()) {
-                throw new Exception("Doctor with the specialization '" + specialization + "' does not exist.");
-            }
-
-            return ResponseEntity.ok(doctors);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error finding doctor by specialization: " + e.getMessage());
         }
     }
 

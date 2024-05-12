@@ -11,7 +11,6 @@ import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.nurse.Nurse;
 import org.had.hospitalinformationsystem.nurse.NurseRepository;
-import org.had.hospitalinformationsystem.patient.Patient;
 import org.had.hospitalinformationsystem.patient.PatientRepository;
 import org.had.hospitalinformationsystem.receptionist.Receptionist;
 import org.had.hospitalinformationsystem.receptionist.ReceptionistRepository;
@@ -20,10 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -217,7 +212,6 @@ public class UserServiceImplementation implements UserService {
                             }
                         }
                     }
-                    // Save updated user
                     User savedUser = userRepository.save(user);
                     savedUser.setAuth(null);
                     return ResponseEntity.ok(new AuthResponse("", "User updated successfully", savedUser));
@@ -320,8 +314,6 @@ public class UserServiceImplementation implements UserService {
                 }
             }
         }
-
-        // Generate the next username
         return prefix + (maxNumber + 1);
     }
 
