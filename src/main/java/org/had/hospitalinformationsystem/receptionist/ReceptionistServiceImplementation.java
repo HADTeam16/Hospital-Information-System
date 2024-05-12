@@ -6,6 +6,8 @@ import org.had.hospitalinformationsystem.appointment.AppointmentRepository;
 import org.had.hospitalinformationsystem.doctor.Doctor;
 import org.had.hospitalinformationsystem.doctor.DoctorRepository;
 import org.had.hospitalinformationsystem.dto.AuthResponse;
+import org.had.hospitalinformationsystem.dto.OtpInfo;
+import org.had.hospitalinformationsystem.dto.OtpValidationRequest;
 import org.had.hospitalinformationsystem.dto.RegistrationDto;
 import org.had.hospitalinformationsystem.jwt.JwtProvider;
 import org.had.hospitalinformationsystem.patient.Patient;
@@ -29,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +59,8 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
     RecordsRepository recordsRepository;
     @Autowired
     ReceptionistRepository receptionistRepository;
+
+    Map<String, OtpInfo> otpMap = new HashMap<>();
 
     @Autowired
     AppointmentRepository appointmentRepository;
@@ -154,6 +159,68 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
         }
     }
 
+    @Override
+    public ResponseEntity<Map<String, String>> deletePatientsendOtp(String jwt, Long id) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+
+            if (!role.equals("receptionist")) {
+                response.put("Message", "Access Denied");
+                return ResponseEntity.badRequest().body(response);
+            }
+            Ward ward = wardRepository.findByPatient(id);
+            if (ward != null) {
+                response.put("Message", "Patient is in Ward so data cannot be deleted");
+                return ResponseEntity.badRequest().body(response);
+            }
+            Patient patient = patientRepository.findPatientById(id);
+            sendOtpEmailForPatientDataDelete(patient.getUser().getEmail(),patient.getUser().getUserName(),patient.getUser().getFirstName());
+            response.put("message", "Otp Sent Successfully!!!");
+            return ResponseEntity.ok().body(response);
+        }
+        catch(Exception e){
+            response.put("message","Error!!!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Map<String, String>> deletePatientDataValidateOtp(String jwt,Long id, String email, String otp){
+        Map<String, String> response = new HashMap<>();
+        try{
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (role.equals("receptionist")) {
+                int val = validateOtp(email,otp);
+                if(val==1){
+                    boolean status = deletePatientRecords(jwt,id);
+                    if(status){
+                        response.put("message","Patient Data Deleted Successfully");
+                    }
+                    else{
+                        response.put("message","Failed to delete Data Try again!!");
+                    }
+                    return ResponseEntity.ok(response);
+                }
+                else if(val==2){
+                    response.put("message","OTP has been expired");
+                    return ResponseEntity.ok(response);
+                }
+                else{
+                    response.put("message","Invalid OTP");
+                    return ResponseEntity.ok(response);
+                }
+            }
+            else {
+                response.put("message", "Access denied!");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+        } catch (Exception e) {
+            response.put("message", "Unknown error");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
     public Boolean removeConsentForPatientId(String jwt,String emailId){
         try{
             String role = JwtProvider.getRoleFromJwtToken(jwt);
@@ -205,32 +272,66 @@ public class ReceptionistServiceImplementation extends Utils implements Receptio
         }
     }
 
-    @Override
-    public ResponseEntity<Map<String, String>> deletePatient(String jwt, Long id) {
-        String role=JwtProvider.getRoleFromJwtToken(jwt);
-        Map<String, String> response = new HashMap<>();
-        if(!role.equals("receptionist")){
-            response.put("Message","Only receptionist can delete a Patient");
-            return ResponseEntity.badRequest().body(response);
-        }
-        Ward ward=wardRepository.findByPatient(id);
-        if(ward!=null){
-            response.put("Message","Patient is in Ward so data cannot be deleted");
-            return ResponseEntity.badRequest().body(response);
-        }
-        List<Appointment> appointments=appointmentRepository.getAppointmentByPatientid(id);
-        for(Appointment a:appointments){
-            List<Records> records=recordsRepository.findRecordsByAppointmentId(a.getAppointmentId());
-            for(Records r:records){
-                recordsRepository.deleteById(r.getRecordsId());
+    private void sendOtpEmailForPatientDataDelete(String email, String username, String name) {
+        String otp = generateOTP();
+        String subject = "Deleting Data";
+        String messageTemplate = "Dear User,<br/><br/>" +
+                //Write Email
+                "" + otp + "" +
+                "" +
+                "" +
+                "" +
+                "" +
+                "";
+        sendEmail(email, username, "", name, subject, messageTemplate);
+        Instant expirationTime = Instant.now().plusSeconds(600);
+        otpMap.put(email,new OtpInfo(otp,expirationTime));
+    }
+
+    private int validateOtp(String email, String otp){
+        String username = email;
+        OtpInfo otpInfo = otpMap.get(username);
+        if (otpInfo != null && otpInfo.getOtp().equals(otp)){
+            if (Instant.now().isBefore(otpInfo.getExpirationTime())) {
+                otpMap.remove(username);
+                return 1;
+            } else {
+                otpMap.remove(username);
+                return 0;
             }
-            Prescription prescription=prescriptionRepository.findPrescriptionByAppointmentID(a.getAppointmentId());
-            prescriptionRepository.deleteById(prescription.getPrescriptionId());
-            appointmentRepository.deleteById(a.getAppointmentId());
+        } else {
+            return -1;
         }
-        response.put("message","Patient data successfully deleted");
-        patientRepository.deleteById(id);
-        userRepository.deleteById(id);
-        return ResponseEntity.ok().body(response);
+    }
+
+    private boolean deletePatientRecords(String jwt, Long id) {
+        try {
+            String role = JwtProvider.getRoleFromJwtToken(jwt);
+            if (!role.equals("receptionist")) {
+                return false;
+            }
+            Ward ward = wardRepository.findByPatient(id);
+            if (ward != null) {
+                return false;
+            }
+            List<Appointment> appointments = appointmentRepository.getAppointmentByPatientid(id);
+            for (Appointment a : appointments) {
+                List<Records> records = recordsRepository.findRecordsByAppointmentId(a.getAppointmentId());
+                for (Records r : records) {
+                    recordsRepository.deleteById(r.getRecordsId());
+                }
+                Prescription prescription = prescriptionRepository.findPrescriptionByAppointmentID(a.getAppointmentId());
+                prescriptionRepository.deleteById(prescription.getPrescriptionId());
+                appointmentRepository.deleteById(a.getAppointmentId());
+            }
+            patientRepository.deleteById(id);
+            userRepository.deleteById(id);
+            return true;
+        }
+        catch(Exception e){
+            return false;
+        }
     }
 }
+
+
