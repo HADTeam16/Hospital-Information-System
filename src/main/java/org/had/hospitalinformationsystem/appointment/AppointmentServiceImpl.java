@@ -70,7 +70,7 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             String userName = JwtProvider.getUserNameFromJwtToken(jwt);
             User user = userRepository.findByUserName(userName);
-            if (role.equals("doctor")) {
+            if (role.equals("doctor") || role.equals("nurse")) {
                 LocalDateTime startDate = date.atStartOfDay();
                 LocalDateTime endDate = startDate.plusDays(1);
                 List<Appointment> appointments = appointmentRepository.findByDoctorIdAndAppointmentDate(user.getId(), startDate, endDate);
@@ -165,7 +165,7 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
     public ResponseEntity<PrescriptionsAndRecords> getAppointmentDetails(String jwt, Long appointmentId) {
         String role = JwtProvider.getRoleFromJwtToken(jwt);
 
-        if (role.equals("doctor")) {
+        if (role.equals("doctor") || role.equals("nurse")) {
             List<String> records = recordsRepository.findRecordsImageByAppointmentId(appointmentId);
             List<String> Record=new ArrayList<>();
             for(String r:records){
