@@ -140,19 +140,21 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
     public ResponseEntity<?> getAllPreviousAppointmentsForPatient(String jwt, Long patientId, LocalDateTime date) {
         try {
             String role = JwtProvider.getRoleFromJwtToken(jwt);
-            if (!role.equals("doctor")) {
+            if (role.equals("doctor")  || role.equals("nurse")) {
+                List<Object[]> appointments = appointmentRepository.findAllPreviousAppointmentForPatient(patientId, date);
+                List<AppointmentDataDto> appointmentDataDtos = new ArrayList<>();
+                for (Object[] appointment : appointments) {
+                    AppointmentDataDto dto = new AppointmentDataDto();
+                    dto.setAppointmentId((Long) appointment[0]);
+                    dto.setDateTime((LocalDateTime) appointment[1]);
+                    appointmentDataDtos.add(dto);
+                }
+                return ResponseEntity.ok(appointmentDataDtos);
+            }
+            else{
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
             }
 
-            List<Object[]> appointments = appointmentRepository.findAllPreviousAppointmentForPatient(patientId, date);
-            List<AppointmentDataDto> appointmentDataDtos = new ArrayList<>();
-            for (Object[] appointment : appointments) {
-                AppointmentDataDto dto = new AppointmentDataDto();
-                dto.setAppointmentId((Long) appointment[0]);
-                dto.setDateTime((LocalDateTime) appointment[1]);
-                appointmentDataDtos.add(dto);
-            }
-            return ResponseEntity.ok(appointmentDataDtos);
         } catch (Exception e) {
             // Log the exception for debugging
             return ResponseEntity.internalServerError().body("An error occurred: " + e.getMessage());
