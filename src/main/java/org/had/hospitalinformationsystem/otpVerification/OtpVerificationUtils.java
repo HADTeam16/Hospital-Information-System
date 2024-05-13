@@ -43,7 +43,7 @@ public class OtpVerificationUtils extends Utils {
                 "Please note that this OTP is valid for the next 10 minutes. After this time, you will need to generate a new OTP if you wish to proceed with the removal process.<br/><br/>" +
                 "If you did not initiate this request or have any concerns, please contact our support team immediately.<br/><br/>" +
                 "Best regards,<br/>" +
-                "[Your Organization's Name]";
+                "Pure Zen Wellness Hospital";
         sendEmail(email, username, "", name, subject, messageTemplate);
         Instant expirationTime = Instant.now().plusSeconds(600);
         otpMap.put(email,new OtpInfo(otp,expirationTime));
