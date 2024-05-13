@@ -165,7 +165,7 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
     public ResponseEntity<PrescriptionsAndRecords> getAppointmentDetails(String jwt, Long appointmentId) {
         String role = JwtProvider.getRoleFromJwtToken(jwt);
 
-        if (role.equals("doctor")) {
+        if (role.equals("doctor") || role.equals("nurse")) {
             List<String> records = recordsRepository.findRecordsImageByAppointmentId(appointmentId);
             List<String> Record=new ArrayList<>();
             for(String r:records){
