@@ -213,6 +213,7 @@ public class NurseServiceImplementation implements NurseService {
             w.getAppointment().setBloodPressure(stringEncryptor.decrypt(w.getAppointment().getBloodPressure()));
             w.getPatient().setHeight(stringEncryptor.decrypt((w.getPatient().getHeight())));
             w.getPatient().setBloodGroup(stringEncryptor.decrypt(w.getPatient().getBloodGroup()));
+            w.getPatient().setBloodPressure(stringEncryptor.decrypt(w.getPatient().getBloodPressure()));
         }
         return ResponseEntity.ok().body(wards);
     }
@@ -237,7 +238,7 @@ public class NurseServiceImplementation implements NurseService {
         Long nurseId = userRepository.findByUserName(userName).getId();
         List<Patient> patients=wardRepository.assignedPatientsUnderNurse(nurseId);
         for(Patient p:patients){
-
+            p.setBloodPressure(stringEncryptor.decrypt(p.getBloodPressure()));
         }
         return ResponseEntity.ok().body(patients);
     }
