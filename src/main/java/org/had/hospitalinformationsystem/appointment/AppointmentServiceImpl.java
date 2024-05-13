@@ -70,7 +70,7 @@ public class AppointmentServiceImpl extends AppointmentUtils implements Appointm
             String role = JwtProvider.getRoleFromJwtToken(jwt);
             String userName = JwtProvider.getUserNameFromJwtToken(jwt);
             User user = userRepository.findByUserName(userName);
-            if (role.equals("doctor")) {
+            if (role.equals("doctor") || role.equals("nurse")) {
                 LocalDateTime startDate = date.atStartOfDay();
                 LocalDateTime endDate = startDate.plusDays(1);
                 List<Appointment> appointments = appointmentRepository.findByDoctorIdAndAppointmentDate(user.getId(), startDate, endDate);
